@@ -30,7 +30,7 @@ struct Buffer {
                                                  few voices fit; bump to 8K for more */
 #define LENS_MAX_BUFFERS          16
 #define LENS_MAX_TERMINALS        16
-#define LENS_CONST_POOL_WORDS     64
+#define LENS_CONST_POOL_WORDS     256
 #define LENS_MAX_KFNS             128
 
 /*

@@ -93,7 +93,7 @@ const LENS_MAX_SLOTS            = 256;
 const LENS_NODESTATE_BYTES      = 4 * 1024;
 const LENS_MAX_BUFFERS          = 16;
 const LENS_MAX_TERMINALS        = 16;
-const LENS_CONST_POOL_WORDS     = 64;
+const LENS_CONST_POOL_WORDS     = 256;
 
 // ---- Encoder ----
 function encode(scheduled, graph) {
@@ -176,13 +176,8 @@ function encode(scheduled, graph) {
         w.u16(bufIndex.get(ref.id) ?? 0);
       } else if (ref.kind === 'const') {
         const v = Math.round(ref.value); /* the const pool is int32 */
-        if (v >= 0 && v <= 255) {
-          w.u8(TAG_CONST_U8);
-          w.u8(v);
-        } else {
-          w.u8(TAG_CONST_I32);
-          w.i32(v);
-        }
+        w.u8(TAG_CONST_I32);
+        w.i32(v);
       }
     }
 

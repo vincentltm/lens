@@ -72,7 +72,7 @@ builders. Every definition here can be shadowed by redefining it in your own pat
 ; ===========================================================================
 
 ; value (0..VMAX) -> bipolar (-VMAX..+VMAX) signal.
-(def bipolar  (fn (:x) (sub (mul x 2) VMAX)))
+(def bipolar  (fn (:x) (sub (add x x) VMAX)))
 
 ; bipolar (-VMID..+VMID) signal -> value (0..VMAX).
 (def unipolar (fn (:s) (add s VMID)))
@@ -346,6 +346,14 @@ builders. Every definition here can be shadowed by redefining it in your own pat
 ; Karplus-Strong plucked string: :trig re-excites, :pitch (MIDI) sets the
 ; loop length, :damp (0..vmax) sets decay/brightness (more = faster, duller).
 (def pluck (fn (:trig :pitch :damp)))
+
+; Unified single-slot lightweight audio effects suite
+(def reverb     (fn (:in :decay :mix)))
+(def chorus     (fn (:in :rate :depth :feedback)))
+(def flanger    (fn (:in :rate :depth :feedback)))
+(def compressor (fn (:in :threshold :ratio :attack :release)))
+(def sel        (fn (:slot)))
+
 
 ; ===========================================================================
 ; PATTERN BUILDERS -- write rhythms and melodies as quoted lists.

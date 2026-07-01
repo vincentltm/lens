@@ -876,6 +876,34 @@ static void run_device_loop(void) {
 #endif
                         break;
                     }
+                    case lenssysex::CMD_UPDATE_CONST: {
+                        uint8_t payload[16];
+                        size_t plen = lenssysex::get_payload(&parser, payload, sizeof(payload));
+                        if (plen == 11) {
+                            uint8_t const_idx = payload[0];
+                            int32_t new_value;
+                            memcpy(&new_value, &payload[1], 4);
+                            uint16_t byte_offset;
+                            memcpy(&byte_offset, &payload[5], 2);
+                            uint32_t new_crc32;
+                            memcpy(&new_crc32, &payload[7], 4);
+
+                            struct LensRuntime* rt = g_rt;
+                            if (rt && const_idx < rt->const_count) {
+                                rt->const_pool[const_idx] = new_value;
+                            }
+
+                            if (g_last_snapshot_len > 0 && (byte_offset + 4) <= g_last_snapshot_len) {
+                                memcpy(&g_last_snapshot[byte_offset], &new_value, 4);
+                                memcpy(&g_last_snapshot[g_last_snapshot_len - 4], &new_crc32, 4);
+                                g_snapshot_crc = new_crc32;
+                            }
+                            lenssysex::sysex_send_frame(lenssysex::CMD_ACK, nullptr, 0);
+                        } else {
+                            lenssysex::sysex_send_nack(cmd, lenssysex::NACK_BAD_LENGTH);
+                        }
+                        break;
+                    }
 
                     default:
                         /* Unknown command: NACK with reason. */

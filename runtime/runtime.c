@@ -363,6 +363,29 @@ struct FollowState {
     uint32_t acc;         /* accumulated :drift phase creep (32-bit, >>20 to 12) */
 };
 
+struct ReverbState {
+    int32_t value;        /* +0 Left output (signed audio) */
+    int32_t value_r;      /* +4 Right output (signed audio) */
+    uint32_t head;
+};
+
+struct ChorusState {
+    int32_t value;        /* +0 output (signed audio) */
+    uint32_t lfo_phase;
+    uint32_t head;
+};
+
+struct FlangerState {
+    int32_t value;        /* +0 output (signed audio) */
+    uint32_t lfo_phase;
+    uint32_t head;
+};
+
+struct CompressorState {
+    int32_t value;        /* +0 output (signed audio) */
+    int32_t envelope;
+};
+
 /* ===== tape state structs ===== */
 
 /*
@@ -891,7 +914,7 @@ void OP_FN(op_sub_sat)(struct Slot* s) {
 }
 void OP_FN(op_mul)(struct Slot* s) {
     int32_t a = *(int32_t*)s->in0, b = *(int32_t*)s->in1;
-    *(int32_t*)s->out = a * b;   /* true multiply; gain-scaling is op_vca */
+    *(int32_t*)s->out = scale_depth(a, b);
 }
 void OP_FN(op_div)(struct Slot* s) {
     *(int32_t*)s->out = js_floor_div(*(int32_t*)s->in0, *(int32_t*)s->in1);
@@ -2568,23 +2591,35 @@ void OP_FN(op_tap)(struct Slot* s) {
     int32_t cur_head = *(const int32_t*)s->in2;
     uint32_t len = (uint32_t)buf->length;
     if (len == 0) { st->value = 0; return; }
-    int32_t offset;
+
+    int32_t offset_q12;
     if (s->param0 & 1u) {
-        int32_t P = amount * (int32_t)(len - 1u);
-        offset = (P * 2 + (int32_t)VMAX_) / ((int32_t)VMAX_ * 2);
-        if (offset < 0) offset = 0;
-        if (offset > (int32_t)(len - 1u)) offset = (int32_t)(len - 1u);
+        int64_t P = (int64_t)amount * (int64_t)(len - 1u) * 4096;
+        offset_q12 = (int32_t)(P / 4095);
     } else {
-        offset = amount;
-        if (offset < 0) offset = 0;
-        if (offset > (int32_t)(len - 1u)) offset = (int32_t)(len - 1u);
+        offset_q12 = amount << 12;
     }
+
+    if (offset_q12 < 0) offset_q12 = 0;
+    int32_t max_offset_q12 = (int32_t)(len - 1u) << 12;
+    if (offset_q12 > max_offset_q12) offset_q12 = max_offset_q12;
+
+    int32_t ipart = offset_q12 >> 12;
+    int32_t fpart = offset_q12 & 0xFFF;
+
     /* Wrap by compare-and-subtract: cur_head is in [0,len) and offset in
        [0,len-1], so one add of len covers a negative result. No power-of-two
        requirement, so the ring can be the full pool length. */
-    int32_t readPos = cur_head - offset;
-    if (readPos < 0) readPos += (int32_t)len;
-    st->value = pack12_read_signed(buf->bytes, (uint32_t)readPos);
+    int32_t readPos0 = cur_head - ipart;
+    if (readPos0 < 0) readPos0 += (int32_t)len;
+
+    int32_t readPos1 = cur_head - ipart - 1;
+    if (readPos1 < 0) readPos1 += (int32_t)len;
+
+    int32_t s0 = pack12_read_signed(buf->bytes, (uint32_t)readPos0);
+    int32_t s1 = pack12_read_signed(buf->bytes, (uint32_t)readPos1);
+
+    st->value = s0 + (((s1 - s0) * fpart) >> 12);
 }
 /* pluck: integer Karplus-Strong. in0=trig (rising edge re-excites), in1=pitch
  * (MIDI note -> loop length), in2=damp (0..VMAX, decay/brightness), in3=delay
@@ -2907,6 +2942,163 @@ void OP_FN(op_terminal_write)(struct Slot* s) {
     *(int32_t*)s->out = *(const int32_t*)s->in0;
 }
 
+void OP_FN(op_reverb)(struct Slot* s) {
+    struct ReverbState* st = (struct ReverbState*)s->out;
+    int32_t inVal = *(const int32_t*)s->in0;
+    int32_t decay = vclamp_(*(const int32_t*)s->in1);
+    int32_t mix   = vclamp_(*(const int32_t*)s->in2);
+    struct Buffer* buf = (struct Buffer*)s->in3;
+
+    if (!buf || buf->length < 5952) {
+        st->value = inVal;
+        st->value_r = inVal;
+        return;
+    }
+
+    uint32_t head = st->head;
+    uint8_t* bytes = buf->bytes;
+
+    int32_t combFb = (decay * 3072) >> 12;
+    int32_t apFb = 1351;
+
+    int32_t tapL1 = pack12_read_signed(bytes, head % 1151);
+    int32_t tapL2 = pack12_read_signed(bytes, 1151 + (head % 1381));
+    int32_t tapR1 = pack12_read_signed(bytes, 2532 + (head % 1249));
+    int32_t tapR2 = pack12_read_signed(bytes, 3781 + (head % 1451));
+
+    int32_t combL1_in = sclamp_(((inVal * 1024) >> 12) + ((tapL1 * combFb) >> 12));
+    int32_t combL2_in = sclamp_(((inVal * 1024) >> 12) + ((tapL2 * combFb) >> 12));
+    int32_t combR1_in = sclamp_(((inVal * 1024) >> 12) + ((tapR1 * combFb) >> 12));
+    int32_t combR2_in = sclamp_(((inVal * 1024) >> 12) + ((tapR2 * combFb) >> 12));
+
+    pack12_write(bytes, head % 1151, combL1_in);
+    pack12_write(bytes, 1151 + (head % 1381), combL2_in);
+    pack12_write(bytes, 2532 + (head % 1249), combR1_in);
+    pack12_write(bytes, 3781 + (head % 1451), combR2_in);
+
+    int32_t sumL = (tapL1 + tapL2) >> 1;
+    int32_t sumR = (tapR1 + tapR2) >> 1;
+
+    int32_t tapL1ap = pack12_read_signed(bytes, 5232 + (head % 347));
+    int32_t tapR1ap = pack12_read_signed(bytes, 5579 + (head % 373));
+
+    int32_t apL1w = sclamp_(((sumL * 2744) >> 12) + ((tapL1ap * apFb) >> 12));
+    int32_t wetL  = sclamp_(tapL1ap - ((apL1w * apFb) >> 12));
+
+    int32_t apR1w = sclamp_(((sumR * 2744) >> 12) + ((tapR1ap * apFb) >> 12));
+    int32_t wetR  = sclamp_(tapR1ap - ((apR1w * apFb) >> 12));
+
+    pack12_write(bytes, 5232 + (head % 347), apL1w);
+    pack12_write(bytes, 5579 + (head % 373), apR1w);
+
+    st->head = head + 1;
+
+    int32_t dryVal = 4095 - mix;
+    st->value   = sclamp_(((inVal * dryVal) >> 12) + ((wetL * mix) >> 12));
+    st->value_r = sclamp_(((inVal * dryVal) >> 12) + ((wetR * mix) >> 12));
+}
+
+void OP_FN(op_chorus)(struct Slot* s) {
+    struct ChorusState* st = (struct ChorusState*)s->out;
+    int32_t inVal = *(const int32_t*)s->in0;
+    int32_t rate  = vclamp_(*(const int32_t*)s->in1);
+    int32_t depth = vclamp_(*(const int32_t*)s->in2);
+    int32_t fb    = vclamp_(*(const int32_t*)s->in3);
+    struct Buffer* buf = (struct Buffer*)s->in4;
+
+    if (!buf || buf->length == 0) {
+        st->value = inVal;
+        return;
+    }
+
+    uint32_t inc = 8947 + (((uint32_t)rate * 885833u) >> 12);
+    st->lfo_phase += inc;
+    int32_t lfo = sine_interp(st->lfo_phase);
+
+    int32_t delay_samples_q16 = (480 << 16) + (lfo * (depth * 240 >> 12) * 32);
+    int32_t ipart = delay_samples_q16 >> 16;
+    int32_t fpart = delay_samples_q16 & 0xFFFF;
+
+    int32_t idx0 = (int32_t)st->head - ipart;
+    int32_t idx1 = (int32_t)st->head - ipart - 1;
+    while (idx0 < 0) idx0 += (int32_t)buf->length;
+    while (idx1 < 0) idx1 += (int32_t)buf->length;
+
+    int32_t s0 = pack12_read_signed(buf->bytes, (uint32_t)idx0);
+    int32_t s1 = pack12_read_signed(buf->bytes, (uint32_t)idx1);
+    int32_t wet = s0 + (((s1 - s0) * fpart) >> 16);
+
+    int32_t fb_bipolar = (fb * 2) - 4095;
+    int32_t write_val = sclamp_(inVal + ((wet * fb_bipolar) >> 12));
+    pack12_write(buf->bytes, st->head, write_val);
+
+    st->head = (st->head + 1) % buf->length;
+    st->value = (inVal + wet) >> 1;
+}
+
+void OP_FN(op_flanger)(struct Slot* s) {
+    struct FlangerState* st = (struct FlangerState*)s->out;
+    int32_t inVal = *(const int32_t*)s->in0;
+    int32_t rate  = vclamp_(*(const int32_t*)s->in1);
+    int32_t depth = vclamp_(*(const int32_t*)s->in2);
+    int32_t fb    = vclamp_(*(const int32_t*)s->in3);
+    struct Buffer* buf = (struct Buffer*)s->in4;
+
+    if (!buf || buf->length == 0) {
+        st->value = inVal;
+        return;
+    }
+
+    uint32_t inc = 4473 + (((uint32_t)rate * 442916u) >> 12);
+    st->lfo_phase += inc;
+    int32_t lfo = sine_interp(st->lfo_phase);
+
+    int32_t delay_samples_q16 = (144 << 16) + (lfo * (depth * 96 >> 12) * 32);
+    int32_t ipart = delay_samples_q16 >> 16;
+    int32_t fpart = delay_samples_q16 & 0xFFFF;
+
+    int32_t idx0 = (int32_t)st->head - ipart;
+    int32_t idx1 = (int32_t)st->head - ipart - 1;
+    while (idx0 < 0) idx0 += (int32_t)buf->length;
+    while (idx1 < 0) idx1 += (int32_t)buf->length;
+
+    int32_t s0 = pack12_read_signed(buf->bytes, (uint32_t)idx0);
+    int32_t s1 = pack12_read_signed(buf->bytes, (uint32_t)idx1);
+    int32_t wet = s0 + (((s1 - s0) * fpart) >> 16);
+
+    int32_t fb_bipolar = (fb * 2) - 4095;
+    int32_t write_val = sclamp_(inVal + ((wet * fb_bipolar) >> 12));
+    pack12_write(buf->bytes, st->head, write_val);
+
+    st->head = (st->head + 1) % buf->length;
+    st->value = (inVal + wet) >> 1;
+}
+
+void OP_FN(op_compressor)(struct Slot* s) {
+    struct CompressorState* st = (struct CompressorState*)s->out;
+    int32_t inVal  = *(const int32_t*)s->in0;
+    int32_t thresh = vclamp_(*(const int32_t*)s->in1);
+    int32_t ratio  = vclamp_(*(const int32_t*)s->in2);
+    int32_t attack = vclamp_(*(const int32_t*)s->in3);
+    int32_t release= vclamp_(*(const int32_t*)s->in4);
+
+    int32_t abs_in = inVal >= 0 ? inVal : -inVal;
+    int32_t attack_coef  = 655 + (attack * 15);
+    int32_t release_coef = 32 + (release * 2);
+    int32_t coef = (abs_in > st->envelope) ? attack_coef : release_coef;
+    st->envelope = st->envelope + (((abs_in - st->envelope) * coef) >> 16);
+
+    int32_t slope = (ratio * 3600) >> 12;
+    int32_t gain = 4095;
+    if (st->envelope > thresh && st->envelope > 0) {
+        int32_t excess = st->envelope - thresh;
+        int32_t reduction = (excess * slope) >> 12;
+        int32_t target = st->envelope - reduction;
+        gain = (target * 4095) / st->envelope;
+    }
+    st->value = sclamp_((inVal * gain) >> 12);
+}
+
 /* ===== KFN table (kid -> RAM-resident fn pointer) ===== */
 /* The table itself may live in flash: it is read only at apply time, not
  * on the hot path.  The functions it points to are in RAM. */
@@ -3037,6 +3229,10 @@ static void (* const KFN[KID_COUNT])(struct Slot*) = {
     /* 118 */ op_dx,
     /* 119 */ op_wavetable,
     /* 120 */ op_pickup,
+    /* 121 */ op_reverb,
+    /* 122 */ op_chorus,
+    /* 123 */ op_flanger,
+    /* 124 */ op_compressor,
 };
 _Static_assert(sizeof(KFN) / sizeof(KFN[0]) == KID_COUNT,
                "KFN entry count must equal KID_COUNT");
@@ -3121,6 +3317,10 @@ static const uint16_t KSTATE_BYTES[KID_COUNT] = {
     [KID_OP_SVF]                          = sizeof(struct SvfState),
     [KID_OP_SHAPE]                        = sizeof(struct ShapeState),
     [KID_OP_DX]                           = sizeof(struct FmState),
+    [KID_OP_REVERB]                       = sizeof(struct ReverbState),
+    [KID_OP_CHORUS]                       = sizeof(struct ChorusState),
+    [KID_OP_FLANGER]                      = sizeof(struct FlangerState),
+    [KID_OP_COMPRESSOR]                   = sizeof(struct CompressorState),
 };
 
 uint32_t runtime_kernel_state_bytes(uint8_t kid) {
@@ -3267,6 +3467,10 @@ static const KEntry KTABLE[] = {
     {"op_terminal_write_led_4",       KID_OP_TERMINAL_WRITE},
     {"op_terminal_write_led_5",       KID_OP_TERMINAL_WRITE},
     {"op_dx",    KID_OP_DX},
+    {"op_reverb", KID_OP_REVERB},
+    {"op_chorus", KID_OP_CHORUS},
+    {"op_flanger", KID_OP_FLANGER},
+    {"op_compressor", KID_OP_COMPRESSOR},
     {NULL, KID_UNKNOWN}
 };
 

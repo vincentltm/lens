@@ -478,6 +478,60 @@ const MODULE_DEFS = {
       { id: 'outR', label: 'OUT R' }
     ]
   },
+  chorus: {
+    title: 'Stereo Chorus', hp: 6, category: 'shapers', knobLayout: 'vertical',
+    isMacro: true,
+    knobs: [
+      { param: 'rate',        label: 'RATE',        size: 'medium', def: 1000 },
+      { param: 'depth',       label: 'DEPTH',       size: 'medium', def: 2048 },
+      { param: 'feedback',    label: 'FEEDBACK',    size: 'medium', def: 2048 },
+      { param: 'rateamt',     label: 'RATE CV AMT', size: 'small',  def: 4095 },
+      { param: 'depthamt',    label: 'DEP CV AMT',  size: 'small',  def: 4095 },
+    ],
+    inputs: [
+      { id: 'in',    label: 'IN' },
+      { id: 'rate',  label: 'CV RATE' },
+      { id: 'depth', label: 'CV DEPTH' },
+    ],
+    outputs: [
+      { id: 'out', label: 'OUT' }
+    ]
+  },
+  flanger: {
+    title: 'Flanger', hp: 6, category: 'shapers', knobLayout: 'vertical',
+    isMacro: true,
+    knobs: [
+      { param: 'rate',        label: 'RATE',        size: 'medium', def: 500 },
+      { param: 'depth',       label: 'DEPTH',       size: 'medium', def: 1024 },
+      { param: 'feedback',    label: 'FEEDBACK',    size: 'medium', def: 3000 },
+      { param: 'rateamt',     label: 'RATE CV AMT', size: 'small',  def: 4095 },
+      { param: 'depthamt',    label: 'DEP CV AMT',  size: 'small',  def: 4095 },
+    ],
+    inputs: [
+      { id: 'in',    label: 'IN' },
+      { id: 'rate',  label: 'CV RATE' },
+      { id: 'depth', label: 'CV DEPTH' },
+    ],
+    outputs: [
+      { id: 'out', label: 'OUT' }
+    ]
+  },
+  compressor: {
+    title: 'Compressor', hp: 8, category: 'shapers', knobLayout: 'grid',
+    isMacro: true,
+    knobs: [
+      { param: 'threshold', label: 'THRESHOLD', size: 'medium', def: 3000 },
+      { param: 'ratio',     label: 'RATIO',     size: 'medium', def: 2048 },
+      { param: 'attack',    label: 'ATTACK',    size: 'small',  def: 100 },
+      { param: 'release',   label: 'RELEASE',   size: 'small',  def: 1000 },
+    ],
+    inputs: [
+      { id: 'in', label: 'IN' }
+    ],
+    outputs: [
+      { id: 'out', label: 'OUT' }
+    ]
+  },
   logic: {
     title: 'Logic Gate', hp: 2, category: 'math', knobLayout: 'vertical',
     isMacro: true,
@@ -504,6 +558,8 @@ const MODULE_DEFS = {
     outputs: [
       { id: 'add', label: 'ADD' },
       { id: 'sub', label: 'SUB' },
+      { id: 'mul', label: 'MUL' },
+      { id: 'div', label: 'DIV' },
       { id: 'min', label: 'MIN' },
       { id: 'max', label: 'MAX' }
     ]
@@ -604,6 +660,17 @@ const MODULE_DEFS = {
     knobs: [{ param: 'gain', label: 'GAIN', size: 'medium', def: 4095 }],
     inputs: [{ id: 'a', label: 'IN' }],
     outputs: [{ id: 'out', label: 'OUT' }]
+  },
+  constant: {
+    title: 'Constant Val', hp: 2, category: 'math', knobLayout: 'vertical',
+    isMacro: true,
+    knobs: [
+      { param: 'val', label: 'VOLTAGE', size: 'large', def: 2048 }
+    ],
+    inputs: [],
+    outputs: [
+      { id: 'out', label: 'OUT' }
+    ]
   },
   'signal-switch': {
     title: '3-Way Switch', hp: 2, category: 'math', knobLayout: 'vertical',
@@ -1090,6 +1157,165 @@ let nodesCount = 0;
 let liveUpdateTimer = null;
 let isSendingLive = false;
 let liveUpdatePending = false;
+let lastUploadedSnapshot = null;
+
+function getConstantsMetadata(bytes) {
+  const r = {
+    _b: bytes,
+    _p: 0,
+    u8() { return this._b[this._p++]; },
+    u16() { const v = this._b[this._p] | (this._b[this._p+1]<<8); this._p+=2; return v; },
+    u32() { const v = (this._b[this._p]|(this._b[this._p+1]<<8)|(this._b[this._p+2]<<16)|((this._b[this._p+3]<<24)>>>0)); this._p+=4; return v>>>0; },
+    i32() { return this.u32() | 0; },
+    str(n) { const s = String.fromCharCode(...this._b.slice(this._p, this._p+n)); this._p+=n; return s; },
+    pos() { return this._p; }
+  };
+
+  // Header (19 bytes)
+  const magic = [r.u8(), r.u8(), r.u8(), r.u8(), r.u8()];
+  const version = r.u16();
+  r.u16(); // flags
+  const slot_count = r.u16();
+  r.u16(); // reserved
+  r.u16(); // reserved
+  const buffer_count = r.u8();
+  const terminal_count = r.u8();
+  const kernel_id_count = r.u8();
+  r.u8(); // reserved
+
+  // Kernel Registry
+  for (let i = 0; i < kernel_id_count; i++) {
+    const len = r.u8();
+    r.str(len);
+  }
+
+  const constants = [];
+  let constIdx = 0;
+
+  // Slot Table
+  for (let i = 0; i < slot_count; i++) {
+    const kid = r.u8();
+    const core = r.u8();
+    const in_count = r.u8();
+    for (let j = 0; j < in_count; j++) {
+      const tag = r.u8();
+      if (tag === 0 || tag === 4) { // TAG_SLOT = 0, TAG_SLOT_OUT2 = 4
+        r.u16();
+      } else if (tag === 1) { // TAG_BUFFER = 1
+        r.u16();
+      } else if (tag === 2) { // TAG_CONST_U8 = 2
+        const valOffset = r.pos();
+        const val = r.u8();
+        constants.push({
+          const_idx: constIdx++,
+          tag: tag,
+          byte_offset: valOffset,
+          value: val,
+          size: 1
+        });
+      } else if (tag === 3) { // TAG_CONST_I32 = 3
+        const valOffset = r.pos();
+        const val = r.i32();
+        constants.push({
+          const_idx: constIdx++,
+          tag: tag,
+          byte_offset: valOffset,
+          value: val,
+          size: 4
+        });
+      }
+    }
+    r.u16(); // out_offset
+    r.u32(); // param0
+  }
+  return constants;
+}
+
+function getConstantValueForKnob(m, paramName, rawVal) {
+  const prevVal = m.params[paramName];
+  m.params[paramName] = rawVal;
+
+  let result;
+  if (m.type === 'sine' || m.type === 'triangle' || m.type === 'saw' || m.type === 'square' || m.type === 'sub-osc') {
+    if (paramName === 'pitch' || paramName === 'cents') {
+      const pitchKnob = getKnobValue(m.type, 'pitch', m.params.pitch ?? 1935);
+      const centsVal  = (getKnobValue(m.type, 'cents', m.params.cents ?? 2048) - 2048) / 204.8;
+      const noteCable = state.cables.find(c => c.toId === m.id && c.toPort === 'note');
+      if (noteCable) {
+        result = Math.round(pitchKnob - 60 + centsVal);
+      } else {
+        result = Math.round(pitchKnob + centsVal);
+      }
+    }
+  }
+
+  if (result === undefined) {
+    result = getKnobValue(m.type, paramName, rawVal);
+  }
+
+  m.params[paramName] = prevVal;
+  return result;
+}
+
+function rebuildKnobConstantMap() {
+  knobConstantMap = {};
+  if (!compiledSnapshot) return;
+
+  const allMods = state.rows.flat();
+  const baseSnapshot = new Uint8Array(compiledSnapshot);
+  let baseConsts;
+  try {
+    baseConsts = getConstantsMetadata(baseSnapshot);
+  } catch (e) {
+    console.warn('Failed to parse base constants:', e);
+    return;
+  }
+
+  for (const m of allMods) {
+    const def = MODULE_DEFS[m.type];
+    if (!def || def.isHW) continue;
+    for (const k of (def.knobs || [])) {
+      const paramName = k.param;
+      const originalVal = m.params[paramName] ?? k.def;
+      
+      const tempVal = originalVal >= 2048 ? originalVal - 1000 : originalVal + 1000;
+      m.params[paramName] = tempVal;
+
+      try {
+        const code = generateCode(true); // textOnly = true
+        const ast = Lens.read(code);
+        const expanded = Lens.expand(ast, { loadFile: __webLoadFile });
+        const lowered = Lens.lower(expanded);
+        const sched = Lens.schedule(lowered);
+        const tempSnapshot = Lens.encode(sched, lowered);
+
+        if (tempSnapshot.length === baseSnapshot.length) {
+          const tempConsts = getConstantsMetadata(tempSnapshot);
+          if (tempConsts.length === baseConsts.length) {
+            const diffs = [];
+            for (let i = 0; i < baseConsts.length; i++) {
+              if (baseConsts[i].value !== tempConsts[i].value) {
+                diffs.push({ baseEntry: baseConsts[i], tempEntry: tempConsts[i] });
+              }
+            }
+            if (diffs.length === 1) {
+              knobConstantMap[`${m.id}.${paramName}`] = {
+                const_idx: diffs[0].baseEntry.const_idx,
+                byte_offset: diffs[0].baseEntry.byte_offset,
+                size: diffs[0].baseEntry.size
+              };
+            }
+          }
+        }
+      } catch (err) {
+        console.warn(`[Knob Map] Error mapping ${m.id}.${paramName}:`, err);
+      } finally {
+        m.params[paramName] = originalVal;
+      }
+    }
+  }
+  console.log('[Knob Map] Rebuilt knobConstantMap:', knobConstantMap);
+}
 
 function triggerLiveUpdate() {
   if (!midiOut || !compiledSnapshot) return;
@@ -1101,24 +1327,104 @@ function triggerLiveUpdate() {
   liveUpdateTimer = setTimeout(async () => {
     isSendingLive = true;
     liveUpdatePending = false;
-    try {
-      await writeSnapshot();
-      const statusEl = $('status');
-      statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B · playing live!`;
-      statusEl.className = 'ok';
-    } catch (e) {
-      console.warn('Live update failed:', e.message);
-    } finally {
-      isSendingLive = false;
-      if (liveUpdatePending) {
-        triggerLiveUpdate();
+
+    let didUpdateConst = false;
+    if (lastUploadedSnapshot && lastUploadedSnapshot.length === compiledSnapshot.length) {
+      try {
+        const oldConsts = getConstantsMetadata(lastUploadedSnapshot);
+        const newConsts = getConstantsMetadata(compiledSnapshot);
+        if (oldConsts.length === newConsts.length) {
+          const diffs = [];
+          for (let i = 0; i < oldConsts.length; i++) {
+            if (oldConsts[i].value !== newConsts[i].value) {
+              diffs.push({ oldEntry: oldConsts[i], newEntry: newConsts[i] });
+            }
+          }
+          let allBytesMatch = true;
+          for (let i = 0; i < compiledSnapshot.length; i++) {
+            if (lastUploadedSnapshot[i] !== compiledSnapshot[i]) {
+              allBytesMatch = false;
+              break;
+            }
+          }
+
+          if (allBytesMatch) {
+            didUpdateConst = true;
+            const statusEl = $('status');
+            statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B · live updated!`;
+            statusEl.className = 'ok';
+          } else if (diffs.length === 1) {
+            const targetOffset = diffs[0].newEntry.byte_offset;
+            const targetSize = diffs[0].newEntry.size;
+            let otherBytesMatch = true;
+            for (let i = 0; i < compiledSnapshot.length - 4; i++) {
+              if (i >= targetOffset && i < targetOffset + targetSize) continue;
+              if (lastUploadedSnapshot[i] !== compiledSnapshot[i]) {
+                otherBytesMatch = false;
+                break;
+              }
+            }
+            if (otherBytesMatch && targetSize === 4) {
+              const constIdx = diffs[0].newEntry.const_idx;
+              const newValue = diffs[0].newEntry.value;
+              const newCrc32 = compiledSnapshot[compiledSnapshot.length - 4] |
+                               (compiledSnapshot[compiledSnapshot.length - 3] << 8) |
+                               (compiledSnapshot[compiledSnapshot.length - 2] << 16) |
+                               ((compiledSnapshot[compiledSnapshot.length - 1] << 24) >>> 0);
+
+              const payload = new Uint8Array(11);
+              payload[0] = constIdx;
+              payload[1] = newValue & 0xFF;
+              payload[2] = (newValue >> 8) & 0xFF;
+              payload[3] = (newValue >> 16) & 0xFF;
+              payload[4] = (newValue >> 24) & 0xFF;
+              payload[5] = targetOffset & 0xFF;
+              payload[6] = (targetOffset >> 8) & 0xFF;
+              payload[7] = newCrc32 & 0xFF;
+              payload[8] = (newCrc32 >> 8) & 0xFF;
+              payload[9] = (newCrc32 >> 16) & 0xFF;
+              payload[10] = (newCrc32 >> 24) & 0xFF;
+
+              midiOut.send([...Lens.frame(Lens.CMD.UPDATE_CONST, payload)]);
+              const m = await recvAck();
+              if (m.cmd === Lens.CMD.ACK) {
+                lastUploadedSnapshot = new Uint8Array(compiledSnapshot);
+                didUpdateConst = true;
+                const statusEl = $('status');
+                statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B · live updated!`;
+                statusEl.className = 'ok';
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Real-time constant update detection/execution failed, falling back to full upload:', e);
       }
+    }
+
+    if (!didUpdateConst) {
+      try {
+        await writeSnapshot();
+        lastUploadedSnapshot = new Uint8Array(compiledSnapshot);
+        const statusEl = $('status');
+        statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B · playing live!`;
+        statusEl.className = 'ok';
+      } catch (e) {
+        console.warn('Live update failed:', e.message);
+      }
+    }
+    isSendingLive = false;
+    if (liveUpdatePending) {
+      triggerLiveUpdate();
     }
   }, 100);
 }
 let midiOut = null, midiIn = null, ackWaiter = null;
 let compiledSnapshot = null;
 let currentContextMenu = null;
+let hoveredJack = null;
+let knobConstantMap = {};
+let lastGeneratedCode = '';
 
 // ═══════════════════════════════════════════════════════════════════════
 // 3. CORE UTILS
@@ -1284,7 +1590,10 @@ function buildModuleEl(type, instanceId, params, leftPx) {
   const isSlim = def.hp < 6;
   const screws = isSlim ? ['tl', 'br'] : ['tl', 'tr', 'bl', 'br'];
   for (const pos of screws) {
-    mod.appendChild(el('div', `screw screw-${pos}`));
+    const screwEl = el('div', `screw screw-${pos}`);
+    const randRot = Math.floor(Math.random() * 360);
+    screwEl.style.transform = `rotate(${randRot}deg)`;
+    mod.appendChild(screwEl);
   }
 
   // Header Title on faceplate (positioned below top screws to avoid overlap)
@@ -1467,6 +1776,15 @@ function buildJackEl(instanceId, portId, label, direction) {
   jack.dataset.direction  = direction;
   jack.addEventListener('pointerdown', handleJackDown);
 
+  jack.addEventListener('pointerenter', () => {
+    hoveredJack = { instanceId, portId };
+    redrawCables();
+  });
+  jack.addEventListener('pointerleave', () => {
+    hoveredJack = null;
+    redrawCables();
+  });
+
   wrap.appendChild(lbl);
   wrap.appendChild(jack);
   return wrap;
@@ -1608,7 +1926,11 @@ function setupModuleDrag(handleEl, modEl, instanceId) {
       startX: e.clientX,
       startLeft: mData ? (mData.left || 0) : 0,
       rowIdx,
-      hpWidth: def ? def.hp : 6
+      hpWidth: def ? def.hp : 6,
+      startPositions: state.rows[rowIdx].reduce((map, m) => {
+        map[m.id] = m.left || 0;
+        return map;
+      }, {})
     };
 
     document.addEventListener('pointermove', handleModuleMove);
@@ -1647,6 +1969,10 @@ function handleModuleMove(e) {
       const newLeft = findFreePosition(targetRow, activeDrag.hpWidth);
       mData.left = newLeft;
       state.rows[targetRow].push(mData);
+      activeDrag.startPositions = state.rows[targetRow].reduce((map, m) => {
+        map[m.id] = m.left || 0;
+        return map;
+      }, {});
       activeDrag.rowIdx = targetRow;
       activeDrag.startX = e.clientX;
       activeDrag.startLeft = newLeft;
@@ -1734,35 +2060,54 @@ function resolveCollisions(rowIndex, draggedId) {
     ? (parseInt(activeDrag.modEl.style.left) || 0)
     : (draggedM.left || 0);
 
-  // During a drag: sort by center-X and slide other modules out of the way
+  const startPos = (activeDrag && activeDrag.instanceId === draggedId && activeDrag.startPositions)
+    ? activeDrag.startPositions
+    : {};
+
+  // Sort by center-X using the static startPositions for stationary modules
   const sorted = [...row].sort((a, b) => {
     const aDef = MODULE_DEFS[a.type];
     const bDef = MODULE_DEFS[b.type];
     const aWidth = (aDef ? aDef.hp : 6) * HP;
     const bWidth = (bDef ? bDef.hp : 6) * HP;
-    const aLeft = (a.id === draggedId) ? rawLeft : (a.left || 0);
-    const bLeft = (b.id === draggedId) ? rawLeft : (b.left || 0);
+    const aLeft = (a.id === draggedId) ? rawLeft : (startPos[a.id] ?? a.left ?? 0);
+    const bLeft = (b.id === draggedId) ? rawLeft : (startPos[b.id] ?? b.left ?? 0);
     return (aLeft + aWidth / 2) - (bLeft + bWidth / 2);
   });
 
   state.rows[rowIndex] = sorted;
 
-  // Resolve overlaps in the sorted order from left to right
-  let x = 0;
-  for (const m of sorted) {
+  // Find target dragged index
+  const k = sorted.findIndex(m => m.id === draggedId);
+
+  // Position the dragged module
+  draggedM.left = rawLeft;
+  const draggedEl = $('mod-' + draggedId);
+  if (draggedEl) draggedEl.style.left = rawLeft + 'px';
+
+  // Push modules to the left of the dragged module (right-to-left processing)
+  for (let i = k - 1; i >= 0; i--) {
+    const m = sorted[i];
     const mDef = MODULE_DEFS[m.type];
     const mWidth = (mDef ? mDef.hp : 6) * HP;
-    if (m.id === draggedId) {
-      m.left = Math.max(x, rawLeft);
-      const el = $('mod-' + m.id);
-      if (el) el.style.left = m.left + 'px';
-      x = m.left + mWidth;
-    } else {
-      m.left = Math.max(x, m.left || 0);
-      const el = $('mod-' + m.id);
-      if (el) el.style.left = m.left + 'px';
-      x = m.left + mWidth;
-    }
+    const rightBound = sorted[i + 1].left;
+    const origLeft = startPos[m.id] ?? m.left ?? 0;
+    m.left = Math.max(0, Math.min(origLeft, rightBound - mWidth));
+    const el = $('mod-' + m.id);
+    if (el) el.style.left = m.left + 'px';
+  }
+
+  // Push modules to the right of the dragged module (left-to-right processing)
+  for (let i = k + 1; i < sorted.length; i++) {
+    const m = sorted[i];
+    const prevM = sorted[i - 1];
+    const prevDef = MODULE_DEFS[prevM.type];
+    const prevWidth = (prevDef ? prevDef.hp : 6) * HP;
+    const leftBound = prevM.left + prevWidth;
+    const origLeft = startPos[m.id] ?? m.left ?? 0;
+    m.left = Math.max(leftBound, origLeft);
+    const el = $('mod-' + m.id);
+    if (el) el.style.left = m.left + 'px';
   }
 }
 
@@ -1853,6 +2198,8 @@ function showContextMenu(e) {
     const menu = el('div', 'context-menu');
     menu.style.left = e.clientX + 'px';
     menu.style.top = e.clientY + 'px';
+
+
 
     if (def?.deletable !== false) {
       const delItem = el('div', 'context-menu-item', { textContent: 'Delete Module' });
@@ -1970,7 +2317,51 @@ function handleKnobMove(e) {
     }
   }
 
-  generateCode();
+  const mapKey = `${knobState.instanceId}.${knobState.param}`;
+  const map = knobConstantMap[mapKey];
+  const scaledVal = getConstantValueForKnob(modData, knobState.param, val);
+
+  console.log('[Knob Drag]', {
+    mapKey,
+    val,
+    scaledVal,
+    hasMap: !!map,
+    constIdx: map ? map.const_idx : null,
+    hasMidiOut: !!midiOut,
+    hasLastUploadedSnapshot: !!lastUploadedSnapshot
+  });
+
+  if (midiOut && lastUploadedSnapshot && map && map.size === 4) {
+    const constIdx = map.const_idx;
+    const targetOffset = map.byte_offset;
+    
+    lastUploadedSnapshot[targetOffset] = scaledVal & 0xFF;
+    lastUploadedSnapshot[targetOffset + 1] = (scaledVal >> 8) & 0xFF;
+    lastUploadedSnapshot[targetOffset + 2] = (scaledVal >> 16) & 0xFF;
+    lastUploadedSnapshot[targetOffset + 3] = (scaledVal >> 24) & 0xFF;
+
+    const newCrc32 = Lens.crc32(lastUploadedSnapshot.slice(0, lastUploadedSnapshot.length - 4));
+    
+    lastUploadedSnapshot[lastUploadedSnapshot.length - 4] = newCrc32 & 0xFF;
+    lastUploadedSnapshot[lastUploadedSnapshot.length - 3] = (newCrc32 >> 8) & 0xFF;
+    lastUploadedSnapshot[lastUploadedSnapshot.length - 2] = (newCrc32 >> 16) & 0xFF;
+    lastUploadedSnapshot[lastUploadedSnapshot.length - 1] = (newCrc32 >> 24) & 0xFF;
+
+    const payload = new Uint8Array(11);
+    payload[0] = constIdx;
+    payload[1] = scaledVal & 0xFF;
+    payload[2] = (scaledVal >> 8) & 0xFF;
+    payload[3] = (scaledVal >> 16) & 0xFF;
+    payload[4] = (scaledVal >> 24) & 0xFF;
+    payload[5] = targetOffset & 0xFF;
+    payload[6] = (targetOffset >> 8) & 0xFF;
+    payload[7] = newCrc32 & 0xFF;
+    payload[8] = (newCrc32 >> 8) & 0xFF;
+    payload[9] = (newCrc32 >> 16) & 0xFF;
+    payload[10] = (newCrc32 >> 24) & 0xFF;
+
+    midiOut.send([...Lens.frame(Lens.CMD.UPDATE_CONST, payload)]);
+  }
 }
 
 function handleKnobUp(e) {
@@ -1979,6 +2370,7 @@ function handleKnobUp(e) {
   knob.removeEventListener('pointermove', handleKnobMove);
   knob.removeEventListener('pointerup',   handleKnobUp);
   knobState = null;
+  generateCode();
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2170,7 +2562,19 @@ function redrawCables() {
       const toIdx = jackCurrentIndex[toKey] || 0;
       jackCurrentIndex[toKey] = toIdx + 1;
 
-      drawCablePath(svg, fromEl, toEl, c.color, false, fromIdx, fromCount, toIdx, toCount);
+      let dim = false;
+      let glow = false;
+      if (hoveredJack) {
+        const matchesFrom = (c.fromId === hoveredJack.instanceId && c.fromPort === hoveredJack.portId);
+        const matchesTo   = (c.toId === hoveredJack.instanceId && c.toPort === hoveredJack.portId);
+        if (matchesFrom || matchesTo) {
+          glow = true;
+        } else {
+          dim = true;
+        }
+      }
+
+      drawCablePath(svg, fromEl, toEl, c.color, false, fromIdx, fromCount, toIdx, toCount, dim, glow);
     }
   }
 
@@ -2181,7 +2585,7 @@ function redrawCables() {
   }
 }
 
-function drawCablePath(svg, fromEl, toEl, color, dashed, fromIdx = 0, fromCount = 1, toIdx = 0, toCount = 1) {
+function drawCablePath(svg, fromEl, toEl, color, dashed, fromIdx = 0, fromCount = 1, toIdx = 0, toCount = 1, dim = false, glow = false) {
   const r1 = fromEl.getBoundingClientRect();
   const r2 = toEl.getBoundingClientRect();
 
@@ -2208,22 +2612,42 @@ function drawCablePath(svg, fromEl, toEl, color, dashed, fromIdx = 0, fromCount 
   // Vary sag to fan out paths in the middle
   const sagOffset = (fromIdx - (fromCount - 1) / 2) * 12;
 
-  drawCablePathXY(svg, x1, y1, x2, y2, color, dashed, sagOffset);
+  drawCablePathXY(svg, x1, y1, x2, y2, color, dashed, sagOffset, dim, glow);
 }
 
-function drawCablePathXY(svg, x1, y1, x2, y2, color, dashed, sagOffset = 0) {
+function drawCablePathXY(svg, x1, y1, x2, y2, color, dashed, sagOffset = 0, dim = false, glow = false) {
   const dist = Math.hypot(x2-x1, y2-y1);
   const sag  = Math.max(30, dist * 0.28) + sagOffset;
   const d    = `M${x1},${y1} C${x1},${y1+sag} ${x2},${y2+sag} ${x2},${y2}`;
+  
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', d);
   path.setAttribute('stroke', color);
-  path.setAttribute('stroke-width', '4');
+  path.setAttribute('stroke-width', glow ? '5.5' : '4');
   path.setAttribute('fill', 'none');
   path.setAttribute('stroke-linecap', 'round');
-  if (dashed) path.setAttribute('stroke-dasharray', '6 4');
-  path.style.filter = 'drop-shadow(0 3px 5px rgba(0,0,0,.6))';
-  svg.appendChild(path);
+  
+  if (dashed) {
+    path.setAttribute('stroke-dasharray', '6 4');
+    path.style.filter = 'drop-shadow(0 3px 5px rgba(0,0,0,.6))';
+    svg.appendChild(path);
+  } else {
+    // 1. Base glow path (adds depth)
+    const glowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    glowPath.setAttribute('d', d);
+    glowPath.setAttribute('stroke', color);
+    glowPath.setAttribute('stroke-width', glow ? '11' : '7');
+    glowPath.setAttribute('fill', 'none');
+    glowPath.setAttribute('stroke-linecap', 'round');
+    glowPath.style.opacity = dim ? '0.05' : (glow ? '0.6' : '0.3');
+    glowPath.style.filter = 'blur(2px)';
+    svg.appendChild(glowPath);
+
+    // 2. Core colored cable path
+    path.style.opacity = dim ? '0.15' : '1.0';
+    path.style.filter = glow ? 'drop-shadow(0 3px 6px rgba(0,0,0,.4))' : 'drop-shadow(0 3px 5px rgba(0,0,0,.5))';
+    svg.appendChild(path);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2294,7 +2718,7 @@ function getCabledSourceExpr(cable, allMods) {
   
   // Scale raw CV signals (0..4095) to pitch semitones (0..127) using spread when cabled to V/OCT or FM.
   // Do NOT scale sources that already output MIDI note integers.
-  const isPitchInput = cable.toPort === 'note' || cable.toPort === 'pitch' || cable.toPort === 'fm';
+  const isPitchInput = cable.toPort === 'note' || cable.toPort === 'pitch' || cable.toPort === 'fm' || cable.toPort === 'pitch1' || cable.toPort === 'pitch2';
   const isPitchSource = (fromMod.type === 'score-player' && cable.fromPort === 'note') ||
                         (fromMod.type === 'midi-note'    && cable.fromPort === 'note') ||
                         (fromMod.type === 'turing'       && cable.fromPort === 'out')  ||
@@ -2323,10 +2747,13 @@ function getCabledSourceExpr(cable, allMods) {
   if (isPitchInput && !isDirectPitchSource) {
     return `(spread ${expr} 128)`;
   }
+  if (!isPitchInput && isPitchSource) {
+    return `(spread ${expr} 132071)`;
+  }
   return expr;
 }
 
-function generateCode() {
+function generateCode(textOnly = false) {
   const lines  = ['; generated by flare', '(patch'];
   const allMods = state.rows.flat();
 
@@ -2943,6 +3370,9 @@ function generateCode() {
           mixCvExpr = `(clip (add ${attSrc} ${mixVal} :sat))`;
         }
 
+        lines.push(`  (def ${id}tape (audio :seconds 0.75))`);
+        lines.push(`  (def ${id}tap (tap ${id}tape ${timeExpr} :span))`);
+
         if (mixCvExpr) {
           // CV present: always compute wet/dry blend dynamically
           lines.push(`  (def ${id}out (clip (add ${inSig} (vca ${id}tap ${mixCvExpr}))))`);
@@ -2954,8 +3384,6 @@ function generateCode() {
           lines.push(`  (def ${id}out (clip (add ${inSig} (vca ${id}tap ${mixVal}))))`);
         }
 
-        lines.push(`  (def ${id}tape (audio :seconds 0.75))`);
-        lines.push(`  (def ${id}tap (tap ${id}tape ${timeExpr} :span))`);
         if (feedExpr === '0') {
           sinkLines.push(`  (<- ${id}tape ${inSig})`);
         } else if (feedExpr === '1' || feedExpr === '4095') {
@@ -2966,99 +3394,100 @@ function generateCode() {
       }
       continue;
     } else if (m.type === 'reverb') {
-        // Resolve decay — either static or knob + CV
-        const decayCvCable = state.cables.find(c => c.toId === id && c.toPort === 'decay');
-        const knobDecayRaw = m.params.decay ?? 2048;
-        const decayAmtVal  = getKnobValue(m.type, 'decayamt', m.params.decayamt ?? 4095);
-        const decayVal     = getKnobValue(m.type, 'decay', knobDecayRaw);
+      const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
+      const inSig = getCabledSourceExpr(inCable, allMods);
 
-        let combFbExpr;
-        if (decayCvCable) {
-          const decaySrc = getCabledSourceExpr(decayCvCable, allMods);
-          const attSrc   = decayAmtVal >= 4095 ? decaySrc : `(vca ${decaySrc} ${decayAmtVal})`;
-          const dExpr    = `(clip (add ${attSrc} ${decayVal} :sat))`;
-          // combFb = clamp(decay * 0.75) = vca(decay, 3072)
-          combFbExpr = `(vca ${dExpr} 3072)`;
-        } else {
-          combFbExpr = Math.min(3072, Math.round(decayVal * 0.75));
-        }
+      const decayCvCable = state.cables.find(c => c.toId === id && c.toPort === 'decay');
+      const decayVal = getKnobValue(m.type, 'decay', m.params.decay ?? 2048);
+      const decayAmt = getKnobValue(m.type, 'decayamt', m.params.decayamt ?? 4095);
+      let decayExpr = decayVal;
+      if (decayCvCable) {
+        const decaySrc = getCabledSourceExpr(decayCvCable, allMods);
+        const att = decayAmt >= 4095 ? decaySrc : `(vca ${decaySrc} ${decayAmt})`;
+        decayExpr = `(clip (add ${att} ${decayVal} :sat))`;
+      }
 
-        // Resolve mix — either static or knob + CV
-        const mixCvCable  = state.cables.find(c => c.toId === id && c.toPort === 'mix');
-        const knobMixRaw  = m.params.mix ?? 1024;
-        const mixAmtVal   = getKnobValue(m.type, 'mixamt', m.params.mixamt ?? 4095);
-        const mixVal      = getKnobValue(m.type, 'mix', knobMixRaw);
-        let mixCvExpr = null;
-        if (mixCvCable) {
-          const mixSrc = getCabledSourceExpr(mixCvCable, allMods);
-          const attSrc = mixAmtVal >= 4095 ? mixSrc : `(vca ${mixSrc} ${mixAmtVal})`;
-          mixCvExpr = `(clip (add ${attSrc} ${mixVal} :sat))`;
-        }
-        // Allpass feedback: fixed at 0.33 (1351) for smooth dispersion without clipping
-        const apFb = 1351;
-        const apInScale = 2744; // 0.67 to ensure allpass state (x + g*w) <= 1.0 (no clipping)
+      const mixCvCable = state.cables.find(c => c.toId === id && c.toPort === 'mix');
+      const mixVal = getKnobValue(m.type, 'mix', m.params.mix ?? 1024);
+      const mixAmt = getKnobValue(m.type, 'mixamt', m.params.mixamt ?? 4095);
+      let mixExpr = mixVal;
+      if (mixCvCable) {
+        const mixSrc = getCabledSourceExpr(mixCvCable, allMods);
+        const att = mixAmt >= 4095 ? mixSrc : `(vca ${mixSrc} ${mixAmt})`;
+        mixExpr = `(clip (add ${att} ${mixVal} :sat))`;
+      }
 
-        const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
-        const inSig = getCabledSourceExpr(inCable, allMods);
-        const combFb = combFbExpr; // alias: number or Lens expression depending on CV
+      lines.push(`  (def ${id} (reverb :in ${inSig} :decay ${decayExpr} :mix ${mixExpr}))`);
+      lines.push(`  (def ${id}outL ${id})`);
+      lines.push(`  (def ${id}outR (${id} :outR))`);
+      continue;
+    } else if (m.type === 'chorus') {
+      const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
+      const inSig = getCabledSourceExpr(inCable, allMods);
 
-        // Delay lengths (primes for uncorrelated diffuse field)
-        const combs = [
-          { name: 'L1', len: 1151 },
-          { name: 'L2', len: 1381 },
-          { name: 'R1', len: 1249 },
-          { name: 'R2', len: 1451 }
-        ];
-        const allpasses = [
-          { name: 'L1ap', len: 347 },
-          { name: 'R1ap', len: 373 }
-        ];
+      const rateCable = state.cables.find(c => c.toId === id && c.toPort === 'rate');
+      const rateVal = getKnobValue(m.type, 'rate', m.params.rate ?? 1000);
+      const rateAmt = getKnobValue(m.type, 'rateamt', m.params.rateamt ?? 4095);
+      let rateExpr = rateVal;
+      if (rateCable) {
+        const rateSrc = getCabledSourceExpr(rateCable, allMods);
+        const att = rateAmt >= 4095 ? rateSrc : `(vca ${rateSrc} ${rateAmt})`;
+        rateExpr = `(clip (add ${att} ${rateVal} :sat))`;
+      }
 
-        // 1. Declare all tapes and read taps (fixed compile-time sizes converted to seconds)
-        for (const c of combs) {
-          lines.push(`  (def ${id}tape${c.name} (audio :seconds ${(c.len / 48000).toFixed(6)}))`);
-          lines.push(`  (def ${id}tap${c.name} (tap ${id}tape${c.name} ${c.len}))`);
-        }
-        for (const ap of allpasses) {
-          lines.push(`  (def ${id}tape${ap.name} (audio :seconds ${(ap.len / 48000).toFixed(6)}))`);
-          lines.push(`  (def ${id}tap${ap.name} (tap ${id}tape${ap.name} ${ap.len}))`);
-        }
+      const depthCable = state.cables.find(c => c.toId === id && c.toPort === 'depth');
+      const depthVal = getKnobValue(m.type, 'depth', m.params.depth ?? 2048);
+      const depthAmt = getKnobValue(m.type, 'depthamt', m.params.depthamt ?? 4095);
+      let depthExpr = depthVal;
+      if (depthCable) {
+        const depthSrc = getCabledSourceExpr(depthCable, allMods);
+        const att = depthAmt >= 4095 ? depthSrc : `(vca ${depthSrc} ${depthAmt})`;
+        depthExpr = `(clip (add ${att} ${depthVal} :sat))`;
+      }
 
-        // 2. Comb filter mixes (parallel, scaled by 0.50 to keep volume safe)
-        lines.push(`  (def ${id}sumL (vca (add ${id}tapL1 ${id}tapL2) 2048))`);
-        lines.push(`  (def ${id}sumR (vca (add ${id}tapR1 ${id}tapR2) 2048))`);
+      const fbVal = getKnobValue(m.type, 'feedback', m.params.feedback ?? 2048);
 
-        // 3. Allpass L chains (series Direct Form II, pre-scaled to prevent clipping)
-        lines.push(`  (def ${id}apL1w (clip (add (vca ${id}sumL ${apInScale}) (vca ${id}tapL1ap ${apFb}))))`);
-        lines.push(`  (def ${id}wetL (clip (sub ${id}tapL1ap (vca ${id}apL1w ${apFb}))))`);
+      lines.push(`  (def ${id}out (chorus :in ${inSig} :rate ${rateExpr} :depth ${depthExpr} :feedback ${fbVal}))`);
+      continue;
+    } else if (m.type === 'flanger') {
+      const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
+      const inSig = getCabledSourceExpr(inCable, allMods);
 
-        // 4. Allpass R chains (series Direct Form II, pre-scaled to prevent clipping)
-        lines.push(`  (def ${id}apR1w (clip (add (vca ${id}sumR ${apInScale}) (vca ${id}tapR1ap ${apFb}))))`);
-        lines.push(`  (def ${id}wetR (clip (sub ${id}tapR1ap (vca ${id}apR1w ${apFb}))))`);
+      const rateCable = state.cables.find(c => c.toId === id && c.toPort === 'rate');
+      const rateVal = getKnobValue(m.type, 'rate', m.params.rate ?? 500);
+      const rateAmt = getKnobValue(m.type, 'rateamt', m.params.rateamt ?? 4095);
+      let rateExpr = rateVal;
+      if (rateCable) {
+        const rateSrc = getCabledSourceExpr(rateCable, allMods);
+        const att = rateAmt >= 4095 ? rateSrc : `(vca ${rateSrc} ${rateAmt})`;
+        rateExpr = `(clip (add ${att} ${rateVal} :sat))`;
+      }
 
-        // 5. Output mix dry/wet (full-range linear dry/wet mixing)
-        if (mixCvExpr) {
-          // CV present: dynamic dry/wet blend
-          lines.push(`  (def ${id}outL (clip (add (vca ${inSig} (sub 4095 ${mixCvExpr})) (vca ${id}wetL ${mixCvExpr}))))`);
-          lines.push(`  (def ${id}outR (clip (add (vca ${inSig} (sub 4095 ${mixCvExpr})) (vca ${id}wetR ${mixCvExpr}))))`);
-        } else if (mixVal === 0) {
-          lines.push(`  (def ${id}outL ${inSig})`);
-          lines.push(`  (def ${id}outR ${inSig})`);
-        } else if (mixVal === 4095) {
-          lines.push(`  (def ${id}outL ${id}wetL)`);
-          lines.push(`  (def ${id}outR ${id}wetR)`);
-        } else {
-          lines.push(`  (def ${id}outL (clip (add (vca ${inSig} (sub 4095 ${mixVal})) (vca ${id}wetL ${mixVal}))))`);
-          lines.push(`  (def ${id}outR (clip (add (vca ${inSig} (sub 4095 ${mixVal})) (vca ${id}wetR ${mixVal}))))`);
-        }
+      const depthCable = state.cables.find(c => c.toId === id && c.toPort === 'depth');
+      const depthVal = getKnobValue(m.type, 'depth', m.params.depth ?? 1024);
+      const depthAmt = getKnobValue(m.type, 'depthamt', m.params.depthamt ?? 4095);
+      let depthExpr = depthVal;
+      if (depthCable) {
+        const depthSrc = getCabledSourceExpr(depthCable, allMods);
+        const att = depthAmt >= 4095 ? depthSrc : `(vca ${depthSrc} ${depthAmt})`;
+        depthExpr = `(clip (add ${att} ${depthVal} :sat))`;
+      }
 
-        // 6. Write heads (deferred to sinkLines, input scaled to 0.25 to prevent comb filter clipping)
-        for (const c of combs) {
-          sinkLines.push(`  (<- ${id}tape${c.name} (clip (add (vca ${inSig} 1024) (vca ${id}tap${c.name} ${combFb}))))`);
-        }
-        sinkLines.push(`  (<- ${id}tapeL1ap ${id}apL1w)`);
-        sinkLines.push(`  (<- ${id}tapeR1ap ${id}apR1w)`);
-        continue;
+      const fbVal = getKnobValue(m.type, 'feedback', m.params.feedback ?? 3000);
+
+      lines.push(`  (def ${id}out (flanger :in ${inSig} :rate ${rateExpr} :depth ${depthExpr} :feedback ${fbVal}))`);
+      continue;
+    } else if (m.type === 'compressor') {
+      const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
+      const inSig = getCabledSourceExpr(inCable, allMods);
+
+      const threshVal = getKnobValue(m.type, 'threshold', m.params.threshold ?? 3000);
+      const ratioVal  = getKnobValue(m.type, 'ratio', m.params.ratio ?? 2048);
+      const attVal    = getKnobValue(m.type, 'attack', m.params.attack ?? 100);
+      const relVal    = getKnobValue(m.type, 'release', m.params.release ?? 1000);
+
+      lines.push(`  (def ${id}out (compressor :in ${inSig} :threshold ${threshVal} :ratio ${ratioVal} :attack ${attVal} :release ${relVal}))`);
+      continue;
       } else if (m.type === 'logic') {
       const aCable = state.cables.find(c => c.toId === id && c.toPort === 'a');
       const bCable = state.cables.find(c => c.toId === id && c.toPort === 'b');
@@ -3098,12 +3527,22 @@ function generateCode() {
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'sub')) {
         lines.push(`  (def ${id}sub (sub ${aSrc} ${bSrc}))`);
       }
+      if (state.cables.some(c => c.fromId === id && c.fromPort === 'mul')) {
+        lines.push(`  (def ${id}mul (mul ${aSrc} ${bSrc}))`);
+      }
+      if (state.cables.some(c => c.fromId === id && c.fromPort === 'div')) {
+        lines.push(`  (def ${id}div (div ${aSrc} ${bSrc}))`);
+      }
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'min')) {
         lines.push(`  (def ${id}min (min ${aSrc} ${bSrc}))`);
       }
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'max')) {
         lines.push(`  (def ${id}max (max ${aSrc} ${bSrc}))`);
       }
+      continue;
+    } else if (m.type === 'constant') {
+      const valKnob = getKnobValue(m.type, 'val', m.params.val ?? 2048);
+      lines.push(`  (def ${id}out ${valKnob})`);
       continue;
     } else if (m.type === 'benjolin') {
       const pitch1Cable = state.cables.find(c => c.toId === id && c.toPort === 'pitch1');
@@ -3123,9 +3562,9 @@ function generateCode() {
       lines.push(`  (def ${id}r3 (add (add (mul (tap ${id}reg 1) 4) (mul (tap ${id}reg 2) 2)) (tap ${id}reg 3)))`);
       lines.push(`  (def ${id}rungle (div (mul ${id}r3 VMAX) 7))`);
       lines.push(`  (def ${id}runglesm (slew ${id}rungle 2048))`);
-      lines.push(`  (def ${id}fm (vca ${id}r3 ${runglerKnob}))`);
-      lines.push(`  (def ${id}pitch1 (add ${f1Knob} (add ${p1Sig} ${id}fm)))`);
-      lines.push(`  (def ${id}pitch2 (add ${f2Knob} (add ${p2Sig} ${id}fm)))`);
+      lines.push(`  (def ${id}fm (mul ${id}r3 (spread ${runglerKnob} 13)))`);
+      lines.push(`  (def ${id}pitch1 (add (add 30 (spread ${f1Knob} 49)) (add ${p1Sig} ${id}fm)))`);
+      lines.push(`  (def ${id}pitch2 (add (spread ${f2Knob} 73) (add ${p2Sig} ${id}fm)))`);
       lines.push(`  (def ${id}out1 (triangle :note ${id}pitch1))`);
       lines.push(`  (def ${id}out2 (square :note ${id}pitch2))`);
       
@@ -3149,7 +3588,7 @@ function generateCode() {
       if (posCable) {
         posExpr = `(add ${posExpr} ${getCabledSourceExpr(posCable, allMods)} :sat)`;
       }
-      lines.push(`  (def ${id} (morph (lens ${in1} ${in2} ${in3} ${in4}) ${posExpr}))`);
+      lines.push(`  (def ${id}out (morph (lens ${in1} ${in2} ${in3} ${in4}) ${posExpr}))`);
       continue;
     } else if (m.type === 'midi-sync') {
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'clock')) {
@@ -3164,7 +3603,7 @@ function generateCode() {
       const inSig = getCabledSourceExpr(inCable, allMods);
       const loVal = getKnobValue(m.type, 'lo', m.params.lo ?? 1024);
       const hiVal = getKnobValue(m.type, 'hi', m.params.hi ?? 3072);
-      lines.push(`  (def ${id} (schmitt ${inSig} :lo ${loVal} :hi ${hiVal}))`);
+      lines.push(`  (def ${id}out (schmitt ${inSig} :lo ${loVal} :hi ${hiVal}))`);
       continue;
     } else if (m.type === 'shift-register') {
       const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
@@ -3348,8 +3787,18 @@ function generateCode() {
   lines.push(`\n; flare_layout: ${JSON.stringify(layoutMetadata)}`);
 
   const code = lines.join('\n');
+  if (textOnly) return code;
+
+  const lastCodeFunc = lastGeneratedCode.split('; flare_layout:')[0] || '';
+  const currentCodeFunc = code.split('; flare_layout:')[0] || '';
+  const hasCodeChanged = (currentCodeFunc !== lastCodeFunc);
+  
+  lastGeneratedCode = code;
+
   $('codeArea').value = code;
-  compileAndStatus(code);
+  if (hasCodeChanged) {
+    compileAndStatus(code);
+  }
 
   // Autosave current patch state to localStorage
   if (typeof localStorage !== 'undefined') {
@@ -3359,6 +3808,7 @@ function generateCode() {
       console.error('Autosave failed:', e);
     }
   }
+  return code;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -3373,6 +3823,7 @@ function compileAndStatus(code) {
     const lowered  = Lens.lower(expanded);
     const sched    = Lens.schedule(lowered);
     compiledSnapshot = Lens.encode(sched, lowered);
+    rebuildKnobConstantMap();
 
     nodesCount = lowered.slots?.length ?? 0;
     statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B${midiOut ? ' · ' + midiOut.name : ''}`;
@@ -3398,6 +3849,9 @@ async function measurePerf() {
   try {
     midiOut.send([...Lens.frame(6, [])]);
     const m = await recvAck();
+    if (m.cmd === 0x01) {
+      throw new Error('Profiler disabled (rebuild firmware with LENS_PERF_PROBE=ON)');
+    }
     if (m.cmd !== 0x11) {
       throw new Error(`expected PERF_DUMP, got 0x${m.cmd.toString(16)}`);
     }
@@ -3428,6 +3882,7 @@ async function connectMidi() {
     if (!midiOut || !midiIn) { s.textContent = 'Workshop card not found'; s.className = 'err'; return; }
     midiIn.onmidimessage = ev => { const m = Lens.parse([...ev.data]); if (m && ackWaiter) { const w = ackWaiter; ackWaiter = null; w(m); } };
     $('connectMidiBtn').textContent = 'Connected';
+    lastUploadedSnapshot = null;
     generateCode();
   } catch(e) { s.textContent = 'MIDI: ' + e.message; s.className = 'err'; }
 }
@@ -3456,7 +3911,12 @@ async function sendPatch() {
   }
   const s = $('status'); $('sendBtn').disabled = true;
   s.textContent = 'sending…';
-  try { await writeSnapshot(); s.textContent = 'playing!'; s.className = 'ok'; }
+  try {
+    await writeSnapshot();
+    lastUploadedSnapshot = new Uint8Array(compiledSnapshot);
+    s.textContent = 'playing!';
+    s.className = 'ok';
+  }
   catch(e) { s.textContent = e.message; s.className = 'err'; }
   $('sendBtn').disabled = !compiledSnapshot;
 }
@@ -3471,6 +3931,7 @@ async function saveToFlash() {
   s.textContent = 'writing to flash…';
   try {
     await writeSnapshot();
+    lastUploadedSnapshot = new Uint8Array(compiledSnapshot);
     await new Promise(r=>setTimeout(r,700));
     midiOut.send([...Lens.frame(Lens.CMD.SAVE_STATE)]);
     const m = await recvAck(3000);
@@ -3478,6 +3939,7 @@ async function saveToFlash() {
     s.textContent = 'saved! rebooting…'; s.className = 'ok';
     $('connectMidiBtn').textContent = 'Connect MIDI';
     midiOut = midiIn = null;
+    lastUploadedSnapshot = null;
   } catch(e) { s.textContent = e.message; s.className = 'err'; }
   generateCode();
 }

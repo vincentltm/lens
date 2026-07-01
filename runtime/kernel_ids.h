@@ -134,6 +134,10 @@ enum KernelId {
     KID_OP_DX               = 118,  /* fused DX7 voice kernel: blob+pitch+gate -> audio */
     KID_OP_WAVETABLE        = 119,  /* flash-resident wavetable osc: pitch+pos+pm -> audio */
     KID_OP_PICKUP           = 120,  /* soft-takeover: hold target until live knob crosses it */
-    KID_COUNT               = 121,  /* valid ids are 0..KID_COUNT-1; sizes KFN */
+    KID_OP_REVERB           = 121,
+    KID_OP_CHORUS           = 122,
+    KID_OP_FLANGER          = 123,
+    KID_OP_COMPRESSOR       = 124,
+    KID_COUNT               = 125,  /* valid ids are 0..KID_COUNT-1; sizes KFN */
     KID_UNKNOWN             = 255
 };

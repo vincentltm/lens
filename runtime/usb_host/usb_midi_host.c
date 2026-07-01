@@ -32,6 +32,7 @@
 
 #include "usb_midi_host.h"
 #include <stdlib.h>
+#include "pico/version.h"
 //--------------------------------------------------------------------+
 // MACRO CONSTANT TYPEDEF
 //--------------------------------------------------------------------+
@@ -203,8 +204,13 @@ bool midih_init(void)
     p_midi_host->stream_write = malloc(midih_limits.max_cables * sizeof(midi_stream_t));
     TU_ASSERT((p_midi_host->rx_ff_buf != NULL && p_midi_host->tx_ff_buf != NULL && p_midi_host->stream_write != NULL), 0);
     tu_memclr(p_midi_host->stream_write, sizeof(*(p_midi_host->stream_write))*midih_limits.max_cables);
+#if defined(PICO_SDK_VERSION_MAJOR) && (PICO_SDK_VERSION_MAJOR > 2 || (PICO_SDK_VERSION_MAJOR == 2 && PICO_SDK_VERSION_MINOR >= 2))
+    tu_fifo_config(&p_midi_host->rx_ff, p_midi_host->rx_ff_buf, midih_limits.midi_rx_buf, false);
+    tu_fifo_config(&p_midi_host->tx_ff, p_midi_host->tx_ff_buf, midih_limits.midi_tx_buf, false);
+#else
     tu_fifo_config(&p_midi_host->rx_ff, p_midi_host->rx_ff_buf, midih_limits.midi_rx_buf, 1, false); // true, true
     tu_fifo_config(&p_midi_host->tx_ff, p_midi_host->tx_ff_buf, midih_limits.midi_tx_buf, 1, false); // OBVS.
+#endif
 
   #if CFG_FIFO_MUTEX
     tu_fifo_config_mutex(&p_midi_host->rx_ff, NULL, osal_mutex_create(&p_midi_host->rx_ff_mutex));
@@ -310,7 +316,11 @@ void midih_close(uint8_t dev_addr)
 //--------------------------------------------------------------------+
 // Enumeration
 //--------------------------------------------------------------------+
+#if defined(PICO_SDK_VERSION_MAJOR) && (PICO_SDK_VERSION_MAJOR > 2 || (PICO_SDK_VERSION_MAJOR == 2 && PICO_SDK_VERSION_MINOR >= 2))
+uint16_t midih_open(uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const *desc_itf, uint16_t max_len)
+#else
 bool midih_open(uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const *desc_itf, uint16_t max_len)
+#endif
 {
   (void) rhport;
 
@@ -555,7 +565,11 @@ bool midih_open(uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const *d
   }
   p_midi_host->dev_addr = dev_addr;
 
+#if defined(PICO_SDK_VERSION_MAJOR) && (PICO_SDK_VERSION_MAJOR > 2 || (PICO_SDK_VERSION_MAJOR == 2 && PICO_SDK_VERSION_MINOR >= 2))
+  return len_parsed;
+#else
   return true;
+#endif
 }
 
 bool tuh_midi_configured(uint8_t dev_addr)

@@ -42,8 +42,6 @@ int32_t  lens_shadow_pool[LENS_MAX_SLOTS];
    So N uses of the same literal cost one word, not N. Returns the pool index, or
    -1 if the (distinct-value) pool is full. */
 static int lens_intern_const(struct LensRuntime* rt, int32_t v) {
-    for (uint16_t k = 0; k < rt->const_count; k++)
-        if (rt->const_pool[k] == v) return (int)k;
     if (rt->const_count >= LENS_CONST_POOL_WORDS) return -1;
     rt->const_pool[rt->const_count] = v;
     return (int)rt->const_count++;

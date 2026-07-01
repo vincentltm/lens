@@ -449,6 +449,65 @@ function lower(expanded) {
       return allocSlot('op_pluck', [trigRef, pitchRef, dampRef, bufRef], { param0: 0 }, {});
     }
 
+    if (op === 'reverb') {
+      const inArg = args[0] !== undefined ? args[0] : kwargs.in;
+      const decayArg = args[1] !== undefined ? args[1] : kwargs.decay;
+      const mixArg = args[2] !== undefined ? args[2] : kwargs.mix;
+      const inRef = inArg !== undefined ? lowerNode(inArg) : { kind: 'const', value: 0 };
+      const decayRef = decayArg !== undefined ? lowerNode(decayArg) : { kind: 'const', value: 2048 };
+      const mixRef = mixArg !== undefined ? lowerNode(mixArg) : { kind: 'const', value: 1024 };
+      const bufRef = allocBuffer('audio', 5952);
+      return allocSlot('op_reverb', [inRef, decayRef, mixRef, bufRef], { param0: 0 }, {});
+    }
+
+    if (op === 'chorus') {
+      const inArg = args[0] !== undefined ? args[0] : kwargs.in;
+      const rateArg = args[1] !== undefined ? args[1] : kwargs.rate;
+      const depthArg = args[2] !== undefined ? args[2] : kwargs.depth;
+      const fbArg = args[3] !== undefined ? args[3] : kwargs.feedback;
+      const inRef = inArg !== undefined ? lowerNode(inArg) : { kind: 'const', value: 0 };
+      const rateRef = rateArg !== undefined ? lowerNode(rateArg) : { kind: 'const', value: 100 };
+      const depthRef = depthArg !== undefined ? lowerNode(depthArg) : { kind: 'const', value: 1024 };
+      const fbRef = fbArg !== undefined ? lowerNode(fbArg) : { kind: 'const', value: 1024 };
+      const bufRef = allocBuffer('audio', 1024);
+      return allocSlot('op_chorus', [inRef, rateRef, depthRef, fbRef, bufRef], { param0: 0 }, {});
+    }
+
+    if (op === 'flanger') {
+      const inArg = args[0] !== undefined ? args[0] : kwargs.in;
+      const rateArg = args[1] !== undefined ? args[1] : kwargs.rate;
+      const depthArg = args[2] !== undefined ? args[2] : kwargs.depth;
+      const fbArg = args[3] !== undefined ? args[3] : kwargs.feedback;
+      const inRef = inArg !== undefined ? lowerNode(inArg) : { kind: 'const', value: 0 };
+      const rateRef = rateArg !== undefined ? lowerNode(rateArg) : { kind: 'const', value: 50 };
+      const depthRef = depthArg !== undefined ? lowerNode(depthArg) : { kind: 'const', value: 512 };
+      const fbRef = fbArg !== undefined ? lowerNode(fbArg) : { kind: 'const', value: 2048 };
+      const bufRef = allocBuffer('audio', 512);
+      return allocSlot('op_flanger', [inRef, rateRef, depthRef, fbRef, bufRef], { param0: 0 }, {});
+    }
+
+    if (op === 'compressor') {
+      const inArg = args[0] !== undefined ? args[0] : kwargs.in;
+      const threshArg = args[1] !== undefined ? args[1] : kwargs.threshold;
+      const ratioArg = args[2] !== undefined ? args[2] : kwargs.ratio;
+      const attArg = args[3] !== undefined ? args[3] : kwargs.attack;
+      const relArg = args[4] !== undefined ? args[4] : kwargs.release;
+      const inRef = inArg !== undefined ? lowerNode(inArg) : { kind: 'const', value: 0 };
+      const threshRef = threshArg !== undefined ? lowerNode(threshArg) : { kind: 'const', value: 3000 };
+      const ratioRef = ratioArg !== undefined ? lowerNode(ratioArg) : { kind: 'const', value: 2048 };
+      const attRef = attArg !== undefined ? lowerNode(attArg) : { kind: 'const', value: 100 };
+      const relRef = relArg !== undefined ? lowerNode(relArg) : { kind: 'const', value: 1000 };
+      return allocSlot('op_compressor', [inRef, threshRef, ratioRef, attRef, relRef], { param0: 0 }, {});
+    }
+
+    if (op === 'sel') {
+      const targetRef = lowerNode(args[0]);
+      if (targetRef && targetRef.kind === 'slot') {
+        return { kind: 'slot', id: targetRef.id, read: 'out2' };
+      }
+      return targetRef;
+    }
+
     // dx: fused DX7 voice from a flash bank. param0 = bank index;
     // in0=decay, in1=pitch, in2=gate, in3=preset, in4=tone.
     if (op === 'dx') {

@@ -7,9 +7,9 @@ if(WIN32)
 else()
     set(USERHOME $ENV{HOME})
 endif()
-set(sdkVersion 2.1.1)
+set(sdkVersion 2.2.0)
 set(toolchainVersion 14_2_Rel1)
-set(picotoolVersion 2.1.1)
+set(picotoolVersion 2.2.0)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
@@ -120,9 +120,9 @@ target_link_options(lens PRIVATE -Wl,--print-memory-usage)
 # XOSC startup delay guard (from root CMakeLists.txt).
 target_compile_definitions(lens PRIVATE PICO_XOSC_STARTUP_DELAY_MULTIPLIER=64)
 
-# Perf probe: per-sample cycle ring + per-slot counters. Default OFF (release).
-# Enable with: cmake -B build -DLENS_PERF_PROBE=ON
-option(LENS_PERF_PROBE "Compile in perf profiler; reduces audio torus to 64 KB" OFF)
+# Perf probe: per-sample cycle ring + per-slot counters. Default ON (enabled).
+# Disable with: cmake -B build -DLENS_PERF_PROBE=OFF
+option(LENS_PERF_PROBE "Compile in perf profiler; reduces audio torus to 64 KB" ON)
 target_compile_definitions(lens PRIVATE LENS_PERF_PROBE=$<BOOL:${LENS_PERF_PROBE}>)
 message(STATUS "lens LENS_PERF_PROBE: ${LENS_PERF_PROBE}")
 

@@ -220,6 +220,11 @@ const OP_TABLE = {
                  {kw:'tone',default:2600},
                ] },
 
+  reverb:    { inputs: [{kw:'in',default:0}, {kw:'decay',default:2048}, {kw:'mix',default:1024}] },
+  chorus:    { inputs: [{kw:'in',default:0}, {kw:'rate',default:100}, {kw:'depth',default:1024}, {kw:'feedback',default:1024}] },
+  flanger:   { inputs: [{kw:'in',default:0}, {kw:'rate',default:50}, {kw:'depth',default:512}, {kw:'feedback',default:2048}] },
+  compressor:{ inputs: [{kw:'in',default:0}, {kw:'threshold',default:3000}, {kw:'ratio',default:2048}, {kw:'attack',default:100}, {kw:'release',default:1000}] },
+
 };
 
 module.exports = { OP_TABLE };

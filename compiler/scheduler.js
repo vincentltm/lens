@@ -84,6 +84,8 @@ const CYCLE_COST = {
   op_recordhead_len_capped: 102, op_recordhead_len_capped_gated: 102,
   op_step: 62, op_onsets: 62, op_gates: 62, op_hits: 62,
   op_snap: 82, op_thru: 52, op_degree: 62, op_pitch: 62,
+  // Custom single-slot audio effects suite
+  op_reverb: 280, op_chorus: 120, op_flanger: 120, op_compressor: 95,
 };
 
 const DISPATCH_FLOOR = 35; // per-slot overhead before kernel math (step_slot), post skip-check removal
