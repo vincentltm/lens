@@ -377,13 +377,14 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
 /* ── Module Title ───────────────────────────────────────── */
 
 .module-title {
-  font-size: 8px;
-  font-weight: bold;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
   color: var(--ink-dim);
   text-align: center;
-  padding: 14px 10px 4px;
+  padding: 12px 10px 4px;
   cursor: grab;
   user-select: none;
   white-space: nowrap;
@@ -406,21 +407,38 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
 
 .module-del-btn {
   position: absolute;
-  right: 18px;
-  top: 14px;
-  background: none;
-  border: none;
+  right: 12px;
+  top: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--ink-dim);
-  font-size: 14px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
   cursor: pointer;
-  padding: 0;
-  line-height: 1;
-  opacity: 0;
-  transition: opacity .12s;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0.15;
+  transition: all 0.2s ease-in-out;
   z-index: 10;
+  line-height: 1;
 }
-.module:hover .module-del-btn { opacity: .45; }
-.module-del-btn:hover { color: var(--err) !important; opacity: 1 !important; }
+.module:hover .module-del-btn {
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.08);
+}
+.module-del-btn:hover {
+  background: #e63946 !important;
+  color: #fff !important;
+  border-color: #e63946 !important;
+  opacity: 1 !important;
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(230, 57, 70, 0.4);
+}
 
 /* ── Knob Area ──────────────────────────────────────────── */
 
@@ -507,14 +525,16 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
   width: 100%;
 }
 .knob-lbl-name {
-  font-size: 7px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 8px;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: .08em;
   color: var(--ink-dim);
 }
 .knob-lbl-val {
-  font-size: 7.5px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 8px;
   font-weight: normal;
   color: var(--accent);
   margin-top: 1px;
@@ -590,7 +610,10 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
 
 /* Section header ("IN" / "OUT") above jack columns */
 .port-sec-label {
-  font-size: 7px; text-transform: uppercase;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
   letter-spacing: .12em; color: var(--ink-dim);
   padding: 0 0 3px 0; display: block;
   width: 100%;
@@ -639,7 +662,10 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
   max-width: 28px;
 }
 .jack-lbl {
-  font-size: 7.5px; text-transform: uppercase;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
   letter-spacing: .04em;
   color: var(--ink-label);
   text-align: center; line-height: 1.1;
