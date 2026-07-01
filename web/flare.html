@@ -665,8 +665,8 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
 .jack-wrap {
   display: flex; flex-direction: column;
   align-items: center; gap: 4px;
-  width: auto;
-  min-width: 28px;
+  width: 100%;
+  max-width: 28px;
 }
 .jack-lbl {
   font-family: system-ui, -apple-system, sans-serif;
@@ -676,9 +676,10 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
   letter-spacing: .04em;
   color: var(--ink-label);
   text-align: center; line-height: 1.1;
-  width: auto;
+  width: 100%;
   white-space: nowrap;
-  overflow: visible;
+  overflow: hidden;
+  text-overflow: clip;
 }
 
 /* ── Jack Socket ────────────────────────────────────────── */
@@ -934,16 +935,16 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
   display: none;
 }
 .module.mod-2hp .jack-wrap {
-  min-width: 26px;
-  width: auto;
+  max-width: 26px;
 }
 .module.mod-2hp .jack-lbl {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 7.5px;
   font-weight: 600;
   letter-spacing: -0.02em;
-  width: auto;
-  overflow: visible;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
 }
 .module.mod-2hp .knob-wrap {
   transform: scale(0.8);
@@ -6460,8 +6461,10 @@ function buildModuleEl(type, instanceId, params, leftPx) {
   const title = el('div', 'module-title');
   if (type === 'dx' && params.customVoiceName) {
     title.textContent = `DX: ${params.customVoiceName}`;
+    title.title = `DX FM Voice: ${params.customVoiceName}`;
   } else {
     title.textContent = def.title;
+    title.title = def.title;
   }
 
   // Delete
@@ -6618,6 +6621,8 @@ function buildKnobEl(type, instanceId, kDef, val) {
   lbl.appendChild(nameEl);
   lbl.appendChild(valEl);
 
+  wrap.title = `${kDef.label}: ${valEl.textContent}`;
+
   wrap.appendChild(knob);
   wrap.appendChild(lbl);
   return wrap;
@@ -6631,6 +6636,7 @@ function buildJackEl(instanceId, portId, label, direction) {
     return wrap;
   }
   const wrap = el('div', 'jack-wrap');
+  wrap.title = label;
   const lbl  = el('div', 'jack-lbl'); lbl.textContent = label;
 
   const jack = el('div', `jack jack-${direction}`);
@@ -7234,7 +7240,14 @@ function handleKnobMove(e) {
   // Real-time parameter value display updates
   const valEl = knobState.knob.parentNode.querySelector('.knob-lbl-val');
   if (valEl) {
-    valEl.textContent = getDisplayValueStr(modData.type, knobState.param, val, knobState.instanceId);
+    const displayVal = getDisplayValueStr(modData.type, knobState.param, val, knobState.instanceId);
+    valEl.textContent = displayVal;
+    
+    // Update wrapper tooltip
+    const wrap = knobState.knob.parentNode;
+    const nameEl = wrap.querySelector('.knob-lbl-name');
+    const labelText = nameEl ? nameEl.textContent : knobState.param;
+    wrap.title = `${labelText}: ${displayVal}`;
   }
 
   // Reactive DX7 bank/preset updates

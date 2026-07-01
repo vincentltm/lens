@@ -1600,8 +1600,10 @@ function buildModuleEl(type, instanceId, params, leftPx) {
   const title = el('div', 'module-title');
   if (type === 'dx' && params.customVoiceName) {
     title.textContent = `DX: ${params.customVoiceName}`;
+    title.title = `DX FM Voice: ${params.customVoiceName}`;
   } else {
     title.textContent = def.title;
+    title.title = def.title;
   }
 
   // Delete
@@ -1758,6 +1760,8 @@ function buildKnobEl(type, instanceId, kDef, val) {
   lbl.appendChild(nameEl);
   lbl.appendChild(valEl);
 
+  wrap.title = `${kDef.label}: ${valEl.textContent}`;
+
   wrap.appendChild(knob);
   wrap.appendChild(lbl);
   return wrap;
@@ -1771,6 +1775,7 @@ function buildJackEl(instanceId, portId, label, direction) {
     return wrap;
   }
   const wrap = el('div', 'jack-wrap');
+  wrap.title = label;
   const lbl  = el('div', 'jack-lbl'); lbl.textContent = label;
 
   const jack = el('div', `jack jack-${direction}`);
@@ -2374,7 +2379,14 @@ function handleKnobMove(e) {
   // Real-time parameter value display updates
   const valEl = knobState.knob.parentNode.querySelector('.knob-lbl-val');
   if (valEl) {
-    valEl.textContent = getDisplayValueStr(modData.type, knobState.param, val, knobState.instanceId);
+    const displayVal = getDisplayValueStr(modData.type, knobState.param, val, knobState.instanceId);
+    valEl.textContent = displayVal;
+    
+    // Update wrapper tooltip
+    const wrap = knobState.knob.parentNode;
+    const nameEl = wrap.querySelector('.knob-lbl-name');
+    const labelText = nameEl ? nameEl.textContent : knobState.param;
+    wrap.title = `${labelText}: ${displayVal}`;
   }
 
   // Reactive DX7 bank/preset updates
