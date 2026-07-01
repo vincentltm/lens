@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>'(flare) · patcher</title>
+  <link rel="icon" href="lens-logo.svg">
+  <link rel="stylesheet" href="flare.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">'(flare) <span>patcher</span></div>
+  <button id="browserBtn">⊞ Modules</button>
+  <button id="addRowBtn">+ Row</button>
+  <div class="topbar-sep"></div>
+  <button id="connectMidiBtn">Connect MIDI</button>
+  <button id="sendBtn" disabled>Send</button>
+  <button id="saveCardBtn" disabled>Save to Flash</button>
+  <button id="perfBtn" disabled>Measure CPU</button>
+  <button id="toggleCodeBtn">Hide Code</button>
+  <div class="topbar-sep"></div>
+  <button id="clearBtn">Clear</button>
+  <button id="exportBtn">Export .loupe</button>
+  <button id="importBtn">Import .loupe</button>
+  <button id="importDx7Btn">Import DX7 .syx</button>
+  <input type="file" id="dx7FileInput" accept=".syx" style="display: none;">
+  <span style="margin: 0 10px; color: #333;">|</span>
+  <select id="patchSelect" style="background: #1e1f22; color: #ddd; border: 1px solid #444; padding: 4px; border-radius: 4px; vertical-align: middle;">
+    <option value="">-- Load Saved Patch --</option>
+  </select>
+  <button id="savePatchBtn">Save Patch</button>
+  <button id="deletePatchBtn" style="background: #4a1d1d; border-color: #6a2525;">Delete</button>
+  <div id="status">initializing…</div>
+</header>
+
+<!-- Module Browser (slides down from top) -->
+<div class="browser-panel" id="browserPanel">
+  <div class="browser-search-row">
+    <input type="text" id="browserSearch" placeholder="Search modules…" autocomplete="off">
+    <button id="closeBrowserBtn" class="btn-icon">×</button>
+  </div>
+  <div class="browser-grid" id="browserGrid"></div>
+</div>
+
+<!-- App body: rack on left, code pane on right -->
+<div class="app-body">
+
+  <div class="rack-viewport" id="rackViewport">
+    <div class="rack-case" id="rackCase">
+      <!-- rack rows injected by JS -->
+    </div>
+  </div>
+
+  <div class="code-pane" id="codePane" style="position: relative;">
+    <div class="code-pane-resizer" id="codePaneResizer"></div>
+    <div class="code-pane-hdr" style="display: flex; justify-content: space-between; align-items: center; padding: 4px 12px; height: 30px; box-sizing: border-box;">
+      <span id="codePaneTitle">Generated Loupe Code</span>
+      <div id="codePaneActions" style="display: flex; align-items: center; gap: 6px;">
+        <button id="importCodeBtn" style="background: #2d2c2a; color: #ddd; border: 1px solid #444; padding: 2px 6px; border-radius: 3px; font-size: 8px; cursor: pointer;">Import</button>
+        <button id="applyImportBtn" style="display: none; background: #2ecc71; color: #fff; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; font-weight: bold; cursor: pointer;">Apply</button>
+        <button id="cancelImportBtn" style="display: none; background: #e74c3c; color: #fff; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; font-weight: bold; cursor: pointer;">Cancel</button>
+        <span style="color: #444;">|</span>
+        <button id="codeMaximizeBtn" title="Maximize/Restore" style="background: none; border: none; color: var(--ink-dim); font-size: 11px; cursor: pointer; padding: 0 2px; line-height: 1;">⛶</button>
+        <button id="codeCloseBtn" title="Close" style="background: none; border: none; color: var(--ink-dim); font-size: 12px; cursor: pointer; padding: 0 2px; line-height: 1;">×</button>
+      </div>
+    </div>
+    <textarea class="code-area" id="codeArea" readonly placeholder="Wire up modules…"></textarea>
+  </div>
+
+</div>
+
+<!-- Fixed cable SVG overlay — covers the entire viewport, z-index 1000 -->
+<svg id="cableSvg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+</body>
+</html>

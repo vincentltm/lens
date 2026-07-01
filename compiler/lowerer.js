@@ -258,6 +258,9 @@ function lower(expanded) {
       if (op === 'cv-in' && 'bipolar' in kwargs) {
         return allocSlot('op_sub', [leafRef, { kind: 'const', value: 2048 }], {}, { state: [] });
       }
+      if (op === 'cv-in' && 'v-oct' in kwargs) {
+        return allocSlot('op_spread', [leafRef, { kind: 'const', value: 128 }], {}, { state: [] });
+      }
       return leafRef;
     }
     // (switch :z): hardware z-switch. op_switch returns raw 0/1/2; map that to
@@ -424,7 +427,8 @@ function lower(expanded) {
     // tap: C reads in0=buf, in1=amount, in2=cur_head, param0 bit0 = :span flag.
     // in2 is a placeholder filled by the post-pass with the paired recordhead head.
     if (op === 'tap') {
-      const bufRef    = args[0] !== undefined ? lowerNode(args[0]) : { kind: 'const', value: 0 };
+      const bufArg    = args[0] !== undefined ? args[0] : kwargs.tape;
+      const bufRef    = bufArg !== undefined ? lowerNode(bufArg) : { kind: 'const', value: 0 };
       const amountArg = kwargs.amount !== undefined ? kwargs.amount : args[1];
       const amountRef = amountArg !== undefined ? lowerNode(amountArg) : { kind: 'const', value: 0 };
       const spanFlag  = (kwargs.span && kwargs.span.t === 'flag') ? 1 : 0;

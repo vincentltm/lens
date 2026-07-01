@@ -1,0 +1,972 @@
+/* ═══════════════════════════════════════════════════════════
+   flare.css — Eurorack visual patcher, dark theme
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --bg:          #080807;
+  --panel:       #1d1c1a;
+  --panel-hdr:   #111009;
+  --panel-ports: #141311;
+  --rail-metal:  linear-gradient(to bottom, #4a4a48 0%, #303030 40%, #202020 60%, #383836 100%);
+  --wood:        #131416;
+  --border-hi:   #2c2b28;
+  --border-lo:   #0d0c0b;
+  --ink:         #c0bab0;
+  --ink-dim:     #706a60;
+  --ink-label:   #9c9690;    /* port labels — clearly readable */
+  --ink-gold:    #d4a84a;
+  --accent:      #9fd08a;
+  --err:         #e07a5f;
+  --jack-grad:   radial-gradient(circle at 36% 30%, #3e3c39, #171614);
+  --screw-grad:  radial-gradient(circle at 35% 28%, #888, #555 45%, #252422);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  height: 100vh;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+  color: var(--ink);
+  font: 11px/1.4 ui-monospace, Menlo, 'Courier New', monospace;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Topbar ─────────────────────────────────────────────── */
+
+.topbar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: #0b0a09;
+  border-bottom: 1px solid #1a1916;
+  flex-shrink: 0; z-index: 1600;
+}
+.brand {
+  font-size: 13px; font-weight: bold;
+  color: var(--ink); margin-right: 6px; letter-spacing: .02em;
+}
+.brand span { color: var(--ink-dim); font-weight: normal; }
+
+.topbar-sep {
+  width: 1px; height: 18px;
+  background: #222; margin: 0 4px;
+}
+
+button {
+  background: #1c1b18; color: var(--ink);
+  border: 1px solid #2a2926;
+  border-radius: 3px; padding: 4px 10px;
+  font: inherit; cursor: pointer; font-size: 11px;
+  transition: border-color .1s, background .1s;
+}
+button:hover  { border-color: #46443e; background: #242220; }
+button:active { background: #141311; }
+button:disabled { opacity: .3; cursor: default; pointer-events: none; }
+
+.btn-icon {
+  background: none; border: none;
+  font-size: 18px; color: var(--ink-dim);
+  padding: 0 6px; line-height: 1;
+}
+.btn-icon:hover { color: var(--ink); background: none; }
+
+#status {
+  margin-left: auto; color: var(--ink-dim); font-size: 10px;
+  max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+#status.ok  { color: var(--accent); }
+#status.err { color: var(--err); }
+
+/* ── Module Browser Panel ───────────────────────────────── */
+
+.browser-panel {
+  position: fixed;
+  top: 35px; left: 0; right: 0;
+  background: #0d0c0b;
+  border-bottom: 2px solid #1a1916;
+  z-index: 1500;
+  max-height: 55vh; overflow-y: auto;
+  transform: translateY(-110%);
+  visibility: hidden;
+  transition: transform .18s cubic-bezier(.4,0,.2,1), visibility 0s .18s;
+}
+.browser-panel.open {
+  transform: translateY(0);
+  visibility: visible;
+  transition: transform .18s cubic-bezier(.4,0,.2,1), visibility 0s;
+}
+
+.browser-search-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px 8px;
+  border-bottom: 1px solid #1a1916;
+  position: sticky; top: 0; background: #0d0c0b; z-index: 10;
+}
+#browserSearch {
+  flex: 1;
+  background: #111009; color: var(--ink);
+  border: 1px solid #2a2926; border-radius: 3px;
+  padding: 5px 10px; font: inherit; outline: none;
+}
+#browserSearch::placeholder { color: var(--ink-dim); }
+
+.browser-grid {
+  display: flex; gap: 28px; flex-wrap: wrap;
+  padding: 14px 16px 16px;
+}
+
+.browser-cat { flex: 0 0 auto; }
+.browser-cat-title {
+  font-size: 8.5px; text-transform: uppercase;
+  letter-spacing: .14em; color: var(--ink-gold);
+  margin-bottom: 8px;
+}
+.browser-cat-modules {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.browser-mod-btn {
+  background: #1a1917; color: var(--ink);
+  border: 1px solid #262421; border-radius: 2px;
+  padding: 5px 12px; font: inherit; cursor: pointer;
+  font-size: 10.5px; text-align: left;
+  transition: background .1s, color .1s;
+}
+.browser-mod-btn:hover {
+  background: #242220; border-color: #3a3835; color: var(--accent);
+}
+
+/* ── App body ───────────────────────────────────────────── */
+
+.app-body {
+  flex: 1; display: flex; min-height: 0;
+}
+
+/* ── Rack Viewport ──────────────────────────────────────── */
+
+.rack-viewport {
+  flex: 1; overflow: auto;
+  background: #050403;
+  padding: 20px 24px 28px;
+}
+
+/* ── Rack Case (wooden frame) ───────────────────────────── */
+
+.rack-case {
+  display: inline-flex; flex-direction: column;
+  gap: 0;
+  background: var(--wood);
+  padding: 0 16px;
+  border-radius: 5px;
+  box-shadow:
+    0 24px 64px rgba(0,0,0,.95),
+    inset 2px 0 8px rgba(0,0,0,.4),
+    inset -2px 0 8px rgba(0,0,0,.4);
+  min-width: calc(100% - 0px);
+}
+
+/* ── Rack Row ───────────────────────────────────────────── */
+
+.rack-row { display: flex; flex-direction: column; }
+.rack-row + .rack-row { border-top: 10px solid var(--wood); }
+
+.rail {
+  height: 14px;
+  background: var(--rail-metal);
+  position: relative; flex-shrink: 0;
+}
+.rail.top  { border-top: 1px solid #666; border-bottom: 1px solid #111; }
+.rail.bottom { border-top: 1px solid #111; border-bottom: 1px solid #555; }
+
+/* Rail screw slots */
+.rail::before {
+  content: ''; position: absolute; top: 50%; left: 7.5px;
+  width: calc(100% - 15px); height: 6px; margin-top: -3px;
+  background: repeating-linear-gradient(
+    to right, transparent 0, transparent 10px,
+    #161614 10px, #161614 14px, transparent 14px, transparent 15px
+  );
+  opacity: .7;
+}
+
+/* ── Module Bay (HP-grid absolute positioning) ──────────── */
+
+.module-bay {
+  position: relative;
+  z-index: 2;
+  height: 380px;
+  /* min-width set by JS */
+  min-width: 100%;
+  background: #0d0c0a;
+  box-shadow: inset 0 6px 20px rgba(0,0,0,.7);
+  overflow: visible; /* cables may extend above */
+}
+
+/* ── Module Panel ───────────────────────────────────────── */
+
+.module {
+  position: absolute;  /* HP-grid snapped */
+  top: -14px;
+  display: flex; flex-direction: column;
+  height: 408px;
+  background: var(--panel);
+  border-left: 1px solid rgba(255,255,255,0.04);
+  border-right: 1px solid rgba(0,0,0,0.4);
+  box-shadow: 
+    inset 1px 1px 0 rgba(255,255,255,0.06), 
+    inset -1px -1px 0 rgba(0,0,0,0.5),
+    0 10px 25px rgba(0,0,0,0.7);
+  transition: opacity .12s;
+  cursor: default;
+  will-change: left;
+}
+.module.is-dragging { opacity: .25; cursor: grabbing; }
+
+/* ── Category Faceplate Aesthetics ─────────────────────── */
+
+/* 1. Hardware IO: Brushed titanium/dark steel look */
+.module[data-category="io"] {
+  background: linear-gradient(135deg, #424649 0%, #292a2b 100%);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    inset 1px 1px 0 rgba(255,255,255,0.06),
+    inset -1px -1px 0 rgba(0,0,0,0.45),
+    0 10px 25px rgba(0,0,0,0.7);
+}
+.module[data-category="io"] .module-hdr {
+  background: #2a2c2e;
+  color: #c5c6c8;
+  border-bottom: 1px solid #1c1d1f;
+}
+.module[data-category="io"] .port-sec-label { color: var(--ink-dim); }
+.module[data-category="io"] .jack-lbl { color: var(--ink-label); }
+
+/* 2. Oscillators: Obsidian & Gold */
+.module[data-category="oscillators"] {
+  background: linear-gradient(135deg, #161514 0%, #0d0c0c 100%);
+  border-left: 1px solid rgba(230, 184, 96, 0.15);
+  box-shadow: 
+    inset 1px 1px 0 rgba(230, 184, 96, 0.08), 
+    inset -1px -1px 0 rgba(0,0,0,0.6),
+    0 10px 25px rgba(0,0,0,0.7);
+}
+.module[data-category="oscillators"] .module-hdr {
+  background: #201e1a;
+  color: #dfb86c;
+  border-bottom: 1px solid #2e2b26;
+}
+.module[data-category="oscillators"] .knob::before {
+  border-color: #dfb86c;
+}
+.module[data-category="oscillators"] .knob-lbl {
+  color: #e6c88e;
+}
+
+/* 3. Filters: Charcoal & Green */
+.module[data-category="filters"] {
+  background: linear-gradient(135deg, #1c2320 0%, #101513 100%);
+  border-left: 1px solid rgba(82, 183, 136, 0.15);
+  box-shadow: 
+    inset 1px 1px 0 rgba(82, 183, 136, 0.08), 
+    inset -1px -1px 0 rgba(0,0,0,0.6),
+    0 10px 25px rgba(0,0,0,0.7);
+}
+.module[data-category="filters"] .module-hdr {
+  background: #141c19;
+  color: #76c09a;
+  border-bottom: 1px solid #1e2b26;
+}
+.module[data-category="filters"] .knob::before {
+  border-color: #52b788;
+}
+
+/* 4. Waveshapers / Mixers: Slate / Steel Blue */
+.module[data-category="shapers"] {
+  background: linear-gradient(135deg, #1a1e26 0%, #0f1217 100%);
+  border-left: 1px solid rgba(138, 158, 196, 0.15);
+}
+.module[data-category="shapers"] .module-hdr {
+  background: #15181f;
+  color: #8a9ec4;
+  border-bottom: 1px solid #1f232e;
+}
+.module[data-category="shapers"] .knob::before {
+  border-color: #7da0ca;
+}
+
+/* 5. Sound Generators (Voices): Crimson & Obsidian */
+.module[data-category="voices"] {
+  background: linear-gradient(135deg, #1a1010 0%, #0c0707 100%);
+  border-left: 1px solid rgba(230, 57, 70, 0.15);
+}
+.module[data-category="voices"] .module-hdr {
+  background: #1c1212;
+  color: #e63946;
+  border-bottom: 1px solid #2d1d1d;
+}
+.module[data-category="voices"] .knob::before {
+  border-color: #e63946;
+}
+.module[data-category="voices"] .jack {
+  border-color: #3b181a;
+}
+
+/* 6. Clocks: Amethyst Purple */
+.module[data-category="clocks"] {
+  background: linear-gradient(135deg, #1d1727 0%, #100b17 100%);
+  border-left: 1px solid rgba(179, 157, 219, 0.15);
+}
+.module[data-category="clocks"] .module-hdr {
+  background: #16111f;
+  color: #b39ddb;
+  border-bottom: 1px solid #231c30;
+}
+.module[data-category="clocks"] .knob::before {
+  border-color: #b39ddb;
+}
+
+/* 7. MIDI: Industrial Amber */
+.module[data-category="midi"] {
+  background: linear-gradient(135deg, #222019 0%, #14130f 100%);
+  border-left: 1px solid rgba(212, 175, 55, 0.15);
+}
+.module[data-category="midi"] .module-hdr {
+  background: #1c1a14;
+  color: #d4af37;
+  border-bottom: 1px solid #2a271e;
+}
+.module[data-category="midi"] .knob::before {
+  border-color: #d4af37;
+}
+
+/* 8. Math Utilities: Sunset Orange & Bronze */
+.module[data-category="math"] {
+  background: linear-gradient(135deg, #221b15 0%, #130f0c 100%);
+  border-left: 1px solid rgba(244, 162, 97, 0.15);
+}
+.module[data-category="math"] .module-hdr {
+  background: #1c1511;
+  color: #f4a261;
+  border-bottom: 1px solid #2a1f18;
+}
+.module[data-category="math"] .knob::before {
+  border-color: #f4a261;
+}
+
+/* ── Screws ─────────────────────────────────────────────── */
+
+.screw {
+  position: absolute;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--screw-grad);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.06);
+  z-index: 5;
+}
+.screw::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  width: 68%; height: 1.5px; background: #1a1715;
+  transform: translate(-50%,-50%) rotate(38deg);
+}
+.screw-tl { top: 2px;    left: 7.5px; }
+.screw-tr { top: 2px;    right: 7.5px; }
+.screw-bl { bottom: 2px; left: 7.5px; }
+.screw-br { bottom: 2px; right: 7.5px; }
+
+/* ── Module Title ───────────────────────────────────────── */
+
+.module-title {
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  text-align: center;
+  padding: 14px 10px 4px;
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  box-sizing: border-box;
+}
+.module-title:active { cursor: grabbing; }
+
+/* Custom colors for category titles printed on plates */
+.module[data-category="io"] .module-title { color: var(--ink-gold); }
+.module[data-category="oscillators"] .module-title { color: #dfb86c; }
+.module[data-category="filters"] .module-title { color: #52b788; }
+.module[data-category="shapers"] .module-title { color: #8a9ec4; }
+.module[data-category="voices"] .module-title { color: #e63946; }
+.module[data-category="clocks"] .module-title { color: #b39ddb; }
+.module[data-category="midi"] .module-title { color: #d4af37; }
+.module[data-category="math"] .module-title { color: #f4a261; }
+
+.module-del-btn {
+  position: absolute;
+  right: 18px;
+  top: 14px;
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity .12s;
+  z-index: 10;
+}
+.module:hover .module-del-btn { opacity: .45; }
+.module-del-btn:hover { color: var(--err) !important; opacity: 1 !important; }
+
+/* ── Knob Area ──────────────────────────────────────────── */
+
+.module-knobs {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px 10px;
+  padding: 14px 8px;
+  align-content: center;
+}
+
+/* Vertical knob layout (stacked neatly) */
+.knob-layout-vertical {
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Grid knob layout (2x2 grid for ADSR/Mixer) */
+.knob-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  justify-items: center;
+  align-items: center;
+  gap: 10px 8px;
+}
+
+.module-knobs.knobs-compact {
+  gap: 8px 6px;
+  padding: 8px 4px;
+}
+
+.knob-layout-grid.knobs-compact {
+  gap: 6px 4px;
+}
+
+.knob-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.knob {
+  cursor: ns-resize;
+  position: relative;
+  display: block;
+  z-index: 2;
+  border-radius: 50%;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.05);
+}
+
+/* Collar/Bezel behind every knob to separate it from the panel */
+.knob::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid #4a4844;
+  background: radial-gradient(circle, #2d2c29 60%, #151413 100%);
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.08),
+    0 2px 4px rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+.knob svg {
+  position: relative;
+  z-index: 3;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.knob-lbl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.1;
+  text-align: center;
+  width: 100%;
+}
+.knob-lbl-name {
+  font-size: 7px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-dim);
+}
+.knob-lbl-val {
+  font-size: 7.5px;
+  font-weight: normal;
+  color: var(--accent);
+  margin-top: 1px;
+}
+
+/* ── Score Player Input Screen ──────────────────────────── */
+
+.pattern-input-wrap {
+  padding: 8px 12px;
+  background: #090807;
+  border-radius: 4px;
+  border: 1px solid #23211f;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.8);
+  margin: 6px 10px;
+}
+.pattern-input-lbl {
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #6a6864;
+  text-align: left;
+  margin-bottom: 4px;
+}
+.module-pattern-input {
+  background: #030302;
+  border: 1px solid #1c1a18;
+  color: var(--accent);
+  font: 11px/1.2 ui-monospace, Menlo, Monaco, Consolas, monospace;
+  padding: 6px 8px;
+  border-radius: 2px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  text-shadow: 0 0 4px rgba(159,208,138,0.6);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.9);
+  resize: none;
+  height: 48px;
+  display: block;
+}
+.module-pattern-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(159,208,138,0.4), inset 0 1px 2px rgba(0,0,0,0.9);
+}
+
+/* ── Knobless Module Jack Alignment ─────────────────────── */
+
+.mod-knobless .module-ports {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 24px 8px 30px;
+  border-top: none;
+  gap: 20px;
+}
+
+.mod-knobless .ports-col-inner.ports-grid-2 {
+  gap: 16px 10px;
+}
+
+/* ── Port Area ──────────────────────────────────────────── */
+
+.module-ports {
+  flex-shrink: 0;
+  background: var(--panel-ports);
+  border-top: 1px solid rgba(0,0,0,0.3);
+  padding: 8px 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Section header ("IN" / "OUT") above jack columns */
+.port-sec-label {
+  font-size: 7px; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--ink-dim);
+  padding: 0 0 3px 0; display: block;
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  margin-bottom: 4px;
+}
+
+.ports-col {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ports-col-inner {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 8px;
+  width: 100%;
+}
+
+.ports-col-inner.ports-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 10px;
+  justify-items: center;
+  align-items: center;
+}
+
+.ports-col-inner.ports-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px 6px;
+  justify-items: center;
+  align-items: center;
+}
+
+/* Jack wrapper: label + circle, stacked vertically */
+.jack-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  width: 100%;
+  max-width: 28px;
+}
+.jack-lbl {
+  font-size: 7.5px; text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ink-label);
+  text-align: center; line-height: 1.1;
+  width: 100%;
+  white-space: nowrap; overflow: hidden; text-overflow: clip;
+}
+
+/* ── Jack Socket ────────────────────────────────────────── */
+
+.jack {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--jack-grad);
+  border: 1.5px solid #252320;
+  box-shadow:
+    inset 0 1.5px 3px rgba(0,0,0,.85),
+    0 1px 0 rgba(255,255,255,.04);
+  cursor: pointer; position: relative;
+  transition: box-shadow .08s;
+  flex-shrink: 0;
+}
+/* Expand clickable/tappable hit target for easy manipulation */
+.jack::before {
+  content: ''; position: absolute;
+  top: -8px; left: -8px;
+  right: -8px; bottom: -8px;
+  border-radius: 50%;
+}
+/* Inner hole */
+.jack::after {
+  content: ''; position: absolute;
+  inset: 4px; border-radius: 50%;
+  background: #040302;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.95);
+}
+
+/* Input jack: slightly warm border tint */
+.col-in .jack  { border-color: #2c2a26; }
+/* Output jack: slightly cooler border tint */
+.col-out .jack { border-color: #252629; }
+
+.jack:hover {
+  box-shadow:
+    inset 0 1.5px 3px rgba(0,0,0,.85),
+    0 0 0 1.5px rgba(200,200,200,.18);
+}
+.jack.active {
+  border-color: #fff !important;
+  box-shadow: 0 0 10px rgba(255,255,255,.35) !important;
+}
+.jack.snap-target {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 12px rgba(159,208,138,.55) !important;
+}
+
+/* ── WS IO module special layout ───────────────────────── */
+
+.mod-io .module-ports {
+  background: #111009;
+  flex-direction: column; gap: 4px;
+}
+.io-section {
+  display: flex; flex-direction: column; gap: 4px;
+}
+.io-section-label {
+  font-size: 7.5px; text-transform: uppercase; letter-spacing: .14em;
+  color: var(--ink-gold); padding: 4px 4px 2px; opacity: .75;
+}
+.io-jacks-row {
+  display: flex; gap: 4px; flex-wrap: wrap; padding: 0 4px;
+}
+.io-sep {
+  height: 1px; background: #1e1c18; margin: 4px 4px 0;
+}
+
+/* ── Code Pane ──────────────────────────────────────────── */
+
+.code-pane {
+  width: 270px; flex-shrink: 0;
+  display: flex; flex-direction: column;
+  border-left: 1px solid #1a1916;
+  background: #0b0a09;
+  position: relative;
+}
+.code-pane-resizer {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  background: transparent;
+  transition: background 0.12s;
+  z-index: 10;
+}
+.code-pane-resizer:hover, .code-pane-resizer.active {
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.code-pane-hdr {
+  padding: 8px 12px;
+  border-bottom: 1px solid #1a1916;
+  font-size: 8.5px; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--ink-dim);
+  flex-shrink: 0;
+}
+.code-area {
+  flex: 1;
+  background: transparent; color: var(--accent);
+  border: none; padding: 12px;
+  font: 11px/1.6 ui-monospace, Menlo, monospace;
+  resize: none; outline: none; overflow-y: auto;
+  white-space: pre;
+}
+
+/* ── Fixed Cable SVG ────────────────────────────────────── */
+
+#cableSvg {
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh;
+  pointer-events: none; z-index: 1000;
+  overflow: visible;
+}
+
+/* ── Context Menu ────────────────────────────────────────── */
+
+.context-menu {
+  position: fixed;
+  z-index: 2000;
+  background: #121110;
+  border: 1px solid #2d2c2a;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.85);
+  padding: 4px 0;
+  font: 11px ui-monospace, Menlo, monospace;
+  min-width: 150px;
+}
+
+.context-menu-item {
+  position: relative;
+  padding: 6px 14px;
+  cursor: pointer;
+  color: var(--ink);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.1s, color 0.1s;
+}
+
+.context-menu-item:hover {
+  background: #242220;
+  color: var(--accent);
+}
+
+.context-menu-submenu {
+  position: absolute;
+  left: 100%;
+  top: -4px;
+  background: #121110;
+  border: 1px solid #2d2c2a;
+  border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.85);
+  padding: 4px 0;
+  display: none;
+  min-width: 150px;
+}
+
+.context-menu-item:hover .context-menu-submenu {
+  display: block;
+}
+
+/* Context menu header (section label above cable list) */
+.context-menu-header {
+  padding: 5px 14px 3px;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--ink-dim);
+  border-bottom: 1px solid #1e1d1b;
+  margin-bottom: 2px;
+}
+
+/* Context menu divider */
+.context-menu-sep {
+  height: 1px;
+  background: #1e1d1b;
+  margin: 4px 0;
+}
+
+/* Danger action (Disconnect All) */
+.context-menu-item-danger {
+  color: var(--err) !important;
+}
+.context-menu-item-danger:hover {
+  background: rgba(224,122,95,0.12) !important;
+  color: var(--err) !important;
+}
+
+/* Jack incompatible dim during cable drag */
+.jack.drag-incompatible {
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+
+/* ── Hybrid 3-Knob Layout ───────────────────────────────── */
+
+.knob-layout-hybrid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 4px;
+  box-sizing: border-box;
+}
+
+.knob-layout-hybrid-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+  gap: 4px;
+}
+
+
+/* ── Jack Input/Output Differentiation ──────────────────── */
+
+.jack-input {
+  border: 2px solid #5a5f63 !important;
+  background: radial-gradient(circle, #3e4145 0%, #1e2022 100%) !important;
+}
+.jack-input:hover {
+  border-color: #8c9399 !important;
+  box-shadow: inset 0 1.5px 3px rgba(0,0,0,.85), 0 0 8px rgba(107,112,116,0.3) !important;
+}
+
+.jack-output {
+  border: 2px solid #a3884e !important;
+  background: radial-gradient(circle, #2e2612 0%, #110e05 100%) !important;
+}
+.jack-output:hover {
+  border-color: #c9b07a !important;
+  box-shadow: inset 0 1.5px 3px rgba(0,0,0,.85), 0 0 8px rgba(223,177,62,0.3) !important;
+}
+
+/* ── 2 HP Module Specifics ──────────────────────────────── */
+.module.mod-2hp .module-ports {
+  padding: 8px 1px 12px;
+}
+.module.mod-2hp .module-title {
+  font-size: 7px;
+  letter-spacing: 0;
+  padding: 14px 2px 2px;
+}
+.module.mod-2hp .module-del-btn {
+  display: none;
+}
+.module.mod-2hp .jack-wrap {
+  max-width: 26px;
+}
+.module.mod-2hp .jack-lbl {
+  font-size: 7.2px;
+  letter-spacing: -0.02em;
+}
+.module.mod-2hp .knob-wrap {
+  transform: scale(0.8);
+  margin: 0 -4px;
+}
+
+/* ── Drum Sequencer Step Buttons ────────────────────────── */
+.drum-seq-grid-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 10px;
+  background: #090807;
+  border-radius: 4px;
+  margin: 10px 8px;
+  border: 1px solid #23211f;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+}
+.drum-seq-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.drum-seq-row-lbl {
+  font-size: 10px;
+  font-weight: 800;
+  width: 14px;
+  color: #6a6864;
+  text-align: center;
+  font-family: ui-monospace, monospace;
+}
+.drum-seq-step-btn {
+  width: 15px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid #1a1918;
+  background: linear-gradient(to bottom, #3c3a38 0%, #242220 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.8);
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.drum-seq-step-btn:hover {
+  border-color: #3a3835;
+  background: linear-gradient(to bottom, #4c4a48 0%, #2e2c2a 100%);
+}
+.drum-seq-step-btn[data-channel="kickPat"].active {
+  background: linear-gradient(to bottom, #ff5533 0%, #cc2200 100%);
+  border-color: #ff8866;
+  box-shadow: 0 0 10px rgba(255, 85, 51, 0.8), inset 0 1px 1px rgba(255,255,255,0.4);
+}
+.drum-seq-step-btn[data-channel="snarePat"].active {
+  background: linear-gradient(to bottom, #ffaa00 0%, #cc7700 100%);
+  border-color: #ffcc66;
+  box-shadow: 0 0 10px rgba(255, 170, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.4);
+}
+.drum-seq-step-btn[data-channel="hatPat"].active {
+  background: linear-gradient(to bottom, #00d2ff 0%, #0099cc 100%);
+  border-color: #66e5ff;
+  box-shadow: 0 0 10px rgba(0, 210, 255, 0.8), inset 0 1px 1px rgba(255,255,255,0.4);
+}
+.drum-seq-step-btn[data-channel="percPat"].active {
+  background: linear-gradient(to bottom, #d200ff 0%, #9900cc 100%);
+  border-color: #e566ff;
+  box-shadow: 0 0 10px rgba(210, 0, 255, 0.8), inset 0 1px 1px rgba(255,255,255,0.4);
+}

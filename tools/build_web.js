@@ -247,6 +247,68 @@ for (const name of ["lens.html", "index.html"]) {
 }
 console.log("built web/lens.html + web/index.html (" + (html.length / 1024).toFixed(0) + " KB)");
 
+// Build flare.html from its source template and scripts
+try {
+  const flareTemplate = fs.readFileSync(path.join(ROOT, "web", "flare.src.html"), "utf8");
+  const flareCss = fs.readFileSync(path.join(ROOT, "web", "flare.css"), "utf8");
+  const flareJs = fs.readFileSync(path.join(ROOT, "web", "flare.js"), "utf8");
+
+  // Load VCV SVG assets
+  const resDir = '/Users/vmaurer/Music/Archive/Workshop_Computer_VCV/res';
+  const assetFiles = {
+    largeKnob: "largeKnob_dark.svg",
+    mediumKnob: "mediumKnob_dark.svg",
+    smallKnob: "smallKnob_dark.svg",
+    switchUp: "switch_up.svg",
+    switchMid: "switch_middle.svg",
+    switchDown: "switch_down.svg"
+  };
+
+  const assets = {};
+  for (const [key, filename] of Object.entries(assetFiles)) {
+    const filePath = path.join(resDir, filename);
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Asset file not found: ${filePath}`);
+    }
+    const svgContent = fs.readFileSync(filePath, "utf8");
+    assets[key] = svgContent
+      .replace(/<\?xml[^>]*\?>/g, '')
+      .replace(/<!DOCTYPE[^>]*>/g, '')
+      .trim();
+  }
+
+  const assetsJs = `const FLARE_ASSETS = ${JSON.stringify(assets)};`;
+
+  // Read all test patches as Loupe presets
+  const patchesDir = path.join(ROOT, "patches");
+  const patches = {};
+  if (fs.existsSync(patchesDir)) {
+    fs.readdirSync(patchesDir).forEach(file => {
+      if (file.endsWith(".loupe")) {
+        const name = file.replace(".loupe", "");
+        patches[name] = fs.readFileSync(path.join(patchesDir, file), "utf8");
+      }
+    });
+  }
+  const patchesJs = `const LOUPE_PRESETS = ${JSON.stringify(patches)};`;
+
+  let flareHtml = flareTemplate.replace(
+    '<link rel="stylesheet" href="flare.css">',
+    `<style>${flareCss}</style>`
+  );
+
+  flareHtml = flareHtml.replace(
+    '</body>',
+    `<script>${assetsJs}</script>\n<script>${patchesJs}</script>\n<script>${esc(lib)}</script>\n<script>${esc(flareJs)}</script>\n</body>`
+  );
+
+  fs.writeFileSync(path.join(ROOT, "web", "flare.html"), flareHtml);
+  console.log("built web/flare.html (" + (flareHtml.length / 1024).toFixed(0) + " KB)");
+} catch (e) {
+  console.error("Failed to build web/flare.html: " + e.message);
+  process.exit(1);
+}
+
 // Publish an always-current, syntax-highlighted copy of the prelude as a docs page.
 // Generated from prelude.loupe so the docs site never drifts from the real environment.
 const preludeBody = preludeText.endsWith("\n") ? preludeText : preludeText + "\n";
