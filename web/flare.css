@@ -658,8 +658,8 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
 .jack-wrap {
   display: flex; flex-direction: column;
   align-items: center; gap: 4px;
-  width: 100%;
-  max-width: 28px;
+  width: auto;
+  min-width: 28px;
 }
 .jack-lbl {
   font-family: system-ui, -apple-system, sans-serif;
@@ -669,8 +669,9 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
   letter-spacing: .04em;
   color: var(--ink-label);
   text-align: center; line-height: 1.1;
-  width: 100%;
-  white-space: nowrap; overflow: hidden; text-overflow: clip;
+  width: auto;
+  white-space: nowrap;
+  overflow: visible;
 }
 
 /* ── Jack Socket ────────────────────────────────────────── */
@@ -916,19 +917,26 @@ button:disabled { opacity: .3; cursor: default; pointer-events: none; }
   padding: 8px 1px 12px;
 }
 .module.mod-2hp .module-title {
-  font-size: 7px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 700;
   letter-spacing: 0;
-  padding: 14px 2px 2px;
+  padding: 12px 2px 2px;
 }
 .module.mod-2hp .module-del-btn {
   display: none;
 }
 .module.mod-2hp .jack-wrap {
-  max-width: 26px;
+  min-width: 26px;
+  width: auto;
 }
 .module.mod-2hp .jack-lbl {
-  font-size: 7.2px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 600;
   letter-spacing: -0.02em;
+  width: auto;
+  overflow: visible;
 }
 .module.mod-2hp .knob-wrap {
   transform: scale(0.8);
