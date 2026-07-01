@@ -2279,11 +2279,32 @@ void OP_FN(op_dx)(struct Slot* s) {
        tone:  0..4095, centre 2048=unity, scales modulator (non-carrier) outs. */
     int32_t decay = s->in0 ? slot_in0(s) : 2048;
     int32_t tone  = s->in4 ? slot_in4(s) : 2048;
-    const struct Dx7Bank* B = &DX7_BANKS[s->param0 % (uint32_t)NUM_DX7_BANKS];
-    if (!B->data || B->nvoices == 0) { st->value = 0; return; }   /* no banks loaded: silent */
-    int32_t p = preset < 0 ? 0 : preset >= (int32_t)B->nvoices ? (int32_t)B->nvoices - 1 : preset;
-    if (!st->cells_valid || st->cached_bank != (int32_t)s->param0 || st->cached_preset != p) {
-        const uint8_t* vdata = B->data + (uint32_t)p * 128u;
+    uint8_t voice_bytes[128];
+    const uint8_t* vdata = NULL;
+    uint32_t checksum = 0;
+    int32_t p = 0;
+
+    if (s->param0 & 0x8000u) {
+        struct Buffer* buf = (struct Buffer*)s->in3;
+        if (buf && buf->length >= 128) {
+            for (int j = 0; j < 128; j++) {
+                voice_bytes[j] = (uint8_t)pack12_read_signed(buf->bytes, j);
+                checksum = checksum * 33 + voice_bytes[j];
+            }
+            vdata = voice_bytes;
+        }
+    } else {
+        const struct Dx7Bank* B = &DX7_BANKS[s->param0 % (uint32_t)NUM_DX7_BANKS];
+        if (B->data && B->nvoices > 0) {
+            p = preset < 0 ? 0 : preset >= (int32_t)B->nvoices ? (int32_t)B->nvoices - 1 : preset;
+            vdata = B->data + (uint32_t)p * 128u;
+            checksum = (uint32_t)p;
+        }
+    }
+
+    if (!vdata) { st->value = 0; return; }
+
+    if (!st->cells_valid || st->cached_bank != (int32_t)s->param0 || st->cached_preset != (int32_t)checksum) {
         dx7_parse_voice(vdata, st->cells);
         pitchenv_load(&st->peg, vdata);
         /* per-op frequency (osc_freq logfreq base + ratio mask). Packed order
@@ -2299,14 +2320,13 @@ void OP_FN(op_dx)(struct Slot* s) {
             if (!mode) st->op_ratio |= 1 << op;
         }
         st->cached_bank   = (int32_t)s->param0;
-        st->cached_preset = p;
+        st->cached_preset = (int32_t)checksum;
         st->cells_valid   = 1;
         st->ks_pitch      = -1;        /* force keyscale recompute below */
     }
     /* Keyboard level scaling depends on the played note: recompute the per-op
        gain multipliers only when the note (or voice) changes. */
-    if (st->ks_pitch != pitch) {
-        const uint8_t* vdata = B->data + (uint32_t)p * 128u;
+    if (st->ks_pitch != pitch || ((s->param0 & 0x8000u) && st->cached_preset != (int32_t)checksum)) {
         int32_t nlf = midinote_to_logfreq(midi_clamp(pitch));
         for (int i = 0; i < 6; i++) {
             int op = 5 - i;

@@ -1598,7 +1598,11 @@ function buildModuleEl(type, instanceId, params, leftPx) {
 
   // Header Title on faceplate (positioned below top screws to avoid overlap)
   const title = el('div', 'module-title');
-  title.textContent = def.title;
+  if (type === 'dx' && params.customVoiceName) {
+    title.textContent = `DX: ${params.customVoiceName}`;
+  } else {
+    title.textContent = def.title;
+  }
 
   // Delete
   if (def.deletable !== false) {
@@ -2122,6 +2126,52 @@ function closeContextMenu() {
   }
 }
 
+function openDx7ImportForModule(instanceId) {
+  const mData = getModuleData(instanceId);
+  if (!mData) return;
+
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = '.syx';
+  fileInput.style.display = 'none';
+  document.body.appendChild(fileInput);
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (!file) {
+      fileInput.remove();
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const buf = new Uint8Array(evt.target.result);
+      try {
+        const voices = parseDx7Bank(buf);
+        showVoiceSelectionModal(voices, (voice, voiceIdx) => {
+          // Store voice data in this module instance params!
+          mData.params.customVoiceData = Array.from(voice.data);
+          mData.params.customVoiceName = voice.name.trim();
+
+          // Refresh the module faceplate to display the voice name!
+          const oldDom = $(`mod-${instanceId}`);
+          if (oldDom) {
+            const newDom = buildModuleEl('dx', instanceId, mData.params, parseInt(oldDom.style.left));
+            oldDom.replaceWith(newDom);
+          }
+          
+          redrawCables();
+          generateCode();
+        });
+      } catch (err) {
+        alert('Failed to parse DX7 bank: ' + err.message);
+      }
+      fileInput.remove();
+    };
+    reader.readAsArrayBuffer(file);
+  });
+  fileInput.click();
+}
+
 function showContextMenu(e) {
   e.preventDefault();
   closeContextMenu();
@@ -2199,7 +2249,32 @@ function showContextMenu(e) {
     menu.style.left = e.clientX + 'px';
     menu.style.top = e.clientY + 'px';
 
+    if (modEl.dataset.type === 'dx') {
+      const importItem = el('div', 'context-menu-item', { textContent: 'Import DX7 Voice (.syx)...' });
+      importItem.addEventListener('click', () => {
+        openDx7ImportForModule(instanceId);
+        closeContextMenu();
+      });
+      menu.appendChild(importItem);
 
+      const mData = getModuleData(instanceId);
+      if (mData && mData.params.customVoiceData) {
+        const clearItem = el('div', 'context-menu-item context-menu-item-danger', { textContent: 'Clear Custom Voice' });
+        clearItem.addEventListener('click', () => {
+          delete mData.params.customVoiceData;
+          delete mData.params.customVoiceName;
+          const oldDom = $(`mod-${instanceId}`);
+          if (oldDom) {
+            const newDom = buildModuleEl('dx', instanceId, mData.params, parseInt(oldDom.style.left));
+            oldDom.replaceWith(newDom);
+          }
+          redrawCables(); generateCode(); closeContextMenu();
+        });
+        menu.appendChild(clearItem);
+      }
+      const sep = el('div', 'context-menu-sep');
+      menu.appendChild(sep);
+    }
 
     if (def?.deletable !== false) {
       const delItem = el('div', 'context-menu-item', { textContent: 'Delete Module' });
@@ -3665,6 +3740,22 @@ function generateCode(textOnly = false) {
       sinkLines.push(`  (<- ${id}buf ${inSig} :per-sample :when ${recSig})`);
       lines.push(`  (def ${id}out (play ${id}buf ${speedExpr}))`);
       continue;
+    } else if (m.type === 'dx' && m.params.customVoiceData) {
+      const pitchCable = state.cables.find(c => c.toId === id && c.toPort === 'pitch');
+      const gateCable  = state.cables.find(c => c.toId === id && c.toPort === 'gate');
+      const decayCable = state.cables.find(c => c.toId === id && c.toPort === 'decay');
+
+      const pitchSig = pitchCable ? getCabledSourceExpr(pitchCable, allMods) : '69';
+      const gateSig  = gateCable  ? getCabledSourceExpr(gateCable, allMods)  : '0';
+
+      const decayVal = getKnobValue(m.type, 'decay', m.params.decay ?? 2048);
+      const decaySig = decayCable ? getCabledSourceExpr(decayCable, allMods) : decayVal;
+
+      const toneVal = getKnobValue(m.type, 'tone', m.params.tone ?? 2048);
+      const toneSig = toneVal;
+
+      const tapeSig = `(tape 128 [${m.params.customVoiceData.join(' ')}])`;
+      expr = `(dx :voice ${tapeSig} :pitch ${pitchSig} :gate ${gateSig} :decay ${decaySig} :tone ${toneSig})`;
     } else {
       expr = `(${m.type}`;
       for (const p of (def.inputs || [])) {
@@ -4095,6 +4186,7 @@ function parseDx7Voice(b128) {
     feedback:   b128[111] & 7,
     transpose:  b128[117],
     name: Array.from(b128.slice(118,128)).map(c => String.fromCharCode(c)).join('').replace(/[^\x20-\x7e]/g,' ').trim(),
+    data: Array.from(b128)
   };
 }
 

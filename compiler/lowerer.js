@@ -512,22 +512,28 @@ function lower(expanded) {
       return targetRef;
     }
 
-    // dx: fused DX7 voice from a flash bank. param0 = bank index;
-    // in0=decay, in1=pitch, in2=gate, in3=preset, in4=tone.
+    // dx: fused DX7 voice from a flash bank or custom voice buffer. param0 = bank index;
+    // in0=decay, in1=pitch, in2=gate, in3=preset/voice, in4=tone.
     if (op === 'dx') {
       const bankArg   = kwargs.bank   !== undefined ? kwargs.bank   : undefined;
       const presetArg = kwargs.preset !== undefined ? kwargs.preset : undefined;
+      const voiceArg  = kwargs.voice  !== undefined ? kwargs.voice  : undefined;
       const pitchArg  = kwargs.pitch  !== undefined ? kwargs.pitch  : undefined;
       const gateArg   = kwargs.gate   !== undefined ? kwargs.gate   : undefined;
+      const decayArg  = kwargs.decay  !== undefined ? kwargs.decay  : undefined;
+      const toneArg   = kwargs.tone   !== undefined ? kwargs.tone   : undefined;
       const z = { kind: 'const', value: 0 };
       const pitchRef  = pitchArg  !== undefined ? lowerNode(pitchArg)  : { kind: 'const', value: 69 };
       const gateRef   = gateArg   !== undefined ? lowerNode(gateArg)   : z;
+      const decayRef  = decayArg  !== undefined ? lowerNode(decayArg)  : { kind: 'const', value: 2048 };
+      const toneRef   = toneArg   !== undefined ? lowerNode(toneArg)   : { kind: 'const', value: 2048 };
+
+      if (voiceArg !== undefined) {
+        const voiceRef = lowerNode(voiceArg);
+        return allocSlot('op_dx', [decayRef, pitchRef, gateRef, voiceRef, toneRef], { param0: 0x8000 }, {});
+      }
       const presetRef = presetArg !== undefined ? lowerNode(presetArg) : z;
       const bankIdx   = (bankArg && bankArg.t === 'num') ? bankArg.v : 0;
-      const decayArg  = kwargs.decay !== undefined ? kwargs.decay : undefined;
-      const toneArg   = kwargs.tone  !== undefined ? kwargs.tone  : undefined;
-      const decayRef  = decayArg !== undefined ? lowerNode(decayArg) : { kind: 'const', value: 2048 };
-      const toneRef   = toneArg  !== undefined ? lowerNode(toneArg)  : { kind: 'const', value: 2048 };
       return allocSlot('op_dx', [decayRef, pitchRef, gateRef, presetRef, toneRef], { param0: bankIdx }, {});
     }
 

@@ -189,7 +189,7 @@ builders. Every definition here can be shadowed by redefining it in your own pat
 (def envelope (fn (:trig :gate :decay :peak)))
 (def adsr (fn (:gate :attack :decay :sustain :release :peak)))
 (def dxeg (fn (:gate :r1 :r2 :r3 :r4 :l1 :l2 :l3 :l4)))
-(def dx   (fn (:bank :preset :pitch :gate :decay :tone => :out)))
+(def dx   (fn (:bank :preset :voice :pitch :gate :decay :tone => :out)))
 (def slew     (fn (:in :rate)))
 (def vca      (fn (:in :amp)))
 (def ring     (fn (:in :amp)))
