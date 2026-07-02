@@ -1,5 +1,0 @@
-; UTILITY: max / rectifier — analogue OR of two signals (b = -a gives full-wave rectifier).
-; :gate is high while a is positive.
-(def max-rectifier (fn (:a :b => :out :gate)
-  (<- out  (max a b))
-  (<- gate (gt a 0))))

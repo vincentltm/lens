@@ -11,27 +11,52 @@
 
 <header class="topbar">
   <div class="brand">'(flare) <span>patcher</span></div>
-  <button id="browserBtn">⊞ Modules</button>
-  <button id="addRowBtn">+ Row</button>
-  <div class="topbar-sep"></div>
-  <button id="connectMidiBtn">Connect MIDI</button>
-  <button id="sendBtn" disabled>Send</button>
-  <button id="saveCardBtn" disabled>Save to Flash</button>
-  <button id="perfBtn" disabled>Measure CPU</button>
-  <button id="toggleCodeBtn">Hide Code</button>
-  <div class="topbar-sep"></div>
-  <button id="clearBtn">Clear</button>
-  <button id="exportBtn">Export .loupe</button>
-  <button id="importBtn">Import .loupe</button>
-  <button id="importDx7Btn">Import DX7 .syx</button>
-  <input type="file" id="dx7FileInput" accept=".syx" style="display: none;">
-  <span style="margin: 0 10px; color: #333;">|</span>
-  <select id="patchSelect" style="background: #1e1f22; color: #ddd; border: 1px solid #444; padding: 4px; border-radius: 4px; vertical-align: middle;">
-    <option value="">-- Load Saved Patch --</option>
-  </select>
-  <button id="savePatchBtn">Save Patch</button>
-  <button id="deletePatchBtn" style="background: #4a1d1d; border-color: #6a2525;">Delete</button>
-  <div id="status">initializing…</div>
+  
+  <div class="topbar-group">
+    <button id="browserBtn">⊞ Modules</button>
+    <button id="addRowBtn">+ Row</button>
+  </div>
+
+  <div class="topbar-dropdown">
+    <button class="dropdown-trigger">📁 File / Patches ▾</button>
+    <div class="dropdown-menu">
+      <div class="dropdown-section-title">Saved Patches</div>
+      <div class="dropdown-row">
+        <select id="patchSelect">
+          <option value="">📂 Load Patch</option>
+        </select>
+      </div>
+      <button id="savePatchBtn">💾 Save Patch</button>
+      <button id="deletePatchBtn" class="btn-danger">🗑️ Delete Patch</button>
+      <div class="dropdown-divider"></div>
+      <div class="dropdown-section-title">Patcher Operations</div>
+      <button id="clearBtn" class="btn-danger">🧹 Clear Patcher</button>
+      <button id="exportBtn">📤 Export .loupe</button>
+      <button id="importBtn">📥 Import .loupe</button>
+      <button id="importDx7Btn">🎹 Import DX7 .syx</button>
+      <input type="file" id="dx7FileInput" accept=".syx" style="display: none;">
+    </div>
+  </div>
+
+  <div class="topbar-group">
+    <button id="connectMidiBtn">Connect MIDI</button>
+    <div id="midiConnectedGroup" style="display: none; align-items: center; gap: 6px;">
+      <span style="font-size: 11px; font-weight: 600; color: #9fd08a; padding-right: 6px; display: inline-flex; align-items: center; gap: 6px; user-select: none;">
+        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #9fd08a; box-shadow: 0 0 6px #9fd08a;"></span>
+        Connected
+      </span>
+      <button id="sendBtn">Send</button>
+      <button id="saveCardBtn">Save</button>
+
+      <button id="disconnectMidiBtn" title="Disconnect" style="padding: 4px 6px; color: var(--ink-dim);">✕</button>
+    </div>
+  </div>
+
+  <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+    <div id="cpu-status" class="status-pill" style="margin-left: 0; display: none;">CPU: --</div>
+    <div id="mem-status" class="status-pill" style="margin-left: 0; display: none;">MEM: --</div>
+    <div id="status" class="status-pill" style="margin-left: 0;">initializing…</div>
+  </div>
 </header>
 
 <!-- Module Browser (slides down from top) -->
@@ -44,11 +69,13 @@
 </div>
 
 <!-- App body: rack on left, code pane on right -->
-<div class="app-body">
+<div class="app-body" style="position: relative;">
+  <button id="toggleCodeBtn" title="Toggle Code Editor">⟨/⟩</button>
 
   <div class="rack-viewport" id="rackViewport">
-    <div class="rack-case" id="rackCase">
+    <div class="rack-case" id="rackCase" style="position: relative;">
       <!-- rack rows injected by JS -->
+      <svg id="cableSvg" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
   </div>
 
@@ -62,16 +89,12 @@
         <button id="cancelImportBtn" style="display: none; background: #e74c3c; color: #fff; border: none; padding: 2px 6px; border-radius: 3px; font-size: 8px; font-weight: bold; cursor: pointer;">Cancel</button>
         <span style="color: #444;">|</span>
         <button id="codeMaximizeBtn" title="Maximize/Restore" style="background: none; border: none; color: var(--ink-dim); font-size: 11px; cursor: pointer; padding: 0 2px; line-height: 1;">⛶</button>
-        <button id="codeCloseBtn" title="Close" style="background: none; border: none; color: var(--ink-dim); font-size: 12px; cursor: pointer; padding: 0 2px; line-height: 1;">×</button>
       </div>
     </div>
     <textarea class="code-area" id="codeArea" readonly placeholder="Wire up modules…"></textarea>
   </div>
 
 </div>
-
-<!-- Fixed cable SVG overlay — covers the entire viewport, z-index 1000 -->
-<svg id="cableSvg" xmlns="http://www.w3.org/2000/svg"></svg>
 
 </body>
 </html>

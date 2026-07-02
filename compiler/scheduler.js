@@ -44,9 +44,9 @@ const STUB_KERNELS = [
   },
 ];
 
-const BUDGET_PER_SAMPLE = 5208; // 250 MHz / 48 kHz
-const OVERHEAD_CORE0 = 2000;    // ring doorbell, walk, publish shadows, commit, drive outputs
-const OVERHEAD_CORE1 = 500;     // doorbell IRQ entry, walk, publish shadows, signal done
+const BUDGET_PER_SAMPLE = 4500; // effective budget: real 5208 minus ~14% headroom for peak variance
+const OVERHEAD_CORE0 = 2000;    // (legacy; verifyBudget uses measured 800/400 baselines directly)
+const OVERHEAD_CORE1 = 500;
 
 // --- Partition tuning knobs (TUNABLE) ----------------------------------------
 // These are deliberately approximate. The real per-sample overheads will be
@@ -70,22 +70,22 @@ const TERMINAL_FEED_IMBALANCE = 0.20;
 const CYCLE_COST = {
   op_saw: 70, op_square: 95, op_triangle: 50, op_sine: 64, op_phasor: 53,
   op_lpf: 51, op_hpf: 54, op_average: 51, op_slew: 51, op_lpg: 74, op_envfollow: 54,
-  op_vcf: 84,
+  op_vcf: 124,
   op_wavefold: 69, op_crush: 42, op_saturate: 80, op_ring: 73, op_vca: 73,
   op_schmitt: 38, op_envelope: 64, op_noise: 43,
-  op_kick: 185, op_snare: 193, op_hat: 170,
+  op_kick: 295, op_snare: 366, op_hat: 302,
   op_euclid: 55, op_every: 46, op_turns: 43, op_counter: 44,
   op_random: 45, op_chance: 45, op_walk: 47, op_follow: 70,
   op_gate: 45, op_edge: 42, op_fall: 45, op_diff: 36, op_toggle: 40, op_hold: 37,
   op_z1: 35, op_mix2: 40, op_window: 40, op_add_sat: 38, op_sub_sat: 38,
   // Estimates (buffer/memory ops not directly chainable; floor + addressing work).
-  op_wave: 112, op_wave_drumrack: 112, op_tap: 82,
-  op_recordhead_per_sample: 102, op_recordhead_per_cell: 102, op_recordhead_gated: 102,
-  op_recordhead_len_capped: 102, op_recordhead_len_capped_gated: 102,
+  op_wave: 112, op_wave_drumrack: 112, op_tap: 210,
+  op_recordhead_per_sample: 260, op_recordhead_per_cell: 260, op_recordhead_gated: 260,
+  op_recordhead_len_capped: 260, op_recordhead_len_capped_gated: 260,
   op_step: 62, op_onsets: 62, op_gates: 62, op_hits: 62,
   op_snap: 82, op_thru: 52, op_degree: 62, op_pitch: 62,
   // Custom single-slot audio effects suite
-  op_reverb: 280, op_chorus: 120, op_flanger: 120, op_compressor: 95,
+  op_reverb: 2060, op_chorus: 250, op_flanger: 250, op_compressor: 150, op_delay: 450,
 };
 
 const DISPATCH_FLOOR = 35; // per-slot overhead before kernel math (step_slot), post skip-check removal
@@ -131,14 +131,14 @@ function topoSort(slots) {
 function greedyBalance(slots, pinnedToCore0) {
   const pinned = pinnedToCore0 || new Set();
   const byCost = [...slots].sort((a, b) => costOf(b.kernel) - costOf(a.kernel));
-  const coreLoad = [0, 0];
+  const coreLoad = [800, 400];
   const coreOf = new Map();
 
   // First pass: pin terminal-feeding slots to Core 0.
   for (const slot of byCost) {
     if (pinned.has(slot.id)) {
       coreOf.set(slot.id, 0);
-      coreLoad[0] += costOf(slot.kernel);
+      coreLoad[0] += costOf(slot.kernel) + DISPATCH_FLOOR;
     }
   }
   // Second pass: assign remaining slots to the lighter core.
@@ -146,7 +146,7 @@ function greedyBalance(slots, pinnedToCore0) {
     if (!coreOf.has(slot.id)) {
       const core = coreLoad[0] <= coreLoad[1] ? 0 : 1;
       coreOf.set(slot.id, core);
-      coreLoad[core] += costOf(slot.kernel);
+      coreLoad[core] += costOf(slot.kernel) + DISPATCH_FLOOR;
     }
   }
 
@@ -155,8 +155,12 @@ function greedyBalance(slots, pinnedToCore0) {
 
 // Sum costOf over a slot set on each core, given a coreOf map.
 function coreLoads(slots, coreOf) {
-  const load = [0, 0];
-  for (const slot of slots) load[coreOf.get(slot.id) ?? 0] += costOf(slot.kernel);
+  const baseOverhead = [800, 400];
+  const load = [baseOverhead[0], baseOverhead[1]];
+  for (const slot of slots) {
+    const c = coreOf.get(slot.id) ?? 0;
+    load[c] += costOf(slot.kernel) + DISPATCH_FLOOR;
+  }
   return load;
 }
 
@@ -196,7 +200,7 @@ function edgeMinimisePass(slots, coreOf, pinnedToCore0) {
       if (pinned.has(slot.id)) continue;
       const from = coreOf.get(slot.id) ?? 0;
       const to = from ^ 1;
-      const cost = costOf(slot.kernel);
+      const cost = costOf(slot.kernel) + DISPATCH_FLOOR;
 
       // Imbalance after the tentative move.
       const nl0 = from === 0 ? load[0] - cost : load[0] + cost;
@@ -227,9 +231,53 @@ function edgeMinimisePass(slots, coreOf, pinnedToCore0) {
 // 1-sample lag on cross-core outputs for running the graph on both cores. A patch
 // too small to fill a second core leaves c1 empty (dual=false); the runtime still
 // walks it through the same dual path, Core 1 just has nothing to do.
+function budgetBalancePass(slots, coreOf) {
+  const baseOverhead = [800, 400];
+  const BUDGET = 5208;
+
+  let improved = true;
+  while (improved) {
+    improved = false;
+    const load = coreLoads(slots, coreOf);
+    const overCore = load[0] > BUDGET ? 0 : (load[1] > BUDGET ? 1 : -1);
+    if (overCore === -1) break;
+
+    const underCore = overCore ^ 1;
+    let bestSlot = null;
+    let bestEdgeIncrease = Infinity;
+
+    for (const slot of slots) {
+      if (coreOf.get(slot.id) !== overCore) continue;
+      // Pinned slots stay on Core 0 (e.g. terminal writes)
+      if (overCore === 0 && slot.kernel.startsWith('op_terminal_write')) continue;
+
+      const cost = costOf(slot.kernel) + DISPATCH_FLOOR;
+      if (load[underCore] + cost > BUDGET) continue;
+
+      const beforeEdges = crossCoreEdges(slots, coreOf);
+      coreOf.set(slot.id, underCore);
+      const afterEdges = crossCoreEdges(slots, coreOf);
+      coreOf.set(slot.id, overCore); // revert
+
+      const edgeIncrease = afterEdges - beforeEdges;
+      if (edgeIncrease < bestEdgeIncrease) {
+        bestEdgeIncrease = edgeIncrease;
+        bestSlot = slot;
+      }
+    }
+
+    if (bestSlot) {
+      coreOf.set(bestSlot.id, underCore);
+      improved = true;
+    }
+  }
+  return coreOf;
+}
+
 function decidePartition(slots, pinnedToCore0) {
   const dualCoreOf = greedyBalance(slots, pinnedToCore0);
   edgeMinimisePass(slots, dualCoreOf, pinnedToCore0);
+  budgetBalancePass(slots, dualCoreOf);
   const [, c1] = coreLoads(slots, dualCoreOf);
 
   if (c1 > 0) return { coreOf: dualCoreOf, dual: true };
@@ -357,17 +405,20 @@ function terminalFeedPass(sortedSlots, coreOf, terminalWriteIds) {
 // (Core 0 rings Core 1 each sample), so both cores carry their doorbell overhead
 // even when Core 1 is empty.
 function verifyBudget(sampleRate, kernelOfSlot) {
-  const overhead = [OVERHEAD_CORE0, OVERHEAD_CORE1];
+  const baseOverhead = [800, 400]; // Measured baseline overheads (Core0, Core1)
   const sr = [0, 0];
+  const count = [0, 0];
   for (const entry of sampleRate) {
     const k = kernelOfSlot.get(entry.slotId) ?? 'unknown';
-    sr[entry.core] += costOf(k);
+    sr[entry.core] += costOf(k) + DISPATCH_FLOOR;
+    count[entry.core]++;
   }
 
   const results = [0, 1].map(c => {
-    const total = overhead[c] + sr[c];
-    return { sr: sr[c], overhead: overhead[c], total, budget: BUDGET_PER_SAMPLE, ok: total <= BUDGET_PER_SAMPLE };
+    const total = baseOverhead[c] + sr[c];
+    return { sr: sr[c], overhead: baseOverhead[c], total, budget: BUDGET_PER_SAMPLE, ok: total <= BUDGET_PER_SAMPLE };
   });
+
 
   return {
     core0: results[0],
@@ -438,8 +489,49 @@ function schedule(graph) {
     );
   }
 
+  const STATE_SIZES = {
+    op_audio_in: 8, op_average: 8, op_chance: 16, op_counter: 12, op_crush: 12,
+    op_cv_in: 8, op_degree: 8, op_detent: 8, op_diff: 8, op_edge: 8, op_fall: 8,
+    op_envelope: 20, op_envfollow: 8, op_euclid: 12, op_every: 12, op_follow: 12,
+    op_gate: 12, op_gates: 12, op_hat: 16, op_hits: 12, op_hold: 12, op_pickup: 8,
+    op_wavetable: 8, op_kick: 80, op_knob: 8, op_midi: 8, op_lookup: 4, op_lpf: 8,
+    op_lpg: 8, op_noise: 8, op_onsets: 12, op_phasor: 12, op_pitch: 8, op_random: 8,
+    op_recordhead_per_sample: 8, op_recordhead_per_cell: 8, op_recordhead_gated: 8,
+    op_recordhead_len_capped: 12, op_recordhead_len_capped_gated: 16,
+    op_recordhead_seek: 8, op_seek: 4, op_sine: 8, op_saw: 8, op_schmitt: 8, op_slew: 8, op_snare: 20,
+    op_square: 8, op_step: 20, op_switch: 8, op_tap: 8, op_thru: 8, op_toggle: 8,
+    op_triangle: 8, op_turns: 8, op_vcf: 20, op_walk: 12, op_wave: 8,
+    op_wave_drumrack: 8, op_wavefold: 8, op_z1: 8, op_midi_note_out: 16,
+    op_midi_cc_out: 12, op_midi_clock_out: 12, op_adsr: 24, op_dxeg: 44,
+    op_pluck: 12, op_svf: 12, op_shape: 4, op_dx: 308, op_reverb: 136,
+    op_chorus: 16, op_flanger: 16, op_compressor: 8, op_delay: 12
+  };
+
+  let nodestateBytes = 0;
+  for (const slot of graph.slots) {
+    nodestateBytes += STATE_SIZES[slot.kernel] ?? 4;
+  }
+
+  let audioBytes = 0;
+  let controlBytes = 0;
+  for (const buf of graph.buffers) {
+    const nbytes = (buf.length * 3 + 1) >> 1;
+    if (buf.kind === 'audio') {
+      audioBytes += nbytes;
+    } else {
+      controlBytes += nbytes;
+    }
+  }
+
+  const memory = {
+    nodestate: { total: nodestateBytes, budget: 3776, ok: nodestateBytes <= 3776 },
+    audio: { total: audioBytes, budget: 131072, ok: audioBytes <= 131072 },
+    control: { total: controlBytes, budget: 1024, ok: controlBytes <= 1024 },
+    ok: nodestateBytes <= 3776 && audioBytes <= 131072 && controlBytes <= 1024,
+  };
+
   return {
-    sampleRate, writerMap, violations, terminalFeedReport, budget,
+    sampleRate, writerMap, violations, terminalFeedReport, budget, memory,
     dual, edgesBefore, edgesAfter,
   };
 }

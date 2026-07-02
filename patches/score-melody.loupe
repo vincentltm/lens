@@ -1,0 +1,18 @@
+; Score Melody: Arpeggiated melody with score player and delay.
+;   audio-out-1/2 = melody + echo
+(patch
+  (def clock1 (clock :bpm 120))
+  (def score1score (score '(c4 e4 g4 c5 b4 g4 e4 c4)))
+  (def score1note (play :notes score1score :speed (varispeed :knob (add clock1 1638 :sat))))
+  (def sine1 (sine :note score1note))
+  (def delay1tape (audio :seconds 0.75))
+  (def delay1tap (tap delay1tape 2048 :span))
+  (def delay1out (clip (add sine1 (vca delay1tap 1500))))
+  (def vca1 delay1out)
+
+  (<- delay1tape (clip (add sine1 (vca delay1tap 2048))))
+  (<- (audio-out :1) vca1)
+  (<- (audio-out :2) vca1)
+)
+
+; flare_layout: {"rows":[[{"id":"wsIn","type":"ws-in","left":0,"params":{}},{"id":"clock1","type":"clock","left":120,"params":{"bpm":1638}},{"id":"score1","type":"score-player","left":240,"params":{"speed":1638,"pattern":"[c4 e4 g4 c5 b4 g4 e4 c4]"}},{"id":"sine1","type":"sine","left":420,"params":{"pitch":1935,"cents":2048,"depth":1000}},{"id":"delay1","type":"tape-delay","left":600,"params":{"time":2048,"feedback":2048,"mix":1500}}],[{"id":"wsOut","type":"ws-out","left":0,"params":{}},{"id":"vca1","type":"vca","left":120,"params":{"amp":4095}}]],"cables":[{"fromId":"clock1","fromPort":"out","toId":"score1","toPort":"speed","color":"#ff5e57"},{"fromId":"score1","fromPort":"note","toId":"sine1","toPort":"note","color":"#00ff66"},{"fromId":"sine1","fromPort":"out","toId":"delay1","toPort":"in","color":"#00ffff"},{"fromId":"delay1","fromPort":"out","toId":"vca1","toPort":"in","color":"#0088ff"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-1","color":"#ff5e57"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-2","color":"#ff5e57"}],"nextId":100}

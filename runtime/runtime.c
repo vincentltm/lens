@@ -245,6 +245,7 @@ struct WalkState {
 struct LpgState {
     int32_t value;
     int32_t y_q16;
+    int32_t v_q16;
 };
 
 /* EnvFollow: full-wave rectify then one-pole LP.
@@ -363,20 +364,68 @@ struct FollowState {
     uint32_t acc;         /* accumulated :drift phase creep (32-bit, >>20 to 12) */
 };
 
+/* Freeverb: 6 comb + 2 allpass per channel (lighter configuration).
+ * Comb delays (samples): L=1116,1188,1277,1356,1422,1491
+ *                         R=L+23 each.
+ * Allpass delays:         L=556,441  R=L+23 each.
+ *
+ * Buffer layout (cells):
+ *   L combs:    0       .. 7849      (sum = 7850)
+ *   R combs:    7850    .. 15837     (sum = 7988)
+ *   L allpass:  15838   .. 16834     (sum = 997)
+ *   R allpass:  16835   .. 17877     (sum = 1043)
+ *   Total:      17878 cells
+ *
+ * Cumulative base offsets within each section are pre-computed so the hot
+ * audio loop does a single add (base + pos) rather than a running sum.
+ */
+#define FV_NCOMB   6
+#define FV_NAP     2
+static const uint16_t fv_comb_L[FV_NCOMB] = {1116,1188,1277,1356,1422,1491};
+static const uint16_t fv_comb_R[FV_NCOMB] = {1139,1211,1300,1379,1445,1514};
+static const uint16_t fv_ap_L[FV_NAP]     = { 556, 441};
+static const uint16_t fv_ap_R[FV_NAP]     = { 579, 464};
+/* Cumulative base offsets within the L-comb region (cells 0..7849). */
+static const uint16_t fv_comb_base_L[FV_NCOMB] = {    0, 1116, 2304, 3581, 4937, 6359};
+/* Cumulative base offsets within the R-comb region (relative to FV_R_COMB_OFFSET). */
+static const uint16_t fv_comb_base_R[FV_NCOMB] = {    0, 1139, 2350, 3650, 5029, 6474};
+/* Cumulative base offsets within the L-allpass region (relative to FV_L_AP_OFFSET). */
+static const uint16_t fv_ap_base_L[FV_NAP]  = {   0,  556};
+/* Cumulative base offsets within the R-allpass region (relative to FV_R_AP_OFFSET). */
+static const uint16_t fv_ap_base_R[FV_NAP]  = {   0,  579};
+/* L-comb sum: 1116+1188+1277+1356+1422+1491 = 7850 */
+#define FV_R_COMB_OFFSET  7850u
+/* R-comb sum: 1139+1211+1300+1379+1445+1514 = 7988 */
+#define FV_L_AP_OFFSET    15838u
+/* L-ap sum:  556+441 = 997 */
+#define FV_R_AP_OFFSET    16835u
+/* R-ap sum:  579+464 = 1043; total = 16835+1043 = 17878 */
+#define FV_BUF_CELLS      17878u
 struct ReverbState {
-    int32_t value;        /* +0 Left output (signed audio) */
-    int32_t value_r;      /* +4 Right output (signed audio) */
-    uint32_t head;
+    int32_t  value;           /* +0 Left output */
+    int32_t  value_r;         /* +4 Right output */
+    uint32_t comb_pos_L[FV_NCOMB]; /* write-head per comb (L) */
+    uint32_t comb_pos_R[FV_NCOMB]; /* write-head per comb (R) */
+    int32_t  comb_flt_L[FV_NCOMB]; /* LP filter state per comb (L) */
+    int32_t  comb_flt_R[FV_NCOMB]; /* LP filter state per comb (R) */
+    uint32_t ap_pos_L[FV_NAP];    /* allpass write-head (L) */
+    uint32_t ap_pos_R[FV_NAP];    /* allpass write-head (R) */
+    int32_t  dc_x_L;
+    int32_t  dc_y_L;
+    int32_t  dc_x_R;
+    int32_t  dc_y_R;
 };
 
 struct ChorusState {
-    int32_t value;        /* +0 output (signed audio) */
+    int32_t value;        /* +0 Left output (signed audio) */
+    int32_t value_r;      /* +4 Right output (signed audio) */
     uint32_t lfo_phase;
     uint32_t head;
 };
 
 struct FlangerState {
-    int32_t value;        /* +0 output (signed audio) */
+    int32_t value;        /* +0 Left output (signed audio) */
+    int32_t value_r;      /* +4 Right output (signed audio) */
     uint32_t lfo_phase;
     uint32_t head;
 };
@@ -384,6 +433,12 @@ struct FlangerState {
 struct CompressorState {
     int32_t value;        /* +0 output (signed audio) */
     int32_t envelope;
+};
+
+struct DelayState {
+    int32_t value;        /* +0 Left output (signed audio) */
+    int32_t value_r;      /* +4 Right output (signed audio) */
+    uint32_t head;
 };
 
 /* ===== tape state structs ===== */
@@ -604,15 +659,86 @@ static inline void pack12_write(uint8_t* buf, uint32_t idx, int32_t val) {
     }
 }
 
-/* ===== audio helpers ===== */
-
 #define SMAX 2047
+static inline int32_t sclamp_(int32_t x) { return x < -SMAX ? -SMAX : (x > SMAX ? SMAX : x); }
+
+__attribute__((always_inline))
+static inline int32_t pack12_comb_step(uint8_t* buf, uint32_t idx, int32_t inValShifted, int32_t cFb, int32_t* p_comb_flt) {
+    uint32_t pair = idx >> 1;
+    uint32_t base = (pair << 1) + pair;
+    int32_t lp_old_shifted = (*p_comb_flt) >> 1;
+    int32_t out;
+    if ((idx & 1u) == 0u) {
+        out = (int32_t)(((uint32_t)buf[base] | (((uint32_t)buf[base + 1u] & 0x0Fu) << 8)));
+        if (out >= 2048) out -= 4096;
+        int32_t lp = sclamp_((out >> 1) + lp_old_shifted);
+        *p_comb_flt = lp;
+        int32_t writ = sclamp_(inValShifted + ((lp * cFb) >> 12));
+        uint32_t v = (uint32_t)writ & 0xFFFu;
+        buf[base]      = (uint8_t)(v & 0xFFu);
+        buf[base + 1u] = (uint8_t)((buf[base + 1u] & 0xF0u) | (v >> 8));
+    } else {
+        out = (int32_t)((((uint32_t)buf[base + 1u]) >> 4) | (((uint32_t)buf[base + 2u]) << 4));
+        if (out >= 2048) out -= 4096;
+        int32_t lp = sclamp_((out >> 1) + lp_old_shifted);
+        *p_comb_flt = lp;
+        int32_t writ = sclamp_(inValShifted + ((lp * cFb) >> 12));
+        uint32_t v = (uint32_t)writ & 0xFFFu;
+        buf[base + 1u] = (uint8_t)((buf[base + 1u] & 0x0Fu) | ((v & 0xFu) << 4));
+        buf[base + 2u] = (uint8_t)(v >> 4);
+    }
+    return out;
+}
+
+__attribute__((always_inline))
+static inline int32_t pack12_ap_step(uint8_t* buf, uint32_t idx, int32_t wet) {
+    uint32_t pair = idx >> 1;
+    uint32_t base = (pair << 1) + pair;
+    int32_t buf_out;
+    if ((idx & 1u) == 0u) {
+        buf_out = (int32_t)(((uint32_t)buf[base] | (((uint32_t)buf[base + 1u] & 0x0Fu) << 8)));
+        if (buf_out >= 2048) buf_out -= 4096;
+        int32_t writ = sclamp_(wet + (buf_out >> 1));
+        uint32_t v = (uint32_t)writ & 0xFFFu;
+        buf[base]      = (uint8_t)(v & 0xFFu);
+        buf[base + 1u] = (uint8_t)((buf[base + 1u] & 0xF0u) | (v >> 8));
+        return sclamp_(buf_out - (writ >> 1));
+    } else {
+        buf_out = (int32_t)((((uint32_t)buf[base + 1u]) >> 4) | (((uint32_t)buf[base + 2u]) << 4));
+        if (buf_out >= 2048) buf_out -= 4096;
+        int32_t writ = sclamp_(wet + (buf_out >> 1));
+        uint32_t v = (uint32_t)writ & 0xFFFu;
+        buf[base + 1u] = (uint8_t)((buf[base + 1u] & 0x0Fu) | ((v & 0xFu) << 4));
+        buf[base + 2u] = (uint8_t)(v >> 4);
+        return sclamp_(buf_out - (writ >> 1));
+    }
+}
+
+__attribute__((always_inline))
+static inline int32_t comb_step16(int16_t* buf, uint32_t idx, int32_t inValShifted, int32_t cFb, int32_t* p_comb_flt) {
+    int32_t out = buf[idx];
+    int32_t lp_old_shifted = (*p_comb_flt) >> 1;
+    int32_t lp = sclamp_((out >> 1) + lp_old_shifted);
+    *p_comb_flt = lp;
+    int32_t writ = sclamp_(inValShifted + ((lp * cFb) >> 12));
+    buf[idx] = (int16_t)writ;
+    return out;
+}
+
+__attribute__((always_inline))
+static inline int32_t ap_step16(int16_t* buf, uint32_t idx, int32_t wet) {
+    int32_t buf_out = buf[idx];
+    int32_t writ = sclamp_(wet + (buf_out >> 1));
+    buf[idx] = (int16_t)writ;
+    return sclamp_(buf_out - (writ >> 1));
+}
+
+/* ===== audio helpers ===== */
 
 /* Jack-connection mask (bit = hw_scratch jack index); set each sample from the
    hardware normalisation probe and read by op_connected. */
 static uint16_t hw_connected;
 
-static inline int32_t sclamp_(int32_t x) { return x < -SMAX ? -SMAX : (x > SMAX ? SMAX : x); }
 static inline int32_t vclamp_(int32_t x) { return x < 0 ? 0 : (x > VMAX ? VMAX : x); }
 /* Narrow a 32-bit runtime value to the 12-bit magnitude domain (+-VMAX). In-range
    values (uni- or bipolar) pass through; only out-of-range intermediates (e.g. a
@@ -870,13 +996,11 @@ static inline uint32_t pm_offset(int32_t pm) {
  * ring, lpg and sine depth. The %/correction gives round-half-up for both signs. */
 static inline int32_t scale_depth(int32_t val, int32_t depth) {
     int32_t n = val * depth;
-    int32_t b = VMAX_;
-    int32_t n2 = n * 2 + b;
-    int32_t d2 = b * 2;
-    int32_t q = n2 / d2;
-    int32_t r = n2 % d2;
-    if (r != 0 && ((n2 ^ d2) < 0)) q--;
-    return q;
+    if (n >= 0) {
+        return (n + 2047) / 4095;
+    } else {
+        return (n - 2047) / 4095;
+    }
 }
 
 /* ===== filters helpers ===== */
@@ -1550,7 +1674,14 @@ void OP_FN(op_vca)(struct Slot* s) {
 }
 void OP_FN(op_ring)(struct Slot* s) {
     struct NodeStateBase* st = (struct NodeStateBase*)s->out;
-    st->value = scale_depth(*(const int32_t*)s->in0, *(const int32_t*)s->in1);
+    int32_t a = *(const int32_t*)s->in0;
+    int32_t b = *(const int32_t*)s->in1;
+    int32_t n = a * b;
+    if (n >= 0) {
+        st->value = (n + 1023) / 2047;
+    } else {
+        st->value = (n - 1023) / 2047;
+    }
 }
 void OP_FN(op_mix2)(struct Slot* s) {
     struct NodeStateBase* st = (struct NodeStateBase*)s->out;
@@ -1710,8 +1841,21 @@ void OP_FN(op_lpg)(struct Slot* s) {
     int32_t ctrl = *(const int32_t*)s->in1;
     if (ctrl < 0)     ctrl = 0;
     if (ctrl > VMAX_) ctrl = VMAX_;
-    st->y_q16 = onepole_step(st->y_q16, x, ctrl);
-    st->value = scale_depth(round16(st->y_q16), ctrl);
+
+    // Asymmetric Vactrol model: fast open, slow organic decay tail
+    int32_t target_q16 = ctrl * 65536;
+    int32_t diff_q16 = target_q16 - st->v_q16;
+    if (diff_q16 > 0) {
+        st->v_q16 += (diff_q16 / 256) * 20;  // Responsive attack (~5 ms)
+    } else {
+        st->v_q16 += (diff_q16 / 4096) * 5;  // Warm vactrol ring decay (~150 ms)
+    }
+    int32_t vactrol_ctrl = st->v_q16 / 65536;
+    if (vactrol_ctrl < 0) vactrol_ctrl = 0;
+    if (vactrol_ctrl > VMAX_) vactrol_ctrl = VMAX_;
+
+    st->y_q16 = onepole_step(st->y_q16, x, vactrol_ctrl);
+    st->value = scale_depth(round16(st->y_q16), vactrol_ctrl);
 }
 void OP_FN(op_envfollow)(struct Slot* s) {
     struct EnvFollowState* st = (struct EnvFollowState*)s->out;
@@ -1945,12 +2089,12 @@ void OP_FN(op_hat)(struct Slot* s) {
     st->p2 += inc2;
     st->p3 += inc3;
     uint32_t p1 = st->p1, p2 = st->p2, p3 = st->p3;
-    int32_t metal = ((p1 & 0x80000000u) ? 1 : -1)
-                  + ((p2 & 0x80000000u) ? 1 : -1)
-                  + ((p3 & 0x80000000u) ? 1 : -1)
-                  + (((p1 + p2) & 0x80000000u) ? 1 : -1)
-                  + (((p2 + p3) & 0x80000000u) ? 1 : -1)
-                  + (((p1 + p3) & 0x80000000u) ? 1 : -1);
+    int32_t metal = (((int32_t)p1) >> 31) | 1;
+    metal += (((int32_t)p2) >> 31) | 1;
+    metal += (((int32_t)p3) >> 31) | 1;
+    metal += (((int32_t)(p1 + p2)) >> 31) | 1;
+    metal += (((int32_t)(p2 + p3)) >> 31) | 1;
+    metal += (((int32_t)(p1 + p3)) >> 31) | 1;
     int32_t sig = metal * 340;
     uint32_t kc = (uint32_t)((tone < 1 ? 1 : tone) << (16 - VBITS_));
     st->hp += ((((sig << 12) - st->hp) >> 10) * (int32_t)kc) >> 6;
@@ -2962,6 +3106,10 @@ void OP_FN(op_terminal_write)(struct Slot* s) {
     *(int32_t*)s->out = *(const int32_t*)s->in0;
 }
 
+/* Freeverb: 8-comb + 4-allpass stereo reverb.
+ * Decay 0..4095 maps comb feedback ~0.70..0.98 (Schroeder room-size scale).
+ * Damp  fixed at 0.5 (LP blend per comb tick).
+ * Mix   0..4095 = dry..wet (crossfade). */
 void OP_FN(op_reverb)(struct Slot* s) {
     struct ReverbState* st = (struct ReverbState*)s->out;
     int32_t inVal = *(const int32_t*)s->in0;
@@ -2969,53 +3117,94 @@ void OP_FN(op_reverb)(struct Slot* s) {
     int32_t mix   = vclamp_(*(const int32_t*)s->in2);
     struct Buffer* buf = (struct Buffer*)s->in3;
 
-    if (!buf || buf->length < 5952) {
-        st->value = inVal;
-        st->value_r = inVal;
-        return;
+    if (!buf || buf->length < FV_BUF_CELLS) {
+        st->value = inVal; st->value_r = inVal; return;
     }
+    int16_t* buf16 = (int16_t*)buf->bytes;
 
-    uint32_t head = st->head;
-    uint8_t* bytes = buf->bytes;
+    /* Comb feedback: decay 0->4095 maps to ~0.70..0.98 in Q12 (2867..4014). */
+    int32_t cFb   = 2867 + ((decay * 1147) >> 12);  /* Q12 */
 
-    int32_t combFb = (decay * 3072) >> 12;
-    int32_t apFb = 1351;
+    /* ---- 6 parallel comb filters (L) ---- */
+    int32_t sumL = 0;
+    int32_t inValShifted = inVal >> 2;
 
-    int32_t tapL1 = pack12_read_signed(bytes, head % 1151);
-    int32_t tapL2 = pack12_read_signed(bytes, 1151 + (head % 1381));
-    int32_t tapR1 = pack12_read_signed(bytes, 2532 + (head % 1249));
-    int32_t tapR2 = pack12_read_signed(bytes, 3781 + (head % 1451));
+#define COMB_STEP_L(c, base, len) do { \
+    uint32_t pos  = st->comb_pos_L[c]; \
+    int32_t  out  = comb_step16(buf16, base + pos, inValShifted, cFb, &st->comb_flt_L[c]); \
+    st->comb_pos_L[c] = (pos + 1 >= len) ? 0 : pos + 1; \
+    sumL += out; \
+} while(0)
 
-    int32_t combL1_in = sclamp_(((inVal * 1024) >> 12) + ((tapL1 * combFb) >> 12));
-    int32_t combL2_in = sclamp_(((inVal * 1024) >> 12) + ((tapL2 * combFb) >> 12));
-    int32_t combR1_in = sclamp_(((inVal * 1024) >> 12) + ((tapR1 * combFb) >> 12));
-    int32_t combR2_in = sclamp_(((inVal * 1024) >> 12) + ((tapR2 * combFb) >> 12));
+    COMB_STEP_L(0, 0, 1116);
+    COMB_STEP_L(1, 1116, 1188);
+    COMB_STEP_L(2, 2304, 1277);
+    COMB_STEP_L(3, 3581, 1356);
+    COMB_STEP_L(4, 4937, 1422);
+    COMB_STEP_L(5, 6359, 1491);
+#undef COMB_STEP_L
 
-    pack12_write(bytes, head % 1151, combL1_in);
-    pack12_write(bytes, 1151 + (head % 1381), combL2_in);
-    pack12_write(bytes, 2532 + (head % 1249), combR1_in);
-    pack12_write(bytes, 3781 + (head % 1451), combR2_in);
+    sumL = sclamp_(sumL >> 2);
+    int32_t xL = sumL;
+    int32_t yL = xL - st->dc_x_L + ((st->dc_y_L * 4075) >> 12);
+    st->dc_x_L = xL;
+    st->dc_y_L = sclamp_(yL);
+    sumL = st->dc_y_L;
 
-    int32_t sumL = (tapL1 + tapL2) >> 1;
-    int32_t sumR = (tapR1 + tapR2) >> 1;
+    /* ---- 6 parallel comb filters (R) ---- */
+    int32_t sumR = 0;
 
-    int32_t tapL1ap = pack12_read_signed(bytes, 5232 + (head % 347));
-    int32_t tapR1ap = pack12_read_signed(bytes, 5579 + (head % 373));
+#define COMB_STEP_R(c, base, len) do { \
+    uint32_t pos  = st->comb_pos_R[c]; \
+    int32_t  out  = comb_step16(buf16, base + pos, inValShifted, cFb, &st->comb_flt_R[c]); \
+    st->comb_pos_R[c] = (pos + 1 >= len) ? 0 : pos + 1; \
+    sumR += out; \
+} while(0)
 
-    int32_t apL1w = sclamp_(((sumL * 2744) >> 12) + ((tapL1ap * apFb) >> 12));
-    int32_t wetL  = sclamp_(tapL1ap - ((apL1w * apFb) >> 12));
+    COMB_STEP_R(0, FV_R_COMB_OFFSET + 0, 1139);
+    COMB_STEP_R(1, FV_R_COMB_OFFSET + 1139, 1211);
+    COMB_STEP_R(2, FV_R_COMB_OFFSET + 2350, 1300);
+    COMB_STEP_R(3, FV_R_COMB_OFFSET + 3650, 1379);
+    COMB_STEP_R(4, FV_R_COMB_OFFSET + 5029, 1445);
+    COMB_STEP_R(5, FV_R_COMB_OFFSET + 6474, 1514);
+#undef COMB_STEP_R
 
-    int32_t apR1w = sclamp_(((sumR * 2744) >> 12) + ((tapR1ap * apFb) >> 12));
-    int32_t wetR  = sclamp_(tapR1ap - ((apR1w * apFb) >> 12));
+    sumR = sclamp_(sumR >> 2);
+    int32_t xR = sumR;
+    int32_t yR = xR - st->dc_x_R + ((st->dc_y_R * 4075) >> 12);
+    st->dc_x_R = xR;
+    st->dc_y_R = sclamp_(yR);
+    sumR = st->dc_y_R;
 
-    pack12_write(bytes, 5232 + (head % 347), apL1w);
-    pack12_write(bytes, 5579 + (head % 373), apR1w);
+    /* ---- 2 series allpass diffusers (L) — Schroeder allpass: g=0.5 fixed ---- */
+    int32_t wetL = sumL;
 
-    st->head = head + 1;
+#define AP_STEP_L(a, base, len) do { \
+    uint32_t pos  = st->ap_pos_L[a]; \
+    wetL = ap_step16(buf16, base + pos, wetL); \
+    st->ap_pos_L[a] = (pos + 1 >= len) ? 0 : pos + 1; \
+} while(0)
 
-    int32_t dryVal = 4095 - mix;
-    st->value   = sclamp_(((inVal * dryVal) >> 12) + ((wetL * mix) >> 12));
-    st->value_r = sclamp_(((inVal * dryVal) >> 12) + ((wetR * mix) >> 12));
+    AP_STEP_L(0, FV_L_AP_OFFSET + 0, 556);
+    AP_STEP_L(1, FV_L_AP_OFFSET + 556, 441);
+#undef AP_STEP_L
+
+    /* ---- 2 series allpass diffusers (R) ---- */
+    int32_t wetR = sumR;
+
+#define AP_STEP_R(a, base, len) do { \
+    uint32_t pos  = st->ap_pos_R[a]; \
+    wetR = ap_step16(buf16, base + pos, wetR); \
+    st->ap_pos_R[a] = (pos + 1 >= len) ? 0 : pos + 1; \
+} while(0)
+
+    AP_STEP_R(0, FV_R_AP_OFFSET + 0, 579);
+    AP_STEP_R(1, FV_R_AP_OFFSET + 579, 464);
+#undef AP_STEP_R
+
+    int32_t dryAmt = 4095 - mix;
+    st->value   = sclamp_(((inVal * dryAmt) >> 12) + ((wetL * mix) >> 12));
+    st->value_r = sclamp_(((inVal * dryAmt) >> 12) + ((wetR * mix) >> 12));
 }
 
 void OP_FN(op_chorus)(struct Slot* s) {
@@ -3028,32 +3217,46 @@ void OP_FN(op_chorus)(struct Slot* s) {
 
     if (!buf || buf->length == 0) {
         st->value = inVal;
+        st->value_r = inVal;
         return;
     }
 
     uint32_t inc = 8947 + (((uint32_t)rate * 885833u) >> 12);
     st->lfo_phase += inc;
-    int32_t lfo = sine_interp(st->lfo_phase);
+    int32_t lfoL = sine_interp(st->lfo_phase);
+    int32_t lfoR = sine_interp(st->lfo_phase + 0x80000000u);
 
-    int32_t delay_samples_q16 = (480 << 16) + (lfo * (depth * 240 >> 12) * 32);
-    int32_t ipart = delay_samples_q16 >> 16;
-    int32_t fpart = delay_samples_q16 & 0xFFFF;
+    // Left channel wet
+    int32_t delayL = (480 << 16) + (lfoL * (depth * 240 >> 12) * 32);
+    int32_t ipartL = delayL >> 16;
+    int32_t fpartL = delayL & 0xFFFF;
+    int32_t idxL0 = (int32_t)st->head - ipartL;
+    int32_t idxL1 = (int32_t)st->head - ipartL - 1;
+    while (idxL0 < 0) idxL0 += (int32_t)buf->length;
+    while (idxL1 < 0) idxL1 += (int32_t)buf->length;
+    int32_t sL0 = pack12_read_signed(buf->bytes, (uint32_t)idxL0);
+    int32_t sL1 = pack12_read_signed(buf->bytes, (uint32_t)idxL1);
+    int32_t wetL = sL0 + (((sL1 - sL0) * fpartL) >> 16);
 
-    int32_t idx0 = (int32_t)st->head - ipart;
-    int32_t idx1 = (int32_t)st->head - ipart - 1;
-    while (idx0 < 0) idx0 += (int32_t)buf->length;
-    while (idx1 < 0) idx1 += (int32_t)buf->length;
-
-    int32_t s0 = pack12_read_signed(buf->bytes, (uint32_t)idx0);
-    int32_t s1 = pack12_read_signed(buf->bytes, (uint32_t)idx1);
-    int32_t wet = s0 + (((s1 - s0) * fpart) >> 16);
+    // Right channel wet
+    int32_t delayR = (480 << 16) + (lfoR * (depth * 240 >> 12) * 32);
+    int32_t ipartR = delayR >> 16;
+    int32_t fpartR = delayR & 0xFFFF;
+    int32_t idxR0 = (int32_t)st->head - ipartR;
+    int32_t idxR1 = (int32_t)st->head - ipartR - 1;
+    while (idxR0 < 0) idxR0 += (int32_t)buf->length;
+    while (idxR1 < 0) idxR1 += (int32_t)buf->length;
+    int32_t sR0 = pack12_read_signed(buf->bytes, (uint32_t)idxR0);
+    int32_t sR1 = pack12_read_signed(buf->bytes, (uint32_t)idxR1);
+    int32_t wetR = sR0 + (((sR1 - sR0) * fpartR) >> 16);
 
     int32_t fb_bipolar = (fb * 2) - 4095;
-    int32_t write_val = sclamp_(inVal + ((wet * fb_bipolar) >> 12));
+    int32_t write_val = sclamp_(inVal + ((wetL * fb_bipolar) >> 12));
     pack12_write(buf->bytes, st->head, write_val);
 
     st->head = (st->head + 1) % buf->length;
-    st->value = (inVal + wet) >> 1;
+    st->value = (inVal + wetL) >> 1;
+    st->value_r = (inVal + wetR) >> 1;
 }
 
 void OP_FN(op_flanger)(struct Slot* s) {
@@ -3066,32 +3269,46 @@ void OP_FN(op_flanger)(struct Slot* s) {
 
     if (!buf || buf->length == 0) {
         st->value = inVal;
+        st->value_r = inVal;
         return;
     }
 
     uint32_t inc = 4473 + (((uint32_t)rate * 442916u) >> 12);
     st->lfo_phase += inc;
-    int32_t lfo = sine_interp(st->lfo_phase);
+    int32_t lfoL = sine_interp(st->lfo_phase);
+    int32_t lfoR = sine_interp(st->lfo_phase + 0x80000000u);
 
-    int32_t delay_samples_q16 = (144 << 16) + (lfo * (depth * 96 >> 12) * 32);
-    int32_t ipart = delay_samples_q16 >> 16;
-    int32_t fpart = delay_samples_q16 & 0xFFFF;
+    // Left channel wet
+    int32_t delayL = (144 << 16) + (lfoL * (depth * 96 >> 12) * 32);
+    int32_t ipartL = delayL >> 16;
+    int32_t fpartL = delayL & 0xFFFF;
+    int32_t idxL0 = (int32_t)st->head - ipartL;
+    int32_t idxL1 = (int32_t)st->head - ipartL - 1;
+    while (idxL0 < 0) idxL0 += (int32_t)buf->length;
+    while (idxL1 < 0) idxL1 += (int32_t)buf->length;
+    int32_t sL0 = pack12_read_signed(buf->bytes, (uint32_t)idxL0);
+    int32_t sL1 = pack12_read_signed(buf->bytes, (uint32_t)idxL1);
+    int32_t wetL = sL0 + (((sL1 - sL0) * fpartL) >> 16);
 
-    int32_t idx0 = (int32_t)st->head - ipart;
-    int32_t idx1 = (int32_t)st->head - ipart - 1;
-    while (idx0 < 0) idx0 += (int32_t)buf->length;
-    while (idx1 < 0) idx1 += (int32_t)buf->length;
-
-    int32_t s0 = pack12_read_signed(buf->bytes, (uint32_t)idx0);
-    int32_t s1 = pack12_read_signed(buf->bytes, (uint32_t)idx1);
-    int32_t wet = s0 + (((s1 - s0) * fpart) >> 16);
+    // Right channel wet
+    int32_t delayR = (144 << 16) + (lfoR * (depth * 96 >> 12) * 32);
+    int32_t ipartR = delayR >> 16;
+    int32_t fpartR = delayR & 0xFFFF;
+    int32_t idxR0 = (int32_t)st->head - ipartR;
+    int32_t idxR1 = (int32_t)st->head - ipartR - 1;
+    while (idxR0 < 0) idxR0 += (int32_t)buf->length;
+    while (idxR1 < 0) idxR1 += (int32_t)buf->length;
+    int32_t sR0 = pack12_read_signed(buf->bytes, (uint32_t)idxR0);
+    int32_t sR1 = pack12_read_signed(buf->bytes, (uint32_t)idxR1);
+    int32_t wetR = sR0 + (((sR1 - sR0) * fpartR) >> 16);
 
     int32_t fb_bipolar = (fb * 2) - 4095;
-    int32_t write_val = sclamp_(inVal + ((wet * fb_bipolar) >> 12));
+    int32_t write_val = sclamp_(inVal + ((wetL * fb_bipolar) >> 12));
     pack12_write(buf->bytes, st->head, write_val);
 
     st->head = (st->head + 1) % buf->length;
-    st->value = (inVal + wet) >> 1;
+    st->value = (inVal + wetL) >> 1;
+    st->value_r = (inVal + wetR) >> 1;
 }
 
 void OP_FN(op_compressor)(struct Slot* s) {
@@ -3117,6 +3334,100 @@ void OP_FN(op_compressor)(struct Slot* s) {
         gain = (target * 4095) / st->envelope;
     }
     st->value = sclamp_((inVal * gain) >> 12);
+}
+
+void OP_FN(op_delay)(struct Slot* s) {
+    struct DelayState* st = (struct DelayState*)s->out;
+    int32_t in_l     = *(const int32_t*)s->in0;
+    int32_t in_r     = *(const int32_t*)s->in1;
+    int32_t time     = vclamp_(*(const int32_t*)s->in2);
+    int32_t feedback = vclamp_(*(const int32_t*)s->in3);
+    struct Buffer* buf = (struct Buffer*)s->in4;
+
+    if (!buf || buf->length == 0) {
+        st->value = in_l;
+        st->value_r = in_r;
+        return;
+    }
+
+    uint32_t half = buf->length >> 1;
+    if (half == 0) {
+        st->value = in_l;
+        st->value_r = in_r;
+        return;
+    }
+
+    uint8_t mode = s->param0 & 0x03u;
+    uint32_t ratio_scaled = (s->param0 >> 8) & 0xFFFu;
+    
+    int32_t wet_L = 0;
+    int32_t wet_R = 0;
+    int32_t write_val_L = 0;
+    int32_t write_val_R = 0;
+
+    if (mode == 0) { // Mono: use full buffer length for double delay time!
+        uint32_t len = buf->length;
+        int32_t delay_q16_L = (time * (len - 1) * 16) + (1 << 16);
+        int32_t ipart_L = delay_q16_L >> 16;
+        int32_t fpart_L = delay_q16_L & 0xFFFF;
+        int32_t idx_L0 = (int32_t)st->head - ipart_L;
+        int32_t idx_L1 = idx_L0 - 1;
+        while (idx_L0 < 0) idx_L0 += len;
+        while (idx_L1 < 0) idx_L1 += len;
+        int32_t wet_L0 = pack12_read_signed(buf->bytes, (uint32_t)idx_L0);
+        int32_t wet_L1 = pack12_read_signed(buf->bytes, (uint32_t)idx_L1);
+        wet_L = wet_L0 + (((wet_L1 - wet_L0) * fpart_L) >> 16);
+        wet_R = wet_L;
+
+        int32_t in_sum = (in_l + in_r) >> 1;
+        write_val_L = sclamp_(in_sum + ((wet_L * feedback) >> 12));
+        
+        pack12_write(buf->bytes, st->head, write_val_L);
+        st->head = (st->head + 1);
+        if (st->head >= len) st->head = 0;
+    } else { // Stereo or Ping-Pong: split buffer in half
+        int32_t delay_q16_L = (time * (half - 1) * 16) + (1 << 16);
+        int32_t ipart_L = delay_q16_L >> 16;
+        int32_t fpart_L = delay_q16_L & 0xFFFF;
+        int32_t idx_L0 = (int32_t)st->head - ipart_L;
+        int32_t idx_L1 = idx_L0 - 1;
+        while (idx_L0 < 0) idx_L0 += half;
+        while (idx_L1 < 0) idx_L1 += half;
+        int32_t wet_L0 = pack12_read_signed(buf->bytes, (uint32_t)idx_L0);
+        int32_t wet_L1 = pack12_read_signed(buf->bytes, (uint32_t)idx_L1);
+        wet_L = wet_L0 + (((wet_L1 - wet_L0) * fpart_L) >> 16);
+
+        int32_t time_R = (time * ratio_scaled) >> 11;
+        if (time_R > 4095) time_R = 4095;
+        int32_t delay_q16_R = (time_R * (half - 1) * 16) + (1 << 16);
+        int32_t ipart_R = delay_q16_R >> 16;
+        int32_t fpart_R = delay_q16_R & 0xFFFF;
+        int32_t idx_R0 = (int32_t)st->head - ipart_R;
+        int32_t idx_R1 = idx_R0 - 1;
+        while (idx_R0 < 0) idx_R0 += half;
+        while (idx_R1 < 0) idx_R1 += half;
+        int32_t wet_R0 = pack12_read_signed(buf->bytes, (uint32_t)(idx_R0 + half));
+        int32_t wet_R1 = pack12_read_signed(buf->bytes, (uint32_t)(idx_R1 + half));
+        wet_R = wet_R0 + (((wet_R1 - wet_R0) * fpart_R) >> 16);
+
+        if (mode == 1) { // Stereo
+            write_val_L = sclamp_(in_l + ((wet_L * feedback) >> 12));
+            write_val_R = sclamp_(in_r + ((wet_R * feedback) >> 12));
+        } else { // Ping-Pong: true Ping-Pong (input summed to mono is injected only to Left loop)
+            int32_t in_sum = (in_l + in_r) >> 1;
+            write_val_L = sclamp_(in_sum + ((wet_R * feedback) >> 12));
+            write_val_R = sclamp_(((wet_L * feedback) >> 12));
+        }
+
+        pack12_write(buf->bytes, st->head, write_val_L);
+        pack12_write(buf->bytes, st->head + half, write_val_R);
+
+        st->head = (st->head + 1);
+        if (st->head >= half) st->head = 0;
+    }
+
+    st->value   = wet_L;
+    st->value_r = wet_R;
 }
 
 /* ===== KFN table (kid -> RAM-resident fn pointer) ===== */
@@ -3253,6 +3564,7 @@ static void (* const KFN[KID_COUNT])(struct Slot*) = {
     /* 122 */ op_chorus,
     /* 123 */ op_flanger,
     /* 124 */ op_compressor,
+    /* 125 */ op_delay,
 };
 _Static_assert(sizeof(KFN) / sizeof(KFN[0]) == KID_COUNT,
                "KFN entry count must equal KID_COUNT");
@@ -3341,6 +3653,7 @@ static const uint16_t KSTATE_BYTES[KID_COUNT] = {
     [KID_OP_CHORUS]                       = sizeof(struct ChorusState),
     [KID_OP_FLANGER]                      = sizeof(struct FlangerState),
     [KID_OP_COMPRESSOR]                   = sizeof(struct CompressorState),
+    [KID_OP_DELAY]                        = sizeof(struct DelayState),
 };
 
 uint32_t runtime_kernel_state_bytes(uint8_t kid) {
@@ -3491,6 +3804,7 @@ static const KEntry KTABLE[] = {
     {"op_chorus", KID_OP_CHORUS},
     {"op_flanger", KID_OP_FLANGER},
     {"op_compressor", KID_OP_COMPRESSOR},
+    {"op_delay", KID_OP_DELAY},
     {NULL, KID_UNKNOWN}
 };
 

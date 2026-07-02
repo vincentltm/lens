@@ -33,7 +33,7 @@ const KNOWN_INTERNAL = new Set([
   // MIDI output sinks (side-effecting roots, no terminal entry)
   'op_midi_note_out', 'op_midi_cc_out', 'op_midi_clock_out',
   // Unified single-slot lightweight audio effects suite
-  'op_reverb', 'op_chorus', 'op_flanger', 'op_compressor',
+  'op_reverb', 'op_chorus', 'op_flanger', 'op_compressor', 'op_delay',
 ]);
 
 // Collect names of primitive fns in prelude: (def NAME (fn (...) <meta-only body>)).

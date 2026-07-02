@@ -1,0 +1,18 @@
+; Acid Bassline: 303-style sequenced acid bassline with interactive controls.
+;   knob-main = Env Mod depth     knob-x = Resonance     knob-y = Decay length
+(patch
+  (def clock1 (clock :bpm 120 :fm 4095))
+  (def clock1mult2 (follow clock1 :mult 2))
+  (def env1 (envelope :trig clock1mult2 :gate 0 :decay (add 0 (knob :y) :sat) :peak 4095))
+  (def seq1count (counter :bars 8 :trig clock1mult2))
+  (def seq1out (thru (lens 48 51 48 60 48 51 60 69) seq1count))
+  (def vca101 (vca env1 (knob :main)))
+  (def saw1 (saw :note (add seq1out -3)))
+  (def lpf1 (lpf2 :in saw1 :cut (add 0 (vca vca101 2037.09375) :sat) :res (add 0 (knob :x) :sat)))
+  (def vca102 (vca lpf1 env1))
+
+  (<- (audio-out :1) vca102)
+  (<- (audio-out :2) vca102)
+)
+
+; flare_layout: {"rows":[[{"id":"wsIn","type":"ws-in","left":0,"params":{}},{"id":"clock1","type":"clock","left":120,"params":{"bpm":1638,"fm":4095,"width":2048}},{"id":"seq1","type":"step-seq","left":240,"params":{"val1":1548,"val2":1644,"val3":1548,"val4":1935,"val5":1548,"val6":1644,"val7":1935,"val8":2225,"steps":4095,"dir":0}},{"id":"saw1","type":"saw","left":420,"params":{"pitch":1822.5,"cents":2048,"depth":0}},{"id":"lpf1","type":"lpf2","left":600,"params":{"cut":0,"res":0,"cutamt":2037.09375}}],[{"id":"wsOut","type":"ws-out","left":0,"params":{}},{"id":"env1","type":"envelope","left":120,"params":{"decay":0,"peak":4095,"decayamt":4095,"peakamt":4095}},{"id":"vca101","type":"vca","left":345,"params":{"amp":4095}},{"id":"vca102","type":"vca","left":465,"params":{"amp":4095}}]],"cables":[{"fromId":"seq1","fromPort":"out","toId":"saw1","toPort":"note","color":"#00ff66"},{"fromId":"saw1","fromPort":"out","toId":"lpf1","toPort":"in","color":"#00ffff"},{"fromId":"clock1","fromPort":"mult2","toId":"env1","toPort":"trig","color":"#ffb900"},{"fromId":"clock1","fromPort":"mult2","toId":"seq1","toPort":"trig","color":"#ffb900"},{"fromId":"wsIn","fromPort":"knob-x","toId":"lpf1","toPort":"res","color":"#00d2ff"},{"fromId":"wsIn","fromPort":"knob-y","toId":"env1","toPort":"decay","color":"#00d2ff"},{"fromId":"vca101","fromPort":"out","toId":"lpf1","toPort":"cut","color":"#ff4d4d"},{"fromId":"env1","fromPort":"out","toId":"vca101","toPort":"in","color":"#ff4d4d"},{"fromId":"wsIn","fromPort":"knob-main","toId":"vca101","toPort":"amp","color":"#00d2ff"},{"fromId":"lpf1","fromPort":"out","toId":"vca102","toPort":"in","color":"#ff4d4d"},{"fromId":"vca102","fromPort":"out","toId":"wsOut","toPort":"audio-out-1","color":"#ff4d4d"},{"fromId":"vca102","fromPort":"out","toId":"wsOut","toPort":"audio-out-2","color":"#ff4d4d"},{"fromId":"env1","fromPort":"out","toId":"vca102","toPort":"amp","color":"#ff4d4d"}],"nextId":103}

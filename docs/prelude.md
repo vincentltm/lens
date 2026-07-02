@@ -221,8 +221,8 @@ builders. Every definition here can be shadowed by redefining it in your own pat
 (def gate    (fn (:in :thresh :len)))
 ; a clock is just a phasor (a phase ramp) named for timebase intent. Rate kwargs and
 ; :sync forward to the phasor; unset ones drop. A consumer edge-detects the ramp.
-(def clock   (fn (:tempo :hz :bpm :rate :width :sync)
-  (phasor :tempo tempo :hz hz :bpm bpm :rate rate :width width :sync sync)))
+(def clock   (fn (:tempo :hz :bpm :rate :width :sync :fm :depth)
+  (phasor :tempo tempo :hz hz :bpm bpm :rate rate :width width :sync sync :fm fm :depth depth)))
 
 ; the master clock every CLK_OP defaults to. Defined after clock/phasor.
 (def master (clock :bpm 120))
@@ -352,7 +352,8 @@ builders. Every definition here can be shadowed by redefining it in your own pat
 (def chorus     (fn (:in :rate :depth :feedback)))
 (def flanger    (fn (:in :rate :depth :feedback)))
 (def compressor (fn (:in :threshold :ratio :attack :release)))
-(def sel        (fn (:slot)))
+(def delay      (fn (:in-l :in-r :time :feedback :mode :ratio)))
+
 
 
 ; ===========================================================================

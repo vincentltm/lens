@@ -173,6 +173,14 @@ const OP_TABLE = {
 
   // op_counter: in0=bars, in1=clk
   counter:   { inputs: [{kw:'bars',default:1}, {kw:'trig',default:0}] },
+  step:      { inputs: [{kw:'tape',default:0}, {kw:'trig',default:0}, {kw:'len',default:0}] },
+  lookup:    { inputs: [{kw:'tape',default:0}, {kw:'index',default:0}, {kw:'len',default:0}] },
+  seek:      { inputs: [{kw:'tape',default:0}, {kw:'index',default:0}, {kw:'trig',default:0}, {kw:'len',default:0}] },
+  onsets:    { inputs: [{kw:'tape',default:0}, {kw:'trig',default:0}] },
+  gates:     { inputs: [{kw:'tape',default:0}, {kw:'trig',default:0}] },
+  hits:      { inputs: [{kw:'tape',default:0}, {kw:'trig',default:0}] },
+  degree:    { inputs: [{kw:'val',default:0}, {kw:'scale',default:0}] },
+  pitch:     { inputs: [{kw:'val',default:0}, {kw:'scale',default:0}] },
 
   // ---- voice kernels ----------------------------------------------------
   // op_envelope: in0=trig, in1=decay, param0=peak (0=VMAX in kernel)
@@ -220,10 +228,11 @@ const OP_TABLE = {
                  {kw:'tone',default:2600},
                ] },
 
-  reverb:    { inputs: [{kw:'in',default:0}, {kw:'decay',default:2048}, {kw:'mix',default:1024}] },
-  chorus:    { inputs: [{kw:'in',default:0}, {kw:'rate',default:100}, {kw:'depth',default:1024}, {kw:'feedback',default:1024}] },
-  flanger:   { inputs: [{kw:'in',default:0}, {kw:'rate',default:50}, {kw:'depth',default:512}, {kw:'feedback',default:2048}] },
-  compressor:{ inputs: [{kw:'in',default:0}, {kw:'threshold',default:3000}, {kw:'ratio',default:2048}, {kw:'attack',default:100}, {kw:'release',default:1000}] },
+  // reverb/chorus/flanger/compressor are NOT in OP_TABLE — they have custom
+  // lowering handlers in lowerer.js that allocate the required backing audio
+  // buffers. Listing them here would cause the generic table path to intercept
+  // them first, skip buffer allocation, and leave the kernels with a null buf
+  // (making them silently pass audio through unchanged).
 
 };
 

@@ -32,21 +32,21 @@ const HP = 15; // 1 Eurorack HP = 15px
 // Lens language expressions for hardware IO ports
 const LENS_PORTS = {
   // Output ports from WS IN (source points in visual patcher)
-  'knob-main':  '(knob :main)',
-  'knob-x':     '(knob :x)',
-  'knob-y':     '(knob :y)',
-  'switch-z':   '(switch :z)',
+  'knob-main': '(knob :main)',
+  'knob-x': '(knob :x)',
+  'knob-y': '(knob :y)',
+  'switch-z': '(switch :z)',
   'audio-in-1': '(audio-in :1)',
   'audio-in-2': '(audio-in :2)',
-  'cv-in-1':    '(cv-in :1)',
-  'cv-in-2':    '(cv-in :2)',
+  'cv-in-1': '(cv-in :1)',
+  'cv-in-2': '(cv-in :2)',
   'pulse-in-1': '(pulse-in :1)',
   'pulse-in-2': '(pulse-in :2)',
   // Input ports to WS OUT (sink points in visual patcher)
   'audio-out-1': '(audio-out :1)',
   'audio-out-2': '(audio-out :2)',
-  'cv-out-1':    '(cv-out :1)',
-  'cv-out-2':    '(cv-out :2)',
+  'cv-out-1': '(cv-out :1)',
+  'cv-out-2': '(cv-out :2)',
   'pulse-out-1': '(pulse-out :1)',
   'pulse-out-2': '(pulse-out :2)',
 };
@@ -63,16 +63,16 @@ const MODULE_DEFS = {
     knobs: [],
     inputs: [],
     outputs: [
-      { id: 'knob-main',  label: 'MAIN' },
-      { id: 'knob-x',     label: 'KNOB X' },
-      { id: 'knob-y',     label: 'KNOB Y' },
-      { id: 'switch-z',   label: 'SW Z' },
-      { id: 'spacer-1',   label: '' },
-      { id: 'spacer-2',   label: '' },
+      { id: 'knob-main', label: 'MAIN' },
+      { id: 'knob-x', label: 'KNOB X' },
+      { id: 'knob-y', label: 'KNOB Y' },
+      { id: 'switch-z', label: 'SW Z' },
+      { id: 'spacer-1', label: '' },
+      { id: 'spacer-2', label: '' },
       { id: 'audio-in-1', label: 'AUD 1' },
       { id: 'audio-in-2', label: 'AUD 2' },
-      { id: 'cv-in-1',    label: 'CV 1' },
-      { id: 'cv-in-2',    label: 'CV 2' },
+      { id: 'cv-in-1', label: 'CV 1' },
+      { id: 'cv-in-2', label: 'CV 2' },
       { id: 'pulse-in-1', label: 'PLS 1' },
       { id: 'pulse-in-2', label: 'PLS 2' },
     ],
@@ -84,8 +84,8 @@ const MODULE_DEFS = {
     inputs: [
       { id: 'audio-out-1', label: 'AUD 1' },
       { id: 'audio-out-2', label: 'AUD 2' },
-      { id: 'cv-out-1',    label: 'CV 1' },
-      { id: 'cv-out-2',    label: 'CV 2' },
+      { id: 'cv-out-1', label: 'CV 1' },
+      { id: 'cv-out-2', label: 'CV 2' },
       { id: 'pulse-out-1', label: 'PLS 1' },
       { id: 'pulse-out-2', label: 'PLS 2' },
     ],
@@ -98,13 +98,12 @@ const MODULE_DEFS = {
     knobs: [
       { param: 'pitch', label: 'PITCH', size: 'large', def: 1935 },
       { param: 'cents', label: 'FINE TUNE', size: 'small', def: 2048 },
-      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 },
-      { param: 'range', label: 'RANGE', size: 'small', def: 0, discrete: ['audio', 'lfo'] },
+      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 }
     ],
     inputs: [
-      { id: 'note',  label: 'V/OCT' },
-      { id: 'fm',    label: 'FM IN' },
-      { id: 'pm',    label: 'PM IN' }
+      { id: 'note', label: 'V/OCT' },
+      { id: 'fm', label: 'FM IN' },
+      { id: 'pm', label: 'PM IN' }
     ],
     outputs: [{ id: 'out', label: 'OUT' }],
   },
@@ -113,8 +112,7 @@ const MODULE_DEFS = {
     knobs: [
       { param: 'pitch', label: 'PITCH', size: 'large', def: 1935 },
       { param: 'cents', label: 'FINE TUNE', size: 'small', def: 2048 },
-      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 },
-      { param: 'range', label: 'RANGE', size: 'small', def: 0, discrete: ['audio', 'lfo'] },
+      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 }
     ],
     inputs: [
       { id: 'note', label: 'V/OCT' },
@@ -128,8 +126,7 @@ const MODULE_DEFS = {
     knobs: [
       { param: 'pitch', label: 'PITCH', size: 'large', def: 1935 },
       { param: 'cents', label: 'FINE TUNE', size: 'small', def: 2048 },
-      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 },
-      { param: 'range', label: 'RANGE', size: 'small', def: 0, discrete: ['audio', 'lfo'] },
+      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 }
     ],
     inputs: [
       { id: 'note', label: 'V/OCT' },
@@ -143,8 +140,7 @@ const MODULE_DEFS = {
     knobs: [
       { param: 'pitch', label: 'PITCH', size: 'large', def: 1935 },
       { param: 'cents', label: 'FINE TUNE', size: 'small', def: 2048 },
-      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 },
-      { param: 'range', label: 'RANGE', size: 'small', def: 0, discrete: ['audio', 'lfo'] },
+      { param: 'depth', label: 'FM DEPTH', size: 'small', def: 0 }
     ],
     inputs: [
       { id: 'note', label: 'V/OCT' },
@@ -173,7 +169,7 @@ const MODULE_DEFS = {
       { param: 'hz', label: 'RATE', size: 'medium', def: 10 }
     ],
     inputs: [
-      { id: 'hz',   label: 'CV RATE' },
+      { id: 'hz', label: 'CV RATE' },
       { id: 'sync', label: 'SYNC' }
     ],
     outputs: [{ id: 'phase', label: 'PHASE' }],
@@ -182,12 +178,12 @@ const MODULE_DEFS = {
     title: 'Delay LFO', hp: 4, category: 'oscillators', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'hz',   label: 'RATE',      size: 'medium', def: 10 },
-      { param: 'fade', label: 'FADE TIME', size: 'small',  def: 2048 }
+      { param: 'hz', label: 'RATE', size: 'medium', def: 10 },
+      { param: 'fade', label: 'FADE TIME', size: 'small', def: 2048 }
     ],
     inputs: [
       { id: 'trig', label: 'FADE GATE' },
-      { id: 'hz',   label: 'CV RATE' },
+      { id: 'hz', label: 'CV RATE' },
       { id: 'fade', label: 'CV FADE' }
     ],
     outputs: [{ id: 'out', label: 'OUT' }]
@@ -195,15 +191,15 @@ const MODULE_DEFS = {
   wt: {
     title: 'WT Osc', hp: 8, category: 'oscillators', knobLayout: 'grid',
     knobs: [
-      { param: 'pitch',  label: 'PITCH',       size: 'medium', def: 1935 },
-      { param: 'table',  label: 'TABLE',       size: 'medium', def: 256, discrete: [0, 1, 2, 3, 4, 5, 6, 7] },
-      { param: 'pos',    label: 'MORPH',       size: 'small',  def: 2048 },
-      { param: 'posamt', label: 'MORPH CV AMT', size: 'small',  def: 4095 },
+      { param: 'pitch', label: 'PITCH', size: 'medium', def: 1935 },
+      { param: 'table', label: 'TABLE', size: 'medium', def: 256, discrete: [0, 1, 2, 3, 4, 5, 6, 7] },
+      { param: 'pos', label: 'MORPH', size: 'small', def: 2048 },
+      { param: 'posamt', label: 'MORPH CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
       { id: 'pitch', label: 'V/OCT' },
-      { id: 'pos',   label: 'MORPH IN' },
-      { id: 'pm',    label: 'PM IN' }
+      { id: 'pos', label: 'MORPH IN' },
+      { id: 'pm', label: 'PM IN' }
     ],
     outputs: [{ id: 'out', label: 'OUT' }]
   },
@@ -216,9 +212,9 @@ const MODULE_DEFS = {
 
   // ── Filters ────────────────────────────────────────────────────────────
   lpf: {
-    title: 'LP Filter', hp: 4, category: 'filters', knobLayout: 'vertical',
+    title: 'LP Filter', hp: 6, category: 'filters', knobLayout: 'vertical',
     knobs: [
-      { param: 'cut',    label: 'CUTOFF',   size: 'medium', def: 2048 },
+      { param: 'cut', label: 'CUTOFF', size: 'large', def: 2048 },
       { param: 'cutamt', label: 'CUT CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
@@ -228,9 +224,9 @@ const MODULE_DEFS = {
     outputs: [{ id: 'out', label: 'OUT' }],
   },
   hpf: {
-    title: 'HP Filter', hp: 4, category: 'filters', knobLayout: 'vertical',
+    title: 'HP Filter', hp: 6, category: 'filters', knobLayout: 'vertical',
     knobs: [
-      { param: 'cut',    label: 'CUTOFF',    size: 'medium', def: 2048 },
+      { param: 'cut', label: 'CUTOFF', size: 'large', def: 2048 },
       { param: 'cutamt', label: 'CUT CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
@@ -242,10 +238,10 @@ const MODULE_DEFS = {
   vcf: {
     title: 'SV Filter', hp: 8, category: 'filters', knobLayout: 'grid',
     knobs: [
-      { param: 'cut',    label: 'CUTOFF',    size: 'medium', def: 2048 },
-      { param: 'res',    label: 'Q-RES',     size: 'medium', def: 1000 },
-      { param: 'cutamt', label: 'CUT CV AMT', size: 'small',  def: 4095 },
-      { param: 'resamt', label: 'RES CV AMT', size: 'small',  def: 4095 },
+      { param: 'cut', label: 'CUTOFF', size: 'medium', def: 2048 },
+      { param: 'res', label: 'Q-RES', size: 'medium', def: 1000 },
+      { param: 'cutamt', label: 'CUT CV AMT', size: 'small', def: 4095 },
+      { param: 'resamt', label: 'RES CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
       { id: 'in', label: 'IN' },
@@ -260,12 +256,11 @@ const MODULE_DEFS = {
     ],
   },
   lpf2: {
-    title: 'LP Filter 2', hp: 8, category: 'filters', knobLayout: 'grid',
+    title: 'LP Filter 2', hp: 6, category: 'filters', knobLayout: 'vertical',
     knobs: [
-      { param: 'cut',    label: 'CUTOFF',    size: 'medium', def: 2048 },
-      { param: 'res',    label: 'Q-RES',     size: 'medium', def: 1000 },
-      { param: 'cutamt', label: 'CUT CV AMT', size: 'small',  def: 4095 },
-      { param: 'resamt', label: 'RES CV AMT', size: 'small',  def: 4095 },
+      { param: 'cut', label: 'CUTOFF', size: 'large', def: 2048 },
+      { param: 'res', label: 'Q-RES', size: 'small', def: 1000 },
+      { param: 'cutamt', label: 'CUT CV AMT', size: 'small', def: 4095 }
     ],
     inputs: [
       { id: 'in', label: 'IN' },
@@ -275,12 +270,11 @@ const MODULE_DEFS = {
     outputs: [{ id: 'out', label: 'OUT' }],
   },
   hpf2: {
-    title: 'HP Filter 2', hp: 8, category: 'filters', knobLayout: 'grid',
+    title: 'HP Filter 2', hp: 6, category: 'filters', knobLayout: 'vertical',
     knobs: [
-      { param: 'cut',    label: 'CUTOFF',    size: 'medium', def: 2048 },
-      { param: 'res',    label: 'Q-RES',     size: 'medium', def: 1000 },
-      { param: 'cutamt', label: 'CUT CV AMT', size: 'small',  def: 4095 },
-      { param: 'resamt', label: 'RES CV AMT', size: 'small',  def: 4095 },
+      { param: 'cut', label: 'CUTOFF', size: 'large', def: 2048 },
+      { param: 'res', label: 'Q-RES', size: 'small', def: 1000 },
+      { param: 'cutamt', label: 'CUT CV AMT', size: 'small', def: 4095 }
     ],
     inputs: [
       { id: 'in', label: 'IN' },
@@ -290,12 +284,11 @@ const MODULE_DEFS = {
     outputs: [{ id: 'out', label: 'OUT' }],
   },
   bpf2: {
-    title: 'BP Filter 2', hp: 8, category: 'filters', knobLayout: 'grid',
+    title: 'BP Filter 2', hp: 6, category: 'filters', knobLayout: 'vertical',
     knobs: [
-      { param: 'cut',    label: 'CUTOFF',    size: 'medium', def: 2048 },
-      { param: 'res',    label: 'Q-RES',     size: 'medium', def: 1000 },
-      { param: 'cutamt', label: 'CUT CV AMT', size: 'small',  def: 4095 },
-      { param: 'resamt', label: 'RES CV AMT', size: 'small',  def: 4095 },
+      { param: 'cut', label: 'CUTOFF', size: 'large', def: 2048 },
+      { param: 'res', label: 'Q-RES', size: 'small', def: 1000 },
+      { param: 'cutamt', label: 'CUT CV AMT', size: 'small', def: 4095 }
     ],
     inputs: [
       { id: 'in', label: 'IN' },
@@ -307,7 +300,7 @@ const MODULE_DEFS = {
   lpg: {
     title: 'LP Gate', hp: 4, category: 'filters', knobLayout: 'vertical',
     knobs: [
-      { param: 'ctrl',    label: 'LEVEL',      size: 'medium', def: 2048 },
+      { param: 'ctrl', label: 'LEVEL', size: 'medium', def: 2048 },
       { param: 'ctrlamt', label: 'LEVEL CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
@@ -319,8 +312,8 @@ const MODULE_DEFS = {
   slew: {
     title: 'Slew Limiter', hp: 4, category: 'filters', knobLayout: 'vertical',
     knobs: [
-      { param: 'rate',    label: 'RISE/FALL',  size: 'medium', def: 1000 },
-      { param: 'rateamt', label: 'RATE CV AMT', size: 'small',  def: 4095 },
+      { param: 'rate', label: 'RISE/FALL', size: 'medium', def: 1000 },
+      { param: 'rateamt', label: 'RATE CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
       { id: 'in', label: 'IN' },
@@ -340,7 +333,7 @@ const MODULE_DEFS = {
     inputs: [{ id: 'in', label: 'IN' }],
     outputs: [{ id: 'out', label: 'OUT' }]
   },
- 
+
   // ── Shapers & Dynamics ─────────────────────────────────────────────────
   vca: {
     title: 'VCA Gain', hp: 4, category: 'envelopes', knobLayout: 'vertical',
@@ -376,31 +369,31 @@ const MODULE_DEFS = {
   envelope: {
     title: 'AR Env', hp: 6, category: 'envelopes', knobLayout: 'grid',
     knobs: [
-      { param: 'decay',    label: 'DECAY',       size: 'medium', def: 2048 },
-      { param: 'peak',     label: 'PEAK',        size: 'small', def: 4095 },
-      { param: 'decayamt', label: 'DEC CV AMT',  size: 'small', def: 4095 },
-      { param: 'peakamt',  label: 'PEAK CV AMT', size: 'small', def: 4095 },
+      { param: 'decay', label: 'DECAY', size: 'medium', def: 2048 },
+      { param: 'peak', label: 'PEAK', size: 'small', def: 4095 },
+      { param: 'decayamt', label: 'DEC CV AMT', size: 'small', def: 4095 },
+      { param: 'peakamt', label: 'PEAK CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
-      { id: 'trig',  label: 'TRIG' },
-      { id: 'gate',  label: 'GATE' },
+      { id: 'trig', label: 'TRIG' },
+      { id: 'gate', label: 'GATE' },
       { id: 'decay', label: 'CV DEC' },
-      { id: 'peak',  label: 'CV PEAK' },
+      { id: 'peak', label: 'CV PEAK' },
     ],
     outputs: [{ id: 'out', label: 'OUT' }],
   },
   adsr: {
     title: 'ADSR Env', hp: 8, category: 'envelopes', knobLayout: 'grid',
     knobs: [
-      { param: 'attack',  label: 'ATTACK',  size: 'small', def: 512  },
-      { param: 'decay',   label: 'DECAY',   size: 'small', def: 1024 },
+      { param: 'attack', label: 'ATTACK', size: 'small', def: 512 },
+      { param: 'decay', label: 'DECAY', size: 'small', def: 1024 },
       { param: 'sustain', label: 'SUSTAIN', size: 'small', def: 4095 },
       { param: 'release', label: 'RELEASE', size: 'small', def: 1024 },
     ],
     inputs: [
-      { id: 'gate',    label: 'GATE' },
-      { id: 'attack',  label: 'CV ATT' },
-      { id: 'decay',   label: 'CV DEC' },
+      { id: 'gate', label: 'GATE' },
+      { id: 'attack', label: 'CV ATT' },
+      { id: 'decay', label: 'CV DEC' },
       { id: 'sustain', label: 'CV SUS' },
       { id: 'release', label: 'CV REL' },
     ],
@@ -423,13 +416,13 @@ const MODULE_DEFS = {
   ring: {
     title: 'Ring Mod', hp: 2, category: 'shapers',
     knobs: [],
-    inputs: [{ id: 'a', label: 'CARRIER' }, { id: 'b', label: 'MODULATOR' }],
+    inputs: [{ id: 'in', label: 'CARRIER' }, { id: 'amp', label: 'MODULATOR' }],
     outputs: [{ id: 'out', label: 'OUT' }],
   },
   wavefold: {
     title: 'Wave Folder', hp: 4, category: 'shapers', knobLayout: 'vertical',
     knobs: [
-      { param: 'drive',    label: 'FOLD',      size: 'medium', def: 1000 },
+      { param: 'drive', label: 'FOLD', size: 'medium', def: 1000 },
       { param: 'driveamt', label: 'FOLD CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
@@ -438,40 +431,64 @@ const MODULE_DEFS = {
     ],
     outputs: [{ id: 'out', label: 'OUT' }],
   },
-  delay: {
-    title: 'Tape Delay', hp: 8, category: 'shapers', knobLayout: 'grid',
+  'tape-delay': {
+    title: 'Tape Loop', hp: 8, category: 'shapers', knobLayout: 'grid',
     isMacro: true,
     knobs: [
-      { param: 'time',        label: 'TIME',        size: 'medium', def: 2048 },
-      { param: 'feedback',    label: 'FEEDBACK',    size: 'medium', def: 1024 },
-      { param: 'mix',         label: 'MIX WET',     size: 'small',  def: 2048 },
-      { param: 'timeamt',     label: 'TIME CV AMT', size: 'small',  def: 4095 },
-      { param: 'feedbackamt', label: 'FEED CV AMT', size: 'small',  def: 4095 },
-      { param: 'mixamt',      label: 'MIX CV AMT',  size: 'small',  def: 4095 },
+      { param: 'time', label: 'TIME', size: 'medium', def: 2048 },
+      { param: 'feedback', label: 'FEEDBACK', size: 'medium', def: 1024 },
+      { param: 'mix', label: 'MIX WET', size: 'small', def: 2048 },
+      { param: 'timeamt', label: 'TIME CV AMT', size: 'small', def: 4095 },
+      { param: 'feedbackamt', label: 'FEED CV AMT', size: 'small', def: 4095 },
+      { param: 'mixamt', label: 'MIX CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
-      { id: 'in',       label: 'IN' },
-      { id: 'time',     label: 'CV TIME' },
+      { id: 'in', label: 'IN' },
+      { id: 'time', label: 'CV TIME' },
       { id: 'feedback', label: 'CV FEED' },
-      { id: 'mix',      label: 'CV MIX' },
+      { id: 'mix', label: 'CV MIX' },
     ],
     outputs: [
       { id: 'out', label: 'OUT' }
     ]
   },
-  reverb: {
-    title: 'Space Reverb', hp: 8, category: 'shapers', knobLayout: 'grid',
+  delay: {
+    title: 'Delay', hp: 10, category: 'shapers', knobLayout: 'grid',
     isMacro: true,
     knobs: [
-      { param: 'decay',    label: 'DECAY',      size: 'medium', def: 2048 },
-      { param: 'mix',      label: 'MIX',        size: 'medium', def: 1024 },
-      { param: 'decayamt', label: 'DEC CV AMT', size: 'small',  def: 4095 },
-      { param: 'mixamt',   label: 'MIX CV AMT', size: 'small',  def: 4095 },
+      { param: 'time', label: 'TIME', size: 'large', def: 2048 },
+      { param: 'feedback', label: 'FEEDBACK', size: 'medium', def: 1024 },
+      { param: 'mix', label: 'MIX', size: 'medium', def: 2048 },
+      { param: 'timeamt', label: 'TIME AMT', size: 'small', def: 4095 },
+      { param: 'feedamt', label: 'FEED AMT', size: 'small', def: 4095 },
+      { param: 'mode', label: 'MODE', size: 'small', def: 'stereo', discrete: ['mono', 'stereo', 'pingpong'] },
+      { param: 'ratio', label: 'RATIO', size: 'small', def: 2048 }
     ],
     inputs: [
-      { id: 'in',    label: 'IN' },
+      { id: 'inL', label: 'IN L' },
+      { id: 'inR', label: 'IN R' },
+      { id: 'time', label: 'CV TIME' },
+      { id: 'feedback', label: 'CV FEED' },
+      { id: 'mix', label: 'CV MIX' }
+    ],
+    outputs: [
+      { id: 'outL', label: 'OUT L' },
+      { id: 'outR', label: 'OUT R' }
+    ]
+  },
+  reverb: {
+    title: 'Reverb', hp: 8, category: 'shapers', knobLayout: 'grid',
+    isMacro: true,
+    knobs: [
+      { param: 'decay', label: 'DECAY', size: 'medium', def: 2048 },
+      { param: 'mix', label: 'MIX', size: 'medium', def: 1024 },
+      { param: 'decayamt', label: 'DEC CV AMT', size: 'small', def: 4095 },
+      { param: 'mixamt', label: 'MIX CV AMT', size: 'small', def: 4095 },
+    ],
+    inputs: [
+      { id: 'in', label: 'IN' },
       { id: 'decay', label: 'CV DEC' },
-      { id: 'mix',   label: 'CV MIX' },
+      { id: 'mix', label: 'CV MIX' },
     ],
     outputs: [
       { id: 'outL', label: 'OUT L' },
@@ -479,41 +496,43 @@ const MODULE_DEFS = {
     ]
   },
   chorus: {
-    title: 'Stereo Chorus', hp: 6, category: 'shapers', knobLayout: 'vertical',
+    title: 'Chorus', hp: 6, category: 'shapers', knobLayout: 'grid',
     isMacro: true,
     knobs: [
-      { param: 'rate',        label: 'RATE',        size: 'medium', def: 1000 },
-      { param: 'depth',       label: 'DEPTH',       size: 'medium', def: 2048 },
-      { param: 'feedback',    label: 'FEEDBACK',    size: 'medium', def: 2048 },
-      { param: 'rateamt',     label: 'RATE CV AMT', size: 'small',  def: 4095 },
-      { param: 'depthamt',    label: 'DEP CV AMT',  size: 'small',  def: 4095 },
+      { param: 'rate', label: 'RATE', size: 'medium', def: 1000 },
+      { param: 'depth', label: 'DEPTH', size: 'medium', def: 2048 },
+      { param: 'feedback', label: 'FEEDBACK', size: 'medium', def: 2048 },
+      { param: 'rateamt', label: 'RATE CV AMT', size: 'small', def: 4095 },
+      { param: 'depthamt', label: 'DEP CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
-      { id: 'in',    label: 'IN' },
-      { id: 'rate',  label: 'CV RATE' },
+      { id: 'in', label: 'IN' },
+      { id: 'rate', label: 'CV RATE' },
       { id: 'depth', label: 'CV DEPTH' },
     ],
     outputs: [
-      { id: 'out', label: 'OUT' }
+      { id: 'outL', label: 'OUT L' },
+      { id: 'outR', label: 'OUT R' }
     ]
   },
   flanger: {
-    title: 'Flanger', hp: 6, category: 'shapers', knobLayout: 'vertical',
+    title: 'Flanger', hp: 6, category: 'shapers', knobLayout: 'grid',
     isMacro: true,
     knobs: [
-      { param: 'rate',        label: 'RATE',        size: 'medium', def: 500 },
-      { param: 'depth',       label: 'DEPTH',       size: 'medium', def: 1024 },
-      { param: 'feedback',    label: 'FEEDBACK',    size: 'medium', def: 3000 },
-      { param: 'rateamt',     label: 'RATE CV AMT', size: 'small',  def: 4095 },
-      { param: 'depthamt',    label: 'DEP CV AMT',  size: 'small',  def: 4095 },
+      { param: 'rate', label: 'RATE', size: 'medium', def: 500 },
+      { param: 'depth', label: 'DEPTH', size: 'medium', def: 1024 },
+      { param: 'feedback', label: 'FEEDBACK', size: 'medium', def: 3000 },
+      { param: 'rateamt', label: 'RATE CV AMT', size: 'small', def: 4095 },
+      { param: 'depthamt', label: 'DEP CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
-      { id: 'in',    label: 'IN' },
-      { id: 'rate',  label: 'CV RATE' },
+      { id: 'in', label: 'IN' },
+      { id: 'rate', label: 'CV RATE' },
       { id: 'depth', label: 'CV DEPTH' },
     ],
     outputs: [
-      { id: 'out', label: 'OUT' }
+      { id: 'outL', label: 'OUT L' },
+      { id: 'outR', label: 'OUT R' }
     ]
   },
   compressor: {
@@ -521,9 +540,9 @@ const MODULE_DEFS = {
     isMacro: true,
     knobs: [
       { param: 'threshold', label: 'THRESHOLD', size: 'medium', def: 3000 },
-      { param: 'ratio',     label: 'RATIO',     size: 'medium', def: 2048 },
-      { param: 'attack',    label: 'ATTACK',    size: 'small',  def: 100 },
-      { param: 'release',   label: 'RELEASE',   size: 'small',  def: 1000 },
+      { param: 'ratio', label: 'RATIO', size: 'medium', def: 2048 },
+      { param: 'attack', label: 'ATTACK', size: 'small', def: 100 },
+      { param: 'release', label: 'RELEASE', size: 'small', def: 1000 },
     ],
     inputs: [
       { id: 'in', label: 'IN' }
@@ -542,7 +561,7 @@ const MODULE_DEFS = {
     ],
     outputs: [
       { id: 'and', label: 'AND' },
-      { id: 'or',  label: 'OR' },
+      { id: 'or', label: 'OR' },
       { id: 'xor', label: 'XOR' },
       { id: 'not', label: 'NOT A' }
     ]
@@ -568,8 +587,10 @@ const MODULE_DEFS = {
     title: 'Scale Quantizer', hp: 4, category: 'math', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'scale', label: 'SCALE', size: 'large', def: 0,
-        discrete: ['minor', 'major', 'minor-pent', 'major-pent', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'chromatic'] }
+      {
+        param: 'scale', label: 'SCALE', size: 'large', def: 0,
+        discrete: ['minor', 'major', 'minor-pent', 'major-pent', 'dorian', 'phrygian', 'lydian', 'mixolydian', 'chromatic']
+      }
     ],
     inputs: [
       { id: 'in', label: 'IN V/OCT' }
@@ -582,7 +603,7 @@ const MODULE_DEFS = {
     title: 'Attenuverter', hp: 4, category: 'math', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'gain',   label: 'GAIN',   size: 'large', def: 2048 },
+      { param: 'gain', label: 'GAIN', size: 'large', def: 2048 },
       { param: 'offset', label: 'OFFSET', size: 'medium', def: 2048 }
     ],
     inputs: [
@@ -612,10 +633,10 @@ const MODULE_DEFS = {
   saturate: {
     title: 'Saturator', hp: 8, category: 'shapers', knobLayout: 'grid',
     knobs: [
-      { param: 'drive',    label: 'DRIVE',      size: 'large', def: 2048 },
-      { param: 'bias',     label: 'BIAS',       size: 'small', def: 0 },
-      { param: 'mix',      label: 'WET',        size: 'small', def: 4095 },
-      { param: 'level',    label: 'LEVEL',      size: 'small', def: 4095 },
+      { param: 'drive', label: 'DRIVE', size: 'large', def: 2048 },
+      { param: 'bias', label: 'BIAS', size: 'small', def: 0 },
+      { param: 'mix', label: 'WET', size: 'small', def: 4095 },
+      { param: 'level', label: 'LEVEL', size: 'small', def: 4095 },
       { param: 'driveamt', label: 'DRV CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
@@ -640,7 +661,7 @@ const MODULE_DEFS = {
   crush: {
     title: 'Bit Crusher', hp: 6, category: 'shapers', knobLayout: 'vertical',
     knobs: [
-      { param: 'rate',    label: 'RATE',       size: 'large', def: 4095 },
+      { param: 'rate', label: 'RATE', size: 'large', def: 4095 },
       { param: 'rateamt', label: 'RATE CV AMT', size: 'small', def: 4095 },
     ],
     inputs: [
@@ -657,7 +678,7 @@ const MODULE_DEFS = {
   },
   mul: {
     title: 'Attenuator', hp: 2, category: 'math', knobLayout: 'vertical',
-    knobs: [{ param: 'gain', label: 'GAIN', size: 'medium', def: 4095 }],
+    knobs: [{ param: 'gain', label: 'GAIN', size: 'small', def: 4095 }],
     inputs: [{ id: 'a', label: 'IN' }],
     outputs: [{ id: 'out', label: 'OUT' }]
   },
@@ -665,11 +686,13 @@ const MODULE_DEFS = {
     title: 'Constant Val', hp: 2, category: 'math', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'val', label: 'VOLTAGE', size: 'large', def: 2048 }
+      { param: 'val', label: 'VOLTAGE', size: 'small', def: 2048 }
     ],
     inputs: [],
     outputs: [
-      { id: 'out', label: 'OUT' }
+      { id: 'out1', label: 'OUT 1' },
+      { id: 'out2', label: 'OUT 2' },
+      { id: 'out3', label: 'OUT 3' }
     ]
   },
   'signal-switch': {
@@ -685,28 +708,28 @@ const MODULE_DEFS = {
     outputs: [{ id: 'out', label: 'OUT' }]
   },
   'seq-switch': {
-    title: 'Seq Switch', hp: 6, category: 'math', knobLayout: 'vertical',
+    title: 'Seq Switch', hp: 2, category: 'math', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'steps', label: 'STEPS', size: 'medium', def: 4095, discrete: [2, 3, 4] }
+      { param: 'steps', label: 'STEPS', size: 'small', def: 4095, discrete: [2, 3, 4] }
     ],
     inputs: [
-      { id: 'trig', label: 'CLOCK' },
-      { id: 'in1', label: 'IN 1' },
-      { id: 'in2', label: 'IN 2' },
-      { id: 'in3', label: 'IN 3' },
-      { id: 'in4', label: 'IN 4' }
+      { id: 'trig', label: 'CLK' },
+      { id: 'in1', label: '1' },
+      { id: 'in2', label: '2' },
+      { id: 'in3', label: '3' },
+      { id: 'in4', label: '4' }
     ],
     outputs: [{ id: 'out', label: 'OUT' }]
   },
 
   // ── Voices ─────────────────────────────────────────────────────────────
   kick: {
-    title: 'Kick Synth', hp: 6, category: 'voices', knobLayout: 'grid',
+    title: 'Kick Synth', hp: 6, category: 'voices', knobLayout: 'vertical',
     knobs: [
-      { param: 'note',  label: 'PITCH', size: 'medium', def: 1161 },
+      { param: 'note', label: 'PITCH', size: 'medium', def: 1161 },
       { param: 'decay', label: 'DECAY', size: 'medium', def: 2048 },
-      { param: 'drive', label: 'DRIVE', size: 'small',  def: 0    },
+      { param: 'drive', label: 'DRIVE', size: 'small', def: 0 },
     ],
     inputs: [
       { id: 'trig', label: 'TRIG' },
@@ -716,16 +739,16 @@ const MODULE_DEFS = {
     outputs: [{ id: 'out', label: 'OUT' }],
   },
   snare: {
-    title: 'Snare Synth', hp: 6, category: 'voices', knobLayout: 'grid',
+    title: 'Snare Synth', hp: 6, category: 'voices', knobLayout: 'vertical',
     knobs: [
-      { param: 'note',   label: 'PITCH',  size: 'medium', def: 1451 },
-      { param: 'decay',  label: 'DECAY',  size: 'medium', def: 2048 },
-      { param: 'snappy', label: 'NOISE',  size: 'small',  def: 2048 },
+      { param: 'note', label: 'PITCH', size: 'medium', def: 1451 },
+      { param: 'decay', label: 'DECAY', size: 'medium', def: 2048 },
+      { param: 'snappy', label: 'NOISE', size: 'small', def: 2048 },
     ],
     inputs: [
-      { id: 'trig',   label: 'TRIG' },
-      { id: 'note',   label: 'PITCH CV' },
-      { id: 'decay',  label: 'CV DEC' },
+      { id: 'trig', label: 'TRIG' },
+      { id: 'note', label: 'PITCH CV' },
+      { id: 'decay', label: 'CV DEC' },
       { id: 'snappy', label: 'CV NOISE' },
     ],
     outputs: [{ id: 'out', label: 'OUT' }],
@@ -733,7 +756,7 @@ const MODULE_DEFS = {
   hat: {
     title: 'Hi-Hat', hp: 6, category: 'voices', knobLayout: 'vertical',
     knobs: [
-      { param: 'note',  label: 'TENSION', size: 'medium', def: 2580 },
+      { param: 'note', label: 'TENSION', size: 'medium', def: 2580 },
       { param: 'decay', label: 'DECAY', size: 'medium', def: 1024 },
     ],
     inputs: [
@@ -747,26 +770,26 @@ const MODULE_DEFS = {
     title: 'Plucked String', hp: 6, category: 'voices', knobLayout: 'vertical',
     knobs: [
       { param: 'pitch', label: 'PITCH', size: 'medium', def: 1935 },
-      { param: 'damp',  label: 'DECAY', size: 'medium', def: 2048 },
+      { param: 'damp', label: 'DECAY', size: 'medium', def: 2048 },
     ],
     inputs: [
-      { id: 'trig',  label: 'STRIKE' },
+      { id: 'trig', label: 'STRIKE' },
       { id: 'pitch', label: 'V/OCT' },
-      { id: 'damp',  label: 'CV DAMP' },
+      { id: 'damp', label: 'CV DAMP' },
     ],
     outputs: [{ id: 'out', label: 'OUT' }],
   },
   dx: {
     title: 'DX FM Voice', hp: 6, category: 'voices', knobLayout: 'grid',
     knobs: [
-      { param: 'bank',   label: 'BANK',   size: 'small', def: 0, discrete: [0, 1, 2] },
-      { param: 'preset', label: 'PRESET', size: 'medium', def: 0, discrete: Array.from({length: 32}, (_, i) => i) },
-      { param: 'decay',  label: 'DECAY',  size: 'medium', def: 2048 },
-      { param: 'tone',   label: 'TONE',   size: 'small', def: 2048 }
+      { param: 'bank', label: 'BANK', size: 'small', def: 0, discrete: [0, 1, 2] },
+      { param: 'preset', label: 'PRESET', size: 'medium', def: 0, discrete: Array.from({ length: 32 }, (_, i) => i) },
+      { param: 'decay', label: 'DECAY', size: 'medium', def: 2048 },
+      { param: 'tone', label: 'TONE', size: 'small', def: 2048 }
     ],
     inputs: [
       { id: 'pitch', label: 'V/OCT' },
-      { id: 'gate',  label: 'GATE' },
+      { id: 'gate', label: 'GATE' },
       { id: 'decay', label: 'CV DEC' }
     ],
     outputs: [{ id: 'out', label: 'OUT' }]
@@ -776,11 +799,11 @@ const MODULE_DEFS = {
     isMacro: true,
     knobs: [
       { param: 'speed', label: 'PLAY SPEED', size: 'large', def: 2048 },
-      { param: 'len',   label: 'MAX SECS',   size: 'medium', def: 2048, discrete: [1, 2, 3, 4] }
+      { param: 'len', label: 'MAX SECS', size: 'medium', def: 2048, discrete: [1, 2, 3, 4] }
     ],
     inputs: [
-      { id: 'in',    label: 'AUDIO IN' },
-      { id: 'rec',   label: 'REC GATE' },
+      { id: 'in', label: 'AUDIO IN' },
+      { id: 'rec', label: 'REC GATE' },
       { id: 'speed', label: 'CV SPEED' }
     ],
     outputs: [{ id: 'out', label: 'OUT' }]
@@ -789,19 +812,19 @@ const MODULE_DEFS = {
     title: 'Benjolin Chaos', hp: 12, category: 'voices', knobLayout: 'grid',
     isMacro: true,
     knobs: [
-      { param: 'freq1',   label: 'VCO 1 FREQ', size: 'large',  def: 1935 },
-      { param: 'freq2',   label: 'VCO 2 FREQ', size: 'large',  def: 1935 },
-      { param: 'rungler', label: 'RUNG DEPT',  size: 'medium', def: 1024 },
-      { param: 'lock',    label: 'LOOP LOCK',  size: 'small',  def: 0, discrete: ['run', 'lock'] }
+      { param: 'freq1', label: 'VCO 1 FREQ', size: 'large', def: 1935 },
+      { param: 'freq2', label: 'VCO 2 FREQ', size: 'large', def: 1935 },
+      { param: 'rungler', label: 'RUNG DEPT', size: 'medium', def: 1024 },
+      { param: 'lock', label: 'LOOP LOCK', size: 'small', def: 0, discrete: ['run', 'lock'] }
     ],
     inputs: [
       { id: 'pitch1', label: 'VCO1 PITCH' },
       { id: 'pitch2', label: 'VCO2 PITCH' }
     ],
     outputs: [
-      { id: 'out1',     label: 'VCO 1 OUT' },
-      { id: 'out2',     label: 'VCO 2 OUT' },
-      { id: 'rungle',   label: 'STEP RUNG' },
+      { id: 'out1', label: 'VCO 1 OUT' },
+      { id: 'out2', label: 'VCO 2 OUT' },
+      { id: 'rungle', label: 'STEP RUNG' },
       { id: 'runglesm', label: 'SMOOTH RG' }
     ]
   },
@@ -810,15 +833,19 @@ const MODULE_DEFS = {
   clock: {
     title: 'Clock Gen', hp: 4, category: 'clocks', knobLayout: 'vertical',
     knobs: [
-      { param: 'bpm',   label: 'BPM',   size: 'medium', def: 1638 },
-      { param: 'fm',    label: 'FM DEPTH', size: 'small', def: 0 },
+      { param: 'bpm', label: 'BPM', size: 'medium', def: 1638 },
+      { param: 'fm', label: 'TEMPO CV AMT', size: 'small', def: 0 },
       { param: 'width', label: 'WIDTH', size: 'small', def: 2048 }
     ],
     inputs: [
       { id: 'sync', label: 'SYNC' },
-      { id: 'fm',   label: 'FM CV' }
+      { id: 'fm', label: 'TEMPO CV' }
     ],
-    outputs: [{ id: 'out', label: 'OUT' }],
+    outputs: [
+      { id: 'out', label: '1/4 OUT' },
+      { id: 'mult2', label: '1/8 OUT' },
+      { id: 'mult4', label: '1/16 OUT' }
+    ],
   },
   'multi-div': {
     title: 'Multi Div', hp: 4, category: 'clocks',
@@ -826,9 +853,9 @@ const MODULE_DEFS = {
     knobs: [],
     inputs: [{ id: 'trig', label: 'CLOCK' }],
     outputs: [
-      { id: 'div2',  label: '/2' },
-      { id: 'div4',  label: '/4' },
-      { id: 'div8',  label: '/8' },
+      { id: 'div2', label: '/2' },
+      { id: 'div4', label: '/4' },
+      { id: 'div8', label: '/8' },
       { id: 'div16', label: '/16' }
     ]
   },
@@ -836,10 +863,14 @@ const MODULE_DEFS = {
     title: 'Rhythm Player', hp: 6, category: 'clocks', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'pattern', label: 'PATTERN', size: 'large', def: 0,
-        discrete: ['four-on-floor', 'backbeat', 'eighths', 'offbeat', 'sixteenths', 'downbeat', 'tresillo', 'cinquillo', 'habanera', 'son-clave', 'rumba-clave', 'bossa'] },
-      { param: 'mode', label: 'MODE', size: 'medium', def: 0,
-        discrete: ['onsets', 'gates', 'hits'] }
+      {
+        param: 'pattern', label: 'PATTERN', size: 'large', def: 0,
+        discrete: ['four-on-floor', 'backbeat', 'eighths', 'offbeat', 'sixteenths', 'downbeat', 'tresillo', 'cinquillo', 'habanera', 'son-clave', 'rumba-clave', 'bossa']
+      },
+      {
+        param: 'mode', label: 'MODE', size: 'medium', def: 0,
+        discrete: ['onsets', 'gates', 'hits']
+      }
     ],
     inputs: [
       { id: 'trig', label: 'CLOCK' }
@@ -853,14 +884,14 @@ const MODULE_DEFS = {
     isMacro: true,
     knobs: [
       { param: 'prob', label: 'MUTATION', size: 'large', def: 4095 },
-      { param: 'len',  label: 'LENGTH',   size: 'medium', def: 4095, discrete: [1, 2, 3, 4, 5, 6, 7, 8, 12, 16] }
+      { param: 'len', label: 'LENGTH', size: 'medium', def: 4095, discrete: [1, 2, 3, 4, 5, 6, 7, 8, 12, 16] }
     ],
     inputs: [
       { id: 'trig', label: 'CLOCK' },
       { id: 'prob', label: 'CV MUT' },
     ],
     outputs: [
-      { id: 'out',  label: 'V/OCT' },
+      { id: 'out', label: 'V/OCT' },
       { id: 'trig', label: 'TRIG' }
     ]
   },
@@ -883,16 +914,16 @@ const MODULE_DEFS = {
     title: 'Step Sequencer', hp: 12, category: 'clocks', knobLayout: 'grid',
     isMacro: true,
     knobs: [
-      { param: 'val1',  label: 'STEP 1', size: 'small', def: 0 },
-      { param: 'val2',  label: 'STEP 2', size: 'small', def: 512 },
-      { param: 'val3',  label: 'STEP 3', size: 'small', def: 1024 },
-      { param: 'val4',  label: 'STEP 4', size: 'small', def: 1536 },
-      { param: 'val5',  label: 'STEP 5', size: 'small', def: 2048 },
-      { param: 'val6',  label: 'STEP 6', size: 'small', def: 2560 },
-      { param: 'val7',  label: 'STEP 7', size: 'small', def: 3072 },
-      { param: 'val8',  label: 'STEP 8', size: 'small', def: 3584 },
-      { param: 'steps', label: 'STEPS',  size: 'small', def: 4095, discrete: [1, 2, 3, 4, 5, 6, 7, 8] },
-      { param: 'dir',   label: 'DIR',    size: 'small', def: 0, discrete: ['forward', 'backward', 'random'] }
+      { param: 'val1', label: 'STEP 1', size: 'small', def: 0 },
+      { param: 'val2', label: 'STEP 2', size: 'small', def: 512 },
+      { param: 'val3', label: 'STEP 3', size: 'small', def: 1024 },
+      { param: 'val4', label: 'STEP 4', size: 'small', def: 1536 },
+      { param: 'val5', label: 'STEP 5', size: 'small', def: 2048 },
+      { param: 'val6', label: 'STEP 6', size: 'small', def: 2560 },
+      { param: 'val7', label: 'STEP 7', size: 'small', def: 3072 },
+      { param: 'val8', label: 'STEP 8', size: 'small', def: 3584 },
+      { param: 'steps', label: 'STEPS', size: 'small', def: 4095, discrete: [1, 2, 3, 4, 5, 6, 7, 8] },
+      { param: 'dir', label: 'DIR', size: 'small', def: 0, discrete: ['forward', 'backward', 'random'] }
     ],
     inputs: [
       { id: 'trig', label: 'CLOCK' }
@@ -904,15 +935,17 @@ const MODULE_DEFS = {
   'drum-seq': {
     title: 'Drum Sequencer', hp: 14, category: 'clocks', knobLayout: 'vertical',
     isMacro: true,
-    knobs: [],
+    knobs: [
+      { param: 'steps', label: 'STEPS', size: 'small', def: 4095, discrete: [1, 2, 3, 4, 5, 6, 7, 8] }
+    ],
     inputs: [
       { id: 'trig', label: 'CLOCK' }
     ],
     outputs: [
-      { id: 'kick',  label: 'KICK' },
+      { id: 'kick', label: 'KICK' },
       { id: 'snare', label: 'SNARE' },
-      { id: 'hat',   label: 'HAT' },
-      { id: 'perc',  label: 'PERC' }
+      { id: 'hat', label: 'HAT' },
+      { id: 'perc', label: 'PERC' }
     ]
   },
   'midi-sync': {
@@ -922,7 +955,7 @@ const MODULE_DEFS = {
     inputs: [],
     outputs: [
       { id: 'clock', label: 'CLOCK' },
-      { id: 'run',   label: 'RUN' }
+      { id: 'run', label: 'RUN' }
     ]
   },
   trig: {
@@ -943,8 +976,8 @@ const MODULE_DEFS = {
   euclid: {
     title: 'Euclid Gen', hp: 4, category: 'gates', knobLayout: 'vertical',
     knobs: [
-      { param: 'steps',  label: 'STEPS',  size: 'medium', def: 1984, discrete: Array.from({length: 32}, (_, i) => i + 1) },
-      { param: 'pulses', label: 'PULSES', size: 'medium', def: 448, discrete: Array.from({length: 32}, (_, i) => i + 1) },
+      { param: 'steps', label: 'STEPS', size: 'medium', def: 1984, discrete: Array.from({ length: 32 }, (_, i) => i + 1) },
+      { param: 'pulses', label: 'PULSES', size: 'medium', def: 448, discrete: Array.from({ length: 32 }, (_, i) => i + 1) },
     ],
     inputs: [{ id: 'trig', label: 'CLOCK' }],
     outputs: [{ id: 'out', label: 'OUT' }],
@@ -966,7 +999,7 @@ const MODULE_DEFS = {
     isMacro: true,
     knobs: [],
     inputs: [
-      { id: 'in',   label: 'CV IN' },
+      { id: 'in', label: 'CV IN' },
       { id: 'trig', label: 'CLOCK' }
     ],
     outputs: [
@@ -980,12 +1013,12 @@ const MODULE_DEFS = {
     title: 'Gate Gen', hp: 6, category: 'gates', knobLayout: 'vertical',
     knobs: [
       { param: 'thresh', label: 'THRESHOLD', size: 'medium', def: 2048 },
-      { param: 'len',    label: 'LENGTH',    size: 'medium', def: 100 }
+      { param: 'len', label: 'LENGTH', size: 'medium', def: 100 }
     ],
     inputs: [
-      { id: 'in',     label: 'IN' },
+      { id: 'in', label: 'IN' },
       { id: 'thresh', label: 'CV THR' },
-      { id: 'len',    label: 'CV LEN' },
+      { id: 'len', label: 'CV LEN' },
     ],
     outputs: [{ id: 'out', label: 'OUT' }],
   },
@@ -993,7 +1026,7 @@ const MODULE_DEFS = {
     title: 'Comparator', hp: 2, category: 'gates', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'lo', label: 'LOW THR',  size: 'medium', def: 1024 },
+      { param: 'lo', label: 'LOW THR', size: 'medium', def: 1024 },
       { param: 'hi', label: 'HIGH THR', size: 'medium', def: 3072 }
     ],
     inputs: [
@@ -1020,7 +1053,7 @@ const MODULE_DEFS = {
     knobs: [{ param: 'p', label: 'PROBABILITY', size: 'medium', def: 2048 }],
     inputs: [
       { id: 'trig', label: 'IN' },
-      { id: 'p',    label: 'CV PROB' },
+      { id: 'p', label: 'CV PROB' },
     ],
     outputs: [{ id: 'out', label: 'OUT' }]
   },
@@ -1039,7 +1072,7 @@ const MODULE_DEFS = {
     title: 'MIDI Keyboard', hp: 6, category: 'midi', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'ch', label: 'MIDI CH', size: 'medium', def: 0, discrete: Array.from({length: 16}, (_, i) => i + 1) }
+      { param: 'ch', label: 'MIDI CH', size: 'medium', def: 0, discrete: Array.from({ length: 16 }, (_, i) => i + 1) }
     ],
     inputs: [],
     outputs: [
@@ -1054,8 +1087,8 @@ const MODULE_DEFS = {
     title: 'MIDI CC In', hp: 4, category: 'midi', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'ch', label: 'MIDI CH', size: 'small', def: 0, discrete: Array.from({length: 17}, (_, i) => i) },
-      { param: 'cc', label: 'CC NUM', size: 'medium', def: 1, discrete: Array.from({length: 128}, (_, i) => i) }
+      { param: 'ch', label: 'MIDI CH', size: 'small', def: 0, discrete: Array.from({ length: 17 }, (_, i) => i) },
+      { param: 'cc', label: 'CC NUM', size: 'medium', def: 1, discrete: Array.from({ length: 128 }, (_, i) => i) }
     ],
     inputs: [],
     outputs: [{ id: 'out', label: 'OUT' }]
@@ -1064,8 +1097,8 @@ const MODULE_DEFS = {
     title: 'MIDI Note Trig', hp: 4, category: 'midi', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'ch', label: 'MIDI CH', size: 'small', def: 0, discrete: Array.from({length: 17}, (_, i) => i) },
-      { param: 'note', label: 'NOTE NUM', size: 'medium', def: 60, discrete: Array.from({length: 128}, (_, i) => i) }
+      { param: 'ch', label: 'MIDI CH', size: 'small', def: 0, discrete: Array.from({ length: 17 }, (_, i) => i) },
+      { param: 'note', label: 'NOTE NUM', size: 'medium', def: 60, discrete: Array.from({ length: 128 }, (_, i) => i) }
     ],
     inputs: [],
     outputs: [{ id: 'out', label: 'OUT' }]
@@ -1084,7 +1117,7 @@ const MODULE_DEFS = {
     title: 'MIDI Keyb Out', hp: 6, category: 'midi', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'ch', label: 'MIDI CH', size: 'medium', def: 1, discrete: Array.from({length: 16}, (_, i) => i + 1) }
+      { param: 'ch', label: 'MIDI CH', size: 'medium', def: 1, discrete: Array.from({ length: 16 }, (_, i) => i + 1) }
     ],
     inputs: [
       { id: 'pitch', label: 'V/OCT' },
@@ -1097,8 +1130,8 @@ const MODULE_DEFS = {
     title: 'MIDI CC Out', hp: 4, category: 'midi', knobLayout: 'vertical',
     isMacro: true,
     knobs: [
-      { param: 'ch', label: 'MIDI CH', size: 'small', def: 1, discrete: Array.from({length: 16}, (_, i) => i + 1) },
-      { param: 'cc', label: 'CC NUM', size: 'medium', def: 1, discrete: Array.from({length: 128}, (_, i) => i) }
+      { param: 'ch', label: 'MIDI CH', size: 'small', def: 1, discrete: Array.from({ length: 16 }, (_, i) => i + 1) },
+      { param: 'cc', label: 'CC NUM', size: 'medium', def: 1, discrete: Array.from({ length: 128 }, (_, i) => i) }
     ],
     inputs: [
       { id: 'val', label: 'SIGNAL' }
@@ -1116,7 +1149,7 @@ const MODULE_DEFS = {
   },
 };
 
-const CATEGORY_ORDER  = [
+const CATEGORY_ORDER = [
   'io',
   'oscillators',
   'voices',
@@ -1164,10 +1197,10 @@ function getConstantsMetadata(bytes) {
     _b: bytes,
     _p: 0,
     u8() { return this._b[this._p++]; },
-    u16() { const v = this._b[this._p] | (this._b[this._p+1]<<8); this._p+=2; return v; },
-    u32() { const v = (this._b[this._p]|(this._b[this._p+1]<<8)|(this._b[this._p+2]<<16)|((this._b[this._p+3]<<24)>>>0)); this._p+=4; return v>>>0; },
+    u16() { const v = this._b[this._p] | (this._b[this._p + 1] << 8); this._p += 2; return v; },
+    u32() { const v = (this._b[this._p] | (this._b[this._p + 1] << 8) | (this._b[this._p + 2] << 16) | ((this._b[this._p + 3] << 24) >>> 0)); this._p += 4; return v >>> 0; },
     i32() { return this.u32() | 0; },
-    str(n) { const s = String.fromCharCode(...this._b.slice(this._p, this._p+n)); this._p+=n; return s; },
+    str(n) { const s = String.fromCharCode(...this._b.slice(this._p, this._p + n)); this._p += n; return s; },
     pos() { return this._p; }
   };
 
@@ -1239,13 +1272,38 @@ function getConstantValueForKnob(m, paramName, rawVal) {
   if (m.type === 'sine' || m.type === 'triangle' || m.type === 'saw' || m.type === 'square' || m.type === 'sub-osc') {
     if (paramName === 'pitch' || paramName === 'cents') {
       const pitchKnob = getKnobValue(m.type, 'pitch', m.params.pitch ?? 1935);
-      const centsVal  = (getKnobValue(m.type, 'cents', m.params.cents ?? 2048) - 2048) / 204.8;
+      const centsVal = (getKnobValue(m.type, 'cents', m.params.cents ?? 2048) - 2048) / 204.8;
       const noteCable = state.cables.find(c => c.toId === m.id && c.toPort === 'note');
       if (noteCable) {
         result = Math.round(pitchKnob - 60 + centsVal);
       } else {
         result = Math.round(pitchKnob + centsVal);
       }
+    }
+  }
+
+  if (m.type === 'delay') {
+    if (paramName === 'mode' || paramName === 'ratio') {
+      const modeDef = MODULE_DEFS.delay.knobs.find(k => k.param === 'mode');
+      const modeVal = paramName === 'mode' ? rawVal : (m.params.mode ?? 'stereo');
+      let mode = 1;
+      if (typeof modeVal === 'string') {
+        if (modeVal === 'mono') mode = 0;
+        else if (modeVal === 'stereo') mode = 1;
+        else if (modeVal === 'pingpong') mode = 2;
+      } else {
+        const modeIdx = Math.max(0, Math.min(modeDef.discrete.length - 1, Math.floor((modeVal / 4096) * modeDef.discrete.length)));
+        const modeStr = modeDef.discrete[modeIdx];
+        if (modeStr === 'mono') mode = 0;
+        else if (modeStr === 'stereo') mode = 1;
+        else if (modeStr === 'pingpong') mode = 2;
+      }
+
+      const ratioRaw = paramName === 'ratio' ? rawVal : (m.params.ratio ?? 2048);
+      const ratio = ratioRaw / 2048;
+      const ratioScaled = Math.round(ratio * 2048);
+
+      result = mode | (ratioScaled << 8);
     }
   }
 
@@ -1277,8 +1335,30 @@ function rebuildKnobConstantMap() {
     for (const k of (def.knobs || [])) {
       const paramName = k.param;
       const originalVal = m.params[paramName] ?? k.def;
-      
-      const tempVal = originalVal >= 2048 ? originalVal - 1000 : originalVal + 1000;
+
+      let tempVal;
+      if (k.discrete) {
+        let currentIdx = -1;
+        if (typeof originalVal === 'string') {
+          currentIdx = k.discrete.indexOf(originalVal);
+        } else {
+          currentIdx = Math.max(0, Math.min(k.discrete.length - 1, Math.floor((originalVal / 4096) * k.discrete.length)));
+        }
+        if (currentIdx === -1) currentIdx = 0;
+        const nextIdx = (currentIdx + 1) % k.discrete.length;
+        const nextDiscreteVal = k.discrete[nextIdx];
+        if (typeof nextDiscreteVal === 'string') {
+          tempVal = nextDiscreteVal;
+        } else {
+          if (k.discrete.length === 2) {
+            tempVal = nextIdx === 0 ? 0 : 4095;
+          } else {
+            tempVal = Math.round((nextIdx / (k.discrete.length - 1)) * 4095);
+          }
+        }
+      } else {
+        tempVal = originalVal >= 2048 ? originalVal - 1000 : originalVal + 1000;
+      }
       m.params[paramName] = tempVal;
 
       try {
@@ -1351,8 +1431,8 @@ function triggerLiveUpdate() {
           if (allBytesMatch) {
             didUpdateConst = true;
             const statusEl = $('status');
-            statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B · live updated!`;
-            statusEl.className = 'ok';
+            statusEl.textContent = getStatusPrefix() + ' · live updated!';
+            statusEl.className = isCpuOverBudget ? 'err' : 'ok';
           } else if (diffs.length === 1) {
             const targetOffset = diffs[0].newEntry.byte_offset;
             const targetSize = diffs[0].newEntry.size;
@@ -1368,9 +1448,9 @@ function triggerLiveUpdate() {
               const constIdx = diffs[0].newEntry.const_idx;
               const newValue = diffs[0].newEntry.value;
               const newCrc32 = compiledSnapshot[compiledSnapshot.length - 4] |
-                               (compiledSnapshot[compiledSnapshot.length - 3] << 8) |
-                               (compiledSnapshot[compiledSnapshot.length - 2] << 16) |
-                               ((compiledSnapshot[compiledSnapshot.length - 1] << 24) >>> 0);
+                (compiledSnapshot[compiledSnapshot.length - 3] << 8) |
+                (compiledSnapshot[compiledSnapshot.length - 2] << 16) |
+                ((compiledSnapshot[compiledSnapshot.length - 1] << 24) >>> 0);
 
               const payload = new Uint8Array(11);
               payload[0] = constIdx;
@@ -1391,8 +1471,8 @@ function triggerLiveUpdate() {
                 lastUploadedSnapshot = new Uint8Array(compiledSnapshot);
                 didUpdateConst = true;
                 const statusEl = $('status');
-                statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B · live updated!`;
-                statusEl.className = 'ok';
+                statusEl.textContent = getStatusPrefix() + ' · live updated!';
+                statusEl.className = isCpuOverBudget ? 'err' : 'ok';
               }
             }
           }
@@ -1407,8 +1487,8 @@ function triggerLiveUpdate() {
         await writeSnapshot();
         lastUploadedSnapshot = new Uint8Array(compiledSnapshot);
         const statusEl = $('status');
-        statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B · playing live!`;
-        statusEl.className = 'ok';
+        statusEl.textContent = getStatusPrefix() + ' · playing live!';
+        statusEl.className = isCpuOverBudget ? 'err' : 'ok';
       } catch (e) {
         console.warn('Live update failed:', e.message);
       }
@@ -1421,6 +1501,13 @@ function triggerLiveUpdate() {
 }
 let midiOut = null, midiIn = null, ackWaiter = null;
 let compiledSnapshot = null;
+let currentCpuString = "";
+let isCpuOverBudget = false;
+
+function getStatusPrefix() {
+  if (!compiledSnapshot) return "";
+  return `${nodesCount} nodes · ${compiledSnapshot.length} B`;
+}
 let currentContextMenu = null;
 let hoveredJack = null;
 let knobConstantMap = {};
@@ -1430,7 +1517,7 @@ let lastGeneratedCode = '';
 // 3. CORE UTILS
 // ═══════════════════════════════════════════════════════════════════════
 
-const $  = id => document.getElementById(id);
+const $ = id => document.getElementById(id);
 const el = (tag, cls, attrs) => {
   const e = document.createElement(tag);
   if (cls) e.className = cls;
@@ -1614,7 +1701,7 @@ function buildModuleEl(type, instanceId, params, leftPx) {
   }
 
   mod.appendChild(title);
-  setupModuleDrag(title, mod, instanceId);
+  setupModuleDrag(mod, mod, instanceId);
 
   // Score Player pattern input directly on faceplate
   if (type === 'score-player') {
@@ -1641,10 +1728,10 @@ function buildModuleEl(type, instanceId, params, leftPx) {
   if (type === 'drum-seq') {
     const gridWrap = el('div', 'drum-seq-grid-wrap');
     const channels = [
-      { key: 'kickPat',  label: 'K', def: [1,0,0,0,1,0,0,0] },
-      { key: 'snarePat', label: 'S', def: [0,0,1,0,0,0,1,0] },
-      { key: 'hatPat',   label: 'H', def: [1,0,1,0,1,0,1,0] },
-      { key: 'percPat',  label: 'P', def: [0,1,0,1,0,1,0,1] }
+      { key: 'kickPat', label: 'K', def: [1, 0, 0, 0, 1, 0, 0, 0] },
+      { key: 'snarePat', label: 'S', def: [0, 0, 1, 0, 0, 0, 1, 0] },
+      { key: 'hatPat', label: 'H', def: [1, 0, 1, 0, 1, 0, 1, 0] },
+      { key: 'percPat', label: 'P', def: [0, 1, 0, 1, 0, 1, 0, 1] }
     ];
     for (const chan of channels) {
       const row = el('div', 'drum-seq-row');
@@ -1654,8 +1741,10 @@ function buildModuleEl(type, instanceId, params, leftPx) {
       const pat = params[chan.key] || [...chan.def];
       params[chan.key] = pat;
 
+      const stepsVal = getKnobValue(type, 'steps', params.steps ?? 4095);
       for (let stepIdx = 0; stepIdx < 8; stepIdx++) {
-        const btn = el('button', 'drum-seq-step-btn' + (pat[stepIdx] ? ' active' : ''));
+        const isDimmed = stepIdx >= stepsVal;
+        const btn = el('button', 'drum-seq-step-btn' + (pat[stepIdx] ? ' active' : '') + (isDimmed ? ' dimmed' : ''));
         btn.dataset.step = stepIdx;
         btn.dataset.channel = chan.key;
         btn.addEventListener('pointerdown', e => e.stopPropagation());
@@ -1682,17 +1771,17 @@ function buildModuleEl(type, instanceId, params, leftPx) {
   // Knobs: Layout class chosen dynamically (vertical vs grid vs hybrid)
   if (hasKnobs) {
     const layoutType = def.knobLayout || 'vertical';
-    if (def.knobs.length === 3 && layoutType === 'vertical') {
+    if (layoutType === 'hybrid') {
       const knobArea = el('div', 'module-knobs knob-layout-hybrid');
       const k1 = def.knobs[0];
       const v1 = params[k1.param] !== undefined ? params[k1.param] : k1.def;
-      knobArea.appendChild(buildKnobEl(type, instanceId, k1, v1));
+      knobArea.appendChild(buildControlEl(type, instanceId, k1, v1));
 
       const row = el('div', 'knob-layout-hybrid-row');
       for (let i = 1; i < 3; i++) {
         const k = def.knobs[i];
         const v = params[k.param] !== undefined ? params[k.param] : k.def;
-        row.appendChild(buildKnobEl(type, instanceId, k, v));
+        row.appendChild(buildControlEl(type, instanceId, k, v));
       }
       knobArea.appendChild(row);
       mod.appendChild(knobArea);
@@ -1701,7 +1790,7 @@ function buildModuleEl(type, instanceId, params, leftPx) {
       const knobArea = el('div', `module-knobs knob-layout-${layoutType}${isCompact ? ' knobs-compact' : ''}`);
       for (const kDef of def.knobs) {
         const val = params[kDef.param] !== undefined ? params[kDef.param] : kDef.def;
-        knobArea.appendChild(buildKnobEl(type, instanceId, kDef, val));
+        knobArea.appendChild(buildControlEl(type, instanceId, kDef, val));
       }
       mod.appendChild(knobArea);
     }
@@ -1730,9 +1819,114 @@ function buildModuleEl(type, instanceId, params, leftPx) {
   return mod;
 }
 
+function buildSwitchEl(type, instanceId, kDef, val) {
+  const wrap = el('div', 'knob-wrap switch-wrap');
+  const numPos = kDef.discrete.length;
+
+  let idx = 0;
+  if (typeof val === 'string') {
+    idx = kDef.discrete.indexOf(val);
+    if (idx === -1) idx = 0;
+  } else {
+    idx = Math.max(0, Math.min(numPos - 1, Math.floor((val / 4096) * numPos)));
+  }
+
+  let rawVal = val;
+  if (typeof val === 'string' || typeof val === 'boolean') {
+    if (numPos === 2) {
+      rawVal = idx === 0 ? 0 : 4095;
+    } else {
+      rawVal = idx === 0 ? 0 : idx === 1 ? 2048 : 4095;
+    }
+  }
+
+  const sw = el('div', 'switch-control');
+  sw.id = `knob-${instanceId}-${kDef.param}`;
+  sw.dataset.instanceId = instanceId;
+  sw.dataset.param = kDef.param;
+  sw.dataset.val = rawVal;
+  sw.style.width = '16px';
+  sw.style.height = '34px';
+  sw.style.background = '#12100d';
+  sw.style.border = '1px solid #3a342a';
+  sw.style.borderRadius = '3px';
+  sw.style.position = 'relative';
+  sw.style.cursor = 'pointer';
+  sw.style.margin = '3px auto';
+
+  const lever = el('div', 'switch-lever');
+  lever.style.width = '12px';
+  lever.style.height = '12px';
+  lever.style.background = 'linear-gradient(135deg, #eee, #999)';
+  lever.style.border = '1px solid #444';
+  lever.style.borderRadius = '2px';
+  lever.style.position = 'absolute';
+  lever.style.left = '1px';
+  lever.style.boxShadow = '0 2px 3px rgba(0,0,0,0.6)';
+  lever.style.transition = 'top 0.1s ease';
+
+  const getTopForIdx = (i) => {
+    if (numPos === 2) {
+      return i === 0 ? '2px' : '18px';
+    } else {
+      return i === 0 ? '2px' : i === 1 ? '10px' : '18px';
+    }
+  };
+
+  lever.style.top = getTopForIdx(idx);
+  sw.appendChild(lever);
+
+  const updateValue = (newVal) => {
+    sw.dataset.val = newVal;
+    const newIdx = Math.max(0, Math.min(numPos - 1, Math.floor((newVal / 4096) * numPos)));
+    lever.style.top = getTopForIdx(newIdx);
+
+    handleParamValueUpdate(instanceId, kDef.param, newVal, sw);
+
+    const displayVal = getDisplayValueStr(type, kDef.param, newVal, instanceId);
+    valEl.textContent = displayVal;
+    wrap.title = `${kDef.label}: ${displayVal}`;
+    generateCode();
+  };
+
+  sw.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const currentVal = parseInt(sw.dataset.val ?? 0);
+    const currentIdx = Math.max(0, Math.min(numPos - 1, Math.floor((currentVal / 4096) * numPos)));
+    const nextIdx = (currentIdx + 1) % numPos;
+    let nextVal = 0;
+    if (numPos === 2) {
+      nextVal = nextIdx === 0 ? 0 : 4095;
+    } else {
+      nextVal = nextIdx === 0 ? 0 : nextIdx === 1 ? 2048 : 4095;
+    }
+    updateValue(nextVal);
+  });
+
+  const lbl = el('div', 'knob-lbl');
+  const nameEl = el('span', 'knob-lbl-name'); nameEl.textContent = kDef.label;
+  const valEl = el('span', 'knob-lbl-val'); valEl.textContent = getDisplayValueStr(type, kDef.param, rawVal, instanceId);
+
+  lbl.appendChild(nameEl);
+  lbl.appendChild(valEl);
+
+  wrap.title = `${kDef.label}: ${valEl.textContent}`;
+  wrap.appendChild(sw);
+  wrap.appendChild(lbl);
+
+  return wrap;
+}
+
+function buildControlEl(type, instanceId, kDef, val) {
+  if (kDef.discrete && kDef.discrete.length >= 2 && kDef.discrete.length <= 3) {
+    return buildSwitchEl(type, instanceId, kDef, val);
+  }
+  return buildKnobEl(type, instanceId, kDef, val);
+}
+
 function buildKnobEl(type, instanceId, kDef, val) {
   const wrap = el('div', 'knob-wrap');
-  const px   = KNOB_PX[kDef.size]  || 30;
+  const px = KNOB_PX[kDef.size] || 30;
   const asset = KNOB_ASSET[kDef.size] || 'mediumKnob';
 
   const knob = el('div', 'knob');
@@ -1740,7 +1934,7 @@ function buildKnobEl(type, instanceId, kDef, val) {
   knob.dataset.instanceId = instanceId;
   knob.dataset.param = kDef.param;
   knob.dataset.val = val;
-  knob.style.width  = px + 'px';
+  knob.style.width = px + 'px';
   knob.style.height = px + 'px';
   knob.innerHTML = (typeof FLARE_ASSETS !== 'undefined' && FLARE_ASSETS[asset]) || '';
 
@@ -1753,10 +1947,10 @@ function buildKnobEl(type, instanceId, kDef, val) {
   knob.addEventListener('pointerdown', handleKnobDown);
 
   const lbl = el('div', 'knob-lbl');
-  
+
   const nameEl = el('span', 'knob-lbl-name'); nameEl.textContent = kDef.label;
-  const valEl  = el('span', 'knob-lbl-val'); valEl.textContent = getDisplayValueStr(type, kDef.param, val, instanceId);
-  
+  const valEl = el('span', 'knob-lbl-val'); valEl.textContent = getDisplayValueStr(type, kDef.param, val, instanceId);
+
   lbl.appendChild(nameEl);
   lbl.appendChild(valEl);
 
@@ -1776,13 +1970,13 @@ function buildJackEl(instanceId, portId, label, direction) {
   }
   const wrap = el('div', 'jack-wrap');
   wrap.title = label;
-  const lbl  = el('div', 'jack-lbl'); lbl.textContent = label;
+  const lbl = el('div', 'jack-lbl'); lbl.textContent = label;
 
   const jack = el('div', `jack jack-${direction}`);
-  jack.id = `jack-${instanceId}-${portId}`;
+  jack.id = `jack-${instanceId}-${direction}-${portId}`;
   jack.dataset.instanceId = instanceId;
-  jack.dataset.portId     = portId;
-  jack.dataset.direction  = direction;
+  jack.dataset.portId = portId;
+  jack.dataset.direction = direction;
   jack.addEventListener('pointerdown', handleJackDown);
 
   jack.addEventListener('pointerenter', () => {
@@ -1806,7 +2000,7 @@ function buildJackEl(instanceId, portId, label, direction) {
 function buildRowEl(rowIndex) {
   const row = el('div', 'rack-row'); row.dataset.rowIndex = rowIndex;
   const railTop = el('div', 'rail top');
-  const bay     = el('div', 'module-bay'); bay.id = `bay-${rowIndex}`; bay.dataset.row = rowIndex;
+  const bay = el('div', 'module-bay'); bay.id = `bay-${rowIndex}`; bay.dataset.row = rowIndex;
   const railBot = el('div', 'rail bottom');
   row.appendChild(railTop); row.appendChild(bay); row.appendChild(railBot);
   return row;
@@ -1887,7 +2081,7 @@ function moveModuleRow(instanceId, delta) {
 
   const mIdx = state.rows[ri].findIndex(m => m.id === instanceId);
   const [mData] = state.rows[ri].splice(mIdx, 1);
-  
+
   const def = MODULE_DEFS[mData.type];
   mData.left = findFreePosition(targetRow, def ? def.hp : 6);
   state.rows[targetRow].push(mData);
@@ -1919,7 +2113,22 @@ let activeDrag = null;
 
 function setupModuleDrag(handleEl, modEl, instanceId) {
   handleEl.addEventListener('pointerdown', e => {
-    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+    if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    // Ignore clicks on knobs, jacks, switches, screws, etc.
+    let cur = e.target;
+    while (cur && cur !== handleEl) {
+      if (cur.classList.contains('knob-wrap') ||
+        cur.classList.contains('jack-wrap') ||
+        cur.classList.contains('switch-wrap') ||
+        cur.classList.contains('screw') ||
+        cur.classList.contains('module-del-btn') ||
+        cur.classList.contains('pattern-input-wrap')) {
+        return;
+      }
+      cur = cur.parentElement;
+    }
+
     e.preventDefault();
     handleEl.setPointerCapture(e.pointerId);
 
@@ -1943,7 +2152,7 @@ function setupModuleDrag(handleEl, modEl, instanceId) {
     };
 
     document.addEventListener('pointermove', handleModuleMove);
-    document.addEventListener('pointerup',   handleModuleUp);
+    document.addEventListener('pointerup', handleModuleUp);
   });
 }
 
@@ -2004,9 +2213,6 @@ function handleModuleMove(e) {
   // Update DOM style immediately so the module follows the pointer smoothly
   activeDrag.modEl.style.left = newLeft + 'px';
 
-  // Resolve collisions in the current row (slide physics)
-  resolveCollisions(activeDrag.rowIdx, activeDrag.instanceId);
-
   updateRowWidths();
   redrawCables();
   // NOTE: No generateCode() here — module positions do NOT affect the graph.
@@ -2015,7 +2221,7 @@ function handleModuleMove(e) {
 function handleModuleUp(e) {
   if (!activeDrag) return;
   document.removeEventListener('pointermove', handleModuleMove);
-  document.removeEventListener('pointerup',   handleModuleUp);
+  document.removeEventListener('pointerup', handleModuleUp);
 
   activeDrag.modEl.classList.remove('is-dragging');
 
@@ -2148,7 +2354,7 @@ function openDx7ImportForModule(instanceId) {
       return;
     }
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function (evt) {
       const buf = new Uint8Array(evt.target.result);
       try {
         const voices = parseDx7Bank(buf);
@@ -2163,7 +2369,7 @@ function openDx7ImportForModule(instanceId) {
             const newDom = buildModuleEl('dx', instanceId, mData.params, parseInt(oldDom.style.left));
             oldDom.replaceWith(newDom);
           }
-          
+
           redrawCables();
           generateCode();
         });
@@ -2190,33 +2396,33 @@ function showContextMenu(e) {
     // Find all cables touching this jack (either end)
     const touchingCables = state.cables.filter(c =>
       (c.fromId === instanceId && c.fromPort === portId) ||
-      (c.toId   === instanceId && c.toPort   === portId)
+      (c.toId === instanceId && c.toPort === portId)
     );
 
     if (touchingCables.length === 0) return; // nothing to disconnect
 
     const menu = el('div', 'context-menu');
     menu.style.left = e.clientX + 'px';
-    menu.style.top  = e.clientY + 'px';
+    menu.style.top = e.clientY + 'px';
 
     const header = el('div', 'context-menu-header', { textContent: 'Disconnect:' });
     menu.appendChild(header);
 
     for (const cable of touchingCables) {
       // Describe the other end of the cable
-      const otherId   = cable.fromId === instanceId && cable.fromPort === portId ? cable.toId   : cable.fromId;
+      const otherId = cable.fromId === instanceId && cable.fromPort === portId ? cable.toId : cable.fromId;
       const otherPort = cable.fromId === instanceId && cable.fromPort === portId ? cable.toPort : cable.fromPort;
-      const otherMod  = allMods.find(m => m.id === otherId);
-      const otherDef  = otherMod ? MODULE_DEFS[otherMod.type] : null;
+      const otherMod = allMods.find(m => m.id === otherId);
+      const otherDef = otherMod ? MODULE_DEFS[otherMod.type] : null;
       const otherLabel = otherDef ? otherDef.title : otherId;
-      const portLabel  = otherPort.replace(/-/g, ' ').toUpperCase();
+      const portLabel = otherPort.replace(/-/g, ' ').toUpperCase();
 
       const item = el('div', 'context-menu-item');
       item.textContent = `→ ${otherLabel} · ${portLabel}`;
       item.addEventListener('click', () => {
         state.cables = state.cables.filter(c =>
           !(c.fromId === cable.fromId && c.fromPort === cable.fromPort &&
-            c.toId   === cable.toId   && c.toPort   === cable.toPort));
+            c.toId === cable.toId && c.toPort === cable.toPort));
         redrawCables(); generateCode();
         closeContextMenu();
       });
@@ -2230,7 +2436,7 @@ function showContextMenu(e) {
       allItem.addEventListener('click', () => {
         state.cables = state.cables.filter(c =>
           !((c.fromId === instanceId && c.fromPort === portId) ||
-            (c.toId   === instanceId && c.toPort   === portId)));
+            (c.toId === instanceId && c.toPort === portId)));
         redrawCables(); generateCode();
         closeContextMenu();
       });
@@ -2350,7 +2556,7 @@ function handleKnobDown(e) {
   knob.setPointerCapture(e.pointerId);
 
   const modData = getModuleData(knob.dataset.instanceId);
-  const param   = knob.dataset.param;
+  const param = knob.dataset.param;
   const startVal = modData ? (modData.params[param] ?? 2048) : 2048;
 
   knobState = {
@@ -2361,7 +2567,7 @@ function handleKnobDown(e) {
   };
 
   knob.addEventListener('pointermove', handleKnobMove);
-  knob.addEventListener('pointerup',   handleKnobUp);
+  knob.addEventListener('pointerup', handleKnobUp);
 }
 
 function handleKnobMove(e) {
@@ -2373,42 +2579,66 @@ function handleKnobMove(e) {
   knobState.knob.dataset.val = val;
   if (knobState.svg) knobState.svg.style.transform = `rotate(${valToAngle(val)}deg)`;
 
-  const modData = getModuleData(knobState.instanceId);
-  if (modData) modData.params[knobState.param] = val;
+  handleParamValueUpdate(knobState.instanceId, knobState.param, val, knobState.knob);
+}
+
+function handleParamValueUpdate(instanceId, param, val, knobEl) {
+  const modData = getModuleData(instanceId);
+  if (!modData) return;
+  modData.params[param] = val;
+
+  // Real-time step sequencer dimming updates
+  if (param === 'steps' && modData.type === 'drum-seq') {
+    const moduleEl = knobEl.closest('.module');
+    if (moduleEl) {
+      const stepsVal = getKnobValue('drum-seq', 'steps', val);
+      const stepBtns = moduleEl.querySelectorAll('.drum-seq-step-btn');
+      stepBtns.forEach(btn => {
+        const stepIdx = parseInt(btn.dataset.step);
+        if (!isNaN(stepIdx)) {
+          if (stepIdx >= stepsVal) {
+            btn.classList.add('dimmed');
+          } else {
+            btn.classList.remove('dimmed');
+          }
+        }
+      });
+    }
+  }
 
   // Real-time parameter value display updates
-  const valEl = knobState.knob.parentNode.querySelector('.knob-lbl-val');
+  const valEl = knobEl.parentNode.querySelector('.knob-lbl-val');
   if (valEl) {
-    const displayVal = getDisplayValueStr(modData.type, knobState.param, val, knobState.instanceId);
+    const displayVal = getDisplayValueStr(modData.type, param, val, instanceId);
     valEl.textContent = displayVal;
-    
+
     // Update wrapper tooltip
-    const wrap = knobState.knob.parentNode;
+    const wrap = knobEl.parentNode;
     const nameEl = wrap.querySelector('.knob-lbl-name');
-    const labelText = nameEl ? nameEl.textContent : knobState.param;
+    const labelText = nameEl ? nameEl.textContent : param;
     wrap.title = `${labelText}: ${displayVal}`;
   }
 
   // Reactive DX7 bank/preset updates
-  if (knobState.param === 'bank' && modData.type === 'dx') {
-    const moduleEl = knobState.knob.closest('.module');
+  if (param === 'bank' && modData.type === 'dx') {
+    const moduleEl = knobEl.closest('.module');
     if (moduleEl) {
       const presetKnob = moduleEl.querySelector('[data-param="preset"]');
       if (presetKnob) {
         const pValEl = presetKnob.parentNode.querySelector('.knob-lbl-val');
         const rawPreset = modData.params.preset ?? 0;
         if (pValEl) {
-          pValEl.textContent = getDisplayValueStr('dx', 'preset', rawPreset, knobState.instanceId);
+          pValEl.textContent = getDisplayValueStr('dx', 'preset', rawPreset, instanceId);
         }
       }
     }
   }
 
-  const mapKey = `${knobState.instanceId}.${knobState.param}`;
+  const mapKey = `${instanceId}.${param}`;
   const map = knobConstantMap[mapKey];
-  const scaledVal = getConstantValueForKnob(modData, knobState.param, val);
+  const scaledVal = getConstantValueForKnob(modData, param, val);
 
-  console.log('[Knob Drag]', {
+  console.log('[Param Update]', {
     mapKey,
     val,
     scaledVal,
@@ -2421,14 +2651,14 @@ function handleKnobMove(e) {
   if (midiOut && lastUploadedSnapshot && map && map.size === 4) {
     const constIdx = map.const_idx;
     const targetOffset = map.byte_offset;
-    
+
     lastUploadedSnapshot[targetOffset] = scaledVal & 0xFF;
     lastUploadedSnapshot[targetOffset + 1] = (scaledVal >> 8) & 0xFF;
     lastUploadedSnapshot[targetOffset + 2] = (scaledVal >> 16) & 0xFF;
     lastUploadedSnapshot[targetOffset + 3] = (scaledVal >> 24) & 0xFF;
 
     const newCrc32 = Lens.crc32(lastUploadedSnapshot.slice(0, lastUploadedSnapshot.length - 4));
-    
+
     lastUploadedSnapshot[lastUploadedSnapshot.length - 4] = newCrc32 & 0xFF;
     lastUploadedSnapshot[lastUploadedSnapshot.length - 3] = (newCrc32 >> 8) & 0xFF;
     lastUploadedSnapshot[lastUploadedSnapshot.length - 2] = (newCrc32 >> 16) & 0xFF;
@@ -2455,7 +2685,7 @@ function handleKnobUp(e) {
   if (!knobState) return;
   const knob = knobState.knob;
   knob.removeEventListener('pointermove', handleKnobMove);
-  knob.removeEventListener('pointerup',   handleKnobUp);
+  knob.removeEventListener('pointerup', handleKnobUp);
   knobState = null;
   generateCode();
 }
@@ -2482,7 +2712,7 @@ function cableColor(fromType, fromPort, toType, toPort) {
     return '#ffb900';
   }
   // Audio -> Coral Red
-  const audioModules = ['sine', 'triangle', 'saw', 'square', 'phasor', 'wt', 'noise', 'pluck', 'kick', 'snare', 'hat', 'dx', 'delay', 'reverb', 'lpf', 'hpf', 'vcf', 'lpg', 'tape-looper'];
+  const audioModules = ['sine', 'triangle', 'saw', 'square', 'phasor', 'wt', 'noise', 'pluck', 'kick', 'snare', 'hat', 'dx', 'delay', 'reverb', 'lpf', 'hpf', 'vcf', 'lpg', 'tape-looper', 'tape-delay'];
   if (all.includes('audio') || fPort === 'out' || fPort === 'out1' || fPort === 'out2' || fPort === 'lp' || fPort === 'hp' || fPort === 'bp' || fPort === 'notch' || audioModules.includes(fType) || audioModules.includes(tType)) {
     return '#ff4d4d';
   }
@@ -2498,16 +2728,16 @@ function handleJackDown(e) {
   const jack = e.currentTarget;
   jack.setPointerCapture(e.pointerId);
 
-  const iId   = jack.dataset.instanceId;
-  const pId   = jack.dataset.portId;
-  const dir   = jack.dataset.direction;
+  const iId = jack.dataset.instanceId;
+  const pId = jack.dataset.portId;
+  const dir = jack.dataset.direction;
 
   // Clicking an occupied INPUT lifts the cable, holding the output end free for re-patch
   if (dir === 'input') {
     const cIdx = state.cables.findIndex(c => c.toId === iId && c.toPort === pId);
     if (cIdx !== -1) {
       const removed = state.cables.splice(cIdx, 1)[0];
-      const fromJack = $(`jack-${removed.fromId}-${removed.fromPort}`);
+      const fromJack = $(`jack-${removed.fromId}-output-${removed.fromPort}`);
       if (fromJack) {
         cableDrag = {
           fromId: removed.fromId, fromPort: removed.fromPort,
@@ -2515,26 +2745,30 @@ function handleJackDown(e) {
         };
         fromJack.classList.add('active');
         document.addEventListener('pointermove', handleJackMove);
-        document.addEventListener('pointerup',   handleJackUp);
+        document.addEventListener('pointerup', handleJackUp);
         redrawCables(); generateCode();
       }
       return;
     }
   }
 
-  // Clicking an occupied OUTPUT with exactly one cable: lift it, holding the output end
+  // Clicking an occupied OUTPUT: lift the last cable's output end, holding it free to re-patch to another output
   if (dir === 'output') {
     const existingCables = state.cables.filter(c => c.fromId === iId && c.fromPort === pId);
-    if (existingCables.length === 1) {
-      const removed = existingCables[0];
-      state.cables = state.cables.filter(c =>
-        !(c.fromId === removed.fromId && c.fromPort === removed.fromPort &&
-          c.toId   === removed.toId   && c.toPort   === removed.toPort));
-      cableDrag = { fromId: iId, fromPort: pId, fromEl: jack, curX: e.clientX, curY: e.clientY };
-      jack.classList.add('active');
-      document.addEventListener('pointermove', handleJackMove);
-      document.addEventListener('pointerup',   handleJackUp);
-      redrawCables(); generateCode();
+    if (existingCables.length > 0) {
+      const removed = existingCables[existingCables.length - 1];
+      state.cables = state.cables.filter(c => c !== removed);
+      const toJack = $(`jack-${removed.toId}-input-${removed.toPort}`);
+      if (toJack) {
+        cableDrag = {
+          fromId: removed.toId, fromPort: removed.toPort,
+          fromEl: toJack, curX: e.clientX, curY: e.clientY,
+        };
+        toJack.classList.add('active');
+        document.addEventListener('pointermove', handleJackMove);
+        document.addEventListener('pointerup', handleJackUp);
+        redrawCables(); generateCode();
+      }
       return;
     }
   }
@@ -2543,7 +2777,7 @@ function handleJackDown(e) {
   cableDrag = { fromId: iId, fromPort: pId, fromEl: jack, curX: e.clientX, curY: e.clientY };
   jack.classList.add('active');
   document.addEventListener('pointermove', handleJackMove);
-  document.addEventListener('pointerup',   handleJackUp);
+  document.addEventListener('pointerup', handleJackUp);
 }
 
 function handleJackMove(e) {
@@ -2569,11 +2803,11 @@ function handleJackMove(e) {
 function handleJackUp(e) {
   if (!cableDrag) return;
   document.removeEventListener('pointermove', handleJackMove);
-  document.removeEventListener('pointerup',   handleJackUp);
+  document.removeEventListener('pointerup', handleJackUp);
 
   try {
     if (cableDrag.fromEl) cableDrag.fromEl.releasePointerCapture(e.pointerId);
-  } catch (err) {}
+  } catch (err) { }
 
   if (cableDrag.fromEl) cableDrag.fromEl.classList.remove('active');
   document.querySelectorAll('.jack.snap-target').forEach(j => j.classList.remove('snap-target'));
@@ -2581,16 +2815,16 @@ function handleJackUp(e) {
 
   const snap = findSnapJack(e.clientX, e.clientY);
   if (snap && canConnect(cableDrag.fromEl, snap)) {
-    const srcJack  = cableDrag.fromEl.dataset.direction === 'output' ? cableDrag.fromEl : snap;
-    const destJack = cableDrag.fromEl.dataset.direction === 'input'  ? cableDrag.fromEl : snap;
+    const srcJack = cableDrag.fromEl.dataset.direction === 'output' ? cableDrag.fromEl : snap;
+    const destJack = cableDrag.fromEl.dataset.direction === 'input' ? cableDrag.fromEl : snap;
 
     state.cables = state.cables.filter(c => !(c.toId === destJack.dataset.instanceId && c.toPort === destJack.dataset.portId));
 
     state.cables.push({
-      fromId: srcJack.dataset.instanceId,  fromPort: srcJack.dataset.portId,
-      toId:   destJack.dataset.instanceId, toPort:   destJack.dataset.portId,
+      fromId: srcJack.dataset.instanceId, fromPort: srcJack.dataset.portId,
+      toId: destJack.dataset.instanceId, toPort: destJack.dataset.portId,
       color: cableColor(srcJack.dataset.instanceId, srcJack.dataset.portId,
-                        destJack.dataset.instanceId, destJack.dataset.portId),
+        destJack.dataset.instanceId, destJack.dataset.portId),
     });
   }
 
@@ -2610,7 +2844,7 @@ function findSnapJack(x, y) {
   document.querySelectorAll('.jack').forEach(j => {
     if (cableDrag && j === cableDrag.fromEl) return;
     const r = j.getBoundingClientRect();
-    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     const d = Math.hypot(x - cx, y - cy);
     if (d < bestDist) { bestDist = d; best = j; }
   });
@@ -2634,8 +2868,8 @@ function redrawCables() {
   const jackCurrentIndex = {};
 
   for (const c of state.cables) {
-    const fromEl = $(`jack-${c.fromId}-${c.fromPort}`);
-    const toEl   = $(`jack-${c.toId}-${c.toPort}`);
+    const fromEl = $(`jack-${c.fromId}-output-${c.fromPort}`);
+    const toEl = $(`jack-${c.toId}-input-${c.toPort}`);
     if (fromEl && toEl) {
       const fromKey = `${c.fromId}-${c.fromPort}`;
       const toKey = `${c.toId}-${c.toPort}`;
@@ -2653,7 +2887,7 @@ function redrawCables() {
       let glow = false;
       if (hoveredJack) {
         const matchesFrom = (c.fromId === hoveredJack.instanceId && c.fromPort === hoveredJack.portId);
-        const matchesTo   = (c.toId === hoveredJack.instanceId && c.toPort === hoveredJack.portId);
+        const matchesTo = (c.toId === hoveredJack.instanceId && c.toPort === hoveredJack.portId);
         if (matchesFrom || matchesTo) {
           glow = true;
         } else {
@@ -2666,20 +2900,25 @@ function redrawCables() {
   }
 
   if (cableDrag) {
-    const r  = cableDrag.fromEl.getBoundingClientRect();
-    const x1 = r.left + r.width/2, y1 = r.top + r.height/2;
-    drawCablePathXY(svg, x1, y1, cableDrag.curX, cableDrag.curY, '#666', true, 0);
+    const r = cableDrag.fromEl.getBoundingClientRect();
+    const svgRect = svg.getBoundingClientRect();
+    const x1 = r.left + r.width / 2 - svgRect.left;
+    const y1 = r.top + r.height / 2 - svgRect.top;
+    const curX = cableDrag.curX - svgRect.left;
+    const curY = cableDrag.curY - svgRect.top;
+    drawCablePathXY(svg, x1, y1, curX, curY, '#666', true, 0);
   }
 }
 
 function drawCablePath(svg, fromEl, toEl, color, dashed, fromIdx = 0, fromCount = 1, toIdx = 0, toCount = 1, dim = false, glow = false) {
   const r1 = fromEl.getBoundingClientRect();
   const r2 = toEl.getBoundingClientRect();
+  const svgRect = svg.getBoundingClientRect();
 
-  const x1_ctr = r1.left + r1.width/2;
-  const y1_ctr = r1.top + r1.height/2;
-  const x2_ctr = r2.left + r2.width/2;
-  const y2_ctr = r2.top + r2.height/2;
+  const x1_ctr = r1.left + r1.width / 2 - svgRect.left;
+  const y1_ctr = r1.top + r1.height / 2 - svgRect.top;
+  const x2_ctr = r2.left + r2.width / 2 - svgRect.left;
+  const y2_ctr = r2.top + r2.height / 2 - svgRect.top;
 
   // Offset stacked plugs circularly around the jack center
   let x1 = x1_ctr, y1 = y1_ctr;
@@ -2703,17 +2942,17 @@ function drawCablePath(svg, fromEl, toEl, color, dashed, fromIdx = 0, fromCount 
 }
 
 function drawCablePathXY(svg, x1, y1, x2, y2, color, dashed, sagOffset = 0, dim = false, glow = false) {
-  const dist = Math.hypot(x2-x1, y2-y1);
-  const sag  = Math.max(30, dist * 0.28) + sagOffset;
-  const d    = `M${x1},${y1} C${x1},${y1+sag} ${x2},${y2+sag} ${x2},${y2}`;
-  
+  const dist = Math.hypot(x2 - x1, y2 - y1);
+  const sag = Math.max(30, dist * 0.28) + sagOffset;
+  const d = `M${x1},${y1} C${x1},${y1 + sag} ${x2},${y2 + sag} ${x2},${y2}`;
+
   const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   path.setAttribute('d', d);
   path.setAttribute('stroke', color);
   path.setAttribute('stroke-width', glow ? '5.5' : '4');
   path.setAttribute('fill', 'none');
   path.setAttribute('stroke-linecap', 'round');
-  
+
   if (dashed) {
     path.setAttribute('stroke-dasharray', '6 4');
     path.style.filter = 'drop-shadow(0 3px 5px rgba(0,0,0,.6))';
@@ -2775,7 +3014,7 @@ function buildBrowser() {
   }
 }
 
-function openBrowser()  {
+function openBrowser() {
   $('browserPanel').classList.add('open');
   $('browserSearch').focus();
   buildBrowser();
@@ -2798,18 +3037,78 @@ function getPitchCenter(type, param) {
   return 0;
 }
 
+function isModulePortPitch(modId, portId, visited = new Set()) {
+  if (!modId) return false;
+  const key = `${modId}.${portId}`;
+  if (visited.has(key)) return false;
+  visited.add(key);
+
+  const mod = state.rows.flat().find(m => m.id === modId);
+  if (!mod) return false;
+
+  // 1. Direct pitch sources
+  if ((mod.type === 'score-player' && portId === 'note') ||
+    (mod.type === 'midi-note' && portId === 'note') ||
+    (mod.type === 'turing' && portId === 'out') ||
+    (mod.type === 'step-seq' && portId === 'out') ||
+    (mod.type === 'ws-in' && (portId === 'cv-in-1' || portId === 'cv-in-2'))) {
+    return true;
+  }
+
+  // 2. Transparent carriers: switches
+  if (mod.type === 'seq-switch' || mod.type === 'signal-switch') {
+    const incoming = state.cables.filter(c => c.toId === mod.id);
+    for (const c of incoming) {
+      if (isModulePortPitch(c.fromId, c.fromPort, visited)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function isModulePortPitchInput(modId, portId, visited = new Set()) {
+  if (!modId) return false;
+  const key = `${modId}.${portId}`;
+  if (visited.has(key)) return false;
+  visited.add(key);
+
+  const mod = state.rows.flat().find(m => m.id === modId);
+  if (!mod) return false;
+
+  if (mod.type === 'ws-out') {
+    if (portId === 'cv-out-1' || portId === 'cv-out-2') {
+      const incoming = state.cables.find(c => c.toId === mod.id && c.toPort === portId);
+      if (incoming) {
+        return isModulePortPitch(incoming.fromId, incoming.fromPort);
+      }
+    }
+    return false;
+  }
+
+  const isDirectPitchInput = portId === 'note' || portId === 'pitch' || portId === 'pitch1' || portId === 'pitch2';
+  if (isDirectPitchInput) return true;
+
+  if (mod.type === 'seq-switch' || mod.type === 'signal-switch') {
+    const outgoing = state.cables.filter(c => c.fromId === mod.id);
+    for (const c of outgoing) {
+      if (isModulePortPitchInput(c.toId, c.toPort, visited)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 function getCabledSourceExpr(cable, allMods) {
   if (!cable) return '0';
   const fromMod = allMods.find(m => m.id === cable.fromId);
   if (!fromMod) return '0';
-  
-  // Scale raw CV signals (0..4095) to pitch semitones (0..127) using spread when cabled to V/OCT or FM.
-  // Do NOT scale sources that already output MIDI note integers.
-  const isPitchInput = cable.toPort === 'note' || cable.toPort === 'pitch' || cable.toPort === 'fm' || cable.toPort === 'pitch1' || cable.toPort === 'pitch2';
-  const isPitchSource = (fromMod.type === 'score-player' && cable.fromPort === 'note') ||
-                        (fromMod.type === 'midi-note'    && cable.fromPort === 'note') ||
-                        (fromMod.type === 'turing'       && cable.fromPort === 'out')  ||
-                        (fromMod.type === 'step-seq'     && cable.fromPort === 'out');  // lens stores MIDI notes directly
+
+  const isPitchInput = isModulePortPitchInput(cable.toId, cable.toPort);
+  const isPitchSource = isModulePortPitch(cable.fromId, cable.fromPort);
 
   let expr;
   if (MODULE_DEFS[fromMod.type]?.isHW) {
@@ -2821,7 +3120,9 @@ function getCabledSourceExpr(cable, allMods) {
     }
   } else {
     const fromDef = MODULE_DEFS[fromMod.type];
-    if (fromDef?.isMacro) {
+    if (fromMod.type === 'clock') {
+      expr = cable.fromPort === 'out' ? cable.fromId : `${cable.fromId}${cable.fromPort}`;
+    } else if (fromDef?.isMacro) {
       expr = `${cable.fromId}${cable.fromPort}`;
     } else {
       const fromPorts = fromDef?.outputs || [];
@@ -2841,7 +3142,7 @@ function getCabledSourceExpr(cable, allMods) {
 }
 
 function generateCode(textOnly = false) {
-  const lines  = ['; generated by flare', '(patch'];
+  const lines = ['; generated by flare', '(patch'];
   const allMods = state.rows.flat();
 
   // 1. Trace active modules backward from output sinks and MIDI outputs (Unconnected Modules Skip Pass)
@@ -2868,39 +3169,48 @@ function generateCode(textOnly = false) {
     }
   }
 
+  const hasPath = (startId, endId, visited = new Set()) => {
+    if (startId === endId) return true;
+    visited.add(startId);
+    const outCables = state.cables.filter(c => c.fromId === startId);
+    for (const c of outCables) {
+      if (c.toId && !visited.has(c.toId)) {
+        if (hasPath(c.toId, endId, visited)) return true;
+      }
+    }
+    return false;
+  };
+
   // Kahn's Topological Sort
   const adj = {}, indeg = {};
   for (const m of allMods) { adj[m.id] = []; indeg[m.id] = 0; }
+  const delayTypes = new Set(['delay', 'tape-delay', 'reverb', 'flanger', 'chorus']);
   for (const c of state.cables) {
     if (c.fromId && c.toId && adj[c.fromId] && indeg[c.toId] !== undefined) {
       const toMod = allMods.find(m => m.id === c.toId);
-      if (toMod && toMod.type === 'delay' && c.toPort === 'in') {
-        const hasMixCV = state.cables.some(cc => cc.toId === toMod.id && cc.toPort === 'mix');
-        if (!hasMixCV) {
-          const mixVal = getKnobValue(toMod.type, 'mix', toMod.params.mix ?? 2048);
-          if (mixVal === 4095) {
-            continue;
-          }
-        }
-      }
-      if (toMod && toMod.type === 'reverb' && c.toPort === 'in') {
-        const hasMixCV = state.cables.some(cc => cc.toId === toMod.id && cc.toPort === 'mix');
-        if (!hasMixCV) {
-          const mixVal = getKnobValue(toMod.type, 'mix', toMod.params.mix ?? 1024);
-          if (mixVal === 4095) {
-            continue;
-          }
-        }
+      const isDelayInput = toMod && delayTypes.has(toMod.type) &&
+        (c.toPort === 'in' || c.toPort === 'in-l' || c.toPort === 'in-r') &&
+        hasPath(c.toId, c.fromId);
+      if (isDelayInput) {
+        continue; // Break topological cycle at delay/effect buffer bounds
       }
       adj[c.fromId].push(c.toId);
       indeg[c.toId]++;
     }
   }
-  const queue   = allMods.filter(m => indeg[m.id] === 0).map(m => m.id);
+  const queue = allMods.filter(m => indeg[m.id] === 0).map(m => m.id);
   const ordered = [];
-  while (queue.length) {
-    const id = queue.shift(); ordered.push(id);
-    for (const nb of (adj[id] || [])) { if (--indeg[nb] === 0) queue.push(nb); }
+  while (true) {
+    while (queue.length) {
+      const id = queue.shift(); ordered.push(id);
+      for (const nb of (adj[id] || [])) { if (--indeg[nb] === 0) queue.push(nb); }
+    }
+    const remaining = allMods.filter(m => activeIds.has(m.id) && !ordered.includes(m.id));
+    if (remaining.length === 0) break;
+    remaining.sort((a, b) => indeg[a.id] - indeg[b.id]);
+    const forceId = remaining[0].id;
+    indeg[forceId] = 0;
+    queue.push(forceId);
   }
   for (const m of allMods) if (!ordered.includes(m.id)) ordered.push(m.id);
 
@@ -2947,12 +3257,12 @@ function generateCode(textOnly = false) {
     } else if (m.type === 'clock') {
       // Clock: only ONE rate kwarg allowed by the Lens phasor lowerer.
       // BPM is the primary rate; fm/width are safe extra kwargs.
-      const bpmVal   = getKnobValue(m.type, 'bpm',   m.params.bpm   ?? 1638);
-      const fmVal    = getKnobValue(m.type, 'fm',    m.params.fm    ?? 0);
+      const bpmVal = getKnobValue(m.type, 'bpm', m.params.bpm ?? 1638);
+      const fmVal = getKnobValue(m.type, 'fm', m.params.fm ?? 0);
       const widthVal = getKnobValue(m.type, 'width', m.params.width ?? 2048);
 
       const syncCable = state.cables.find(c => c.toId === id && c.toPort === 'sync');
-      const fmCable   = state.cables.find(c => c.toId === id && c.toPort === 'fm');
+      const fmCable = state.cables.find(c => c.toId === id && c.toPort === 'fm');
 
       let args = `:bpm ${bpmVal}`;
       if (widthVal !== 2048) args += ` :width ${widthVal}`;
@@ -2973,6 +3283,12 @@ function generateCode(textOnly = false) {
 
       if (state.cables.some(c => c.fromId === id)) {
         lines.push(`  (def ${id} (clock ${args}))`);
+        if (state.cables.some(c => c.fromId === id && c.fromPort === 'mult2')) {
+          lines.push(`  (def ${id}mult2 (follow ${id} :mult 2))`);
+        }
+        if (state.cables.some(c => c.fromId === id && c.fromPort === 'mult4')) {
+          lines.push(`  (def ${id}mult4 (follow ${id} :mult 4))`);
+        }
       }
       continue;
     } else if (m.type === 'multi-div') {
@@ -2991,8 +3307,8 @@ function generateCode(textOnly = false) {
       // Macro Sub-Oscillator VCO: Saw wave with main pitch, sub-1 (-12), and sub-2 (-24) octave outputs
       const noteInCable = state.cables.find(c => c.toId === id && c.toPort === 'note');
       const pitchKnob = getKnobValue(m.type, 'pitch', m.params.pitch ?? 1935);
-      const centsVal  = (getKnobValue(m.type, 'cents', m.params.cents ?? 2048) - 2048) / 204.8;
-      
+      const centsVal = (getKnobValue(m.type, 'cents', m.params.cents ?? 2048) - 2048) / 204.8;
+
       let basePitchStr;
       if (noteInCable) {
         const noteSrc = getCabledSourceExpr(noteInCable, allMods);
@@ -3014,10 +3330,10 @@ function generateCode(textOnly = false) {
       }
     } else if (m.type === 'sine' || m.type === 'triangle' || m.type === 'saw' || m.type === 'square') {
       const noteCable = state.cables.find(c => c.toId === id && c.toPort === 'note');
-      const fmCable   = state.cables.find(c => c.toId === id && c.toPort === 'fm');
-      
+      const fmCable = state.cables.find(c => c.toId === id && c.toPort === 'fm');
+
       const pitchKnob = getKnobValue(m.type, 'pitch', m.params.pitch ?? 1935);
-      const centsVal  = (getKnobValue(m.type, 'cents', m.params.cents ?? 2048) - 2048) / 204.8;
+      const centsVal = (getKnobValue(m.type, 'cents', m.params.cents ?? 2048) - 2048) / 204.8;
       const basePitch = pitchKnob + centsVal;
 
       let pitchExpr = `${basePitch}`;
@@ -3028,10 +3344,7 @@ function generateCode(textOnly = false) {
         pitchExpr = transpose !== 0 ? `(add ${noteSrc} ${transpose})` : noteSrc;
       }
 
-      const isLfo = (m.params.range ?? 0) > 2000;
-      if (isLfo) {
-        pitchExpr = `(sub ${pitchExpr} 84)`;
-      }
+      // VCOs are dedicated audio VCOs now
 
       if (fmCable) {
         const fmSrc = getCabledSourceExpr(fmCable, allMods);
@@ -3062,6 +3375,31 @@ function generateCode(textOnly = false) {
       expr += ')';
       lines.push(`  (def ${id} ${expr})`);
       continue;
+    } else if (m.type === 'vca') {
+      const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
+      const cvCable = state.cables.find(c => c.toId === id && c.toPort === 'amp');
+      const inSig = getCabledSourceExpr(inCable, allMods);
+      const levelVal = getKnobValue(m.type, 'amp', m.params.amp ?? 4095);
+
+      if (cvCable) {
+        const cvSig = getCabledSourceExpr(cvCable, allMods);
+        if (levelVal === 4095) {
+          lines.push(`  (def ${id} (vca ${inSig} ${cvSig}))`);
+        } else if (levelVal === 0) {
+          lines.push(`  (def ${id} 0)`);
+        } else {
+          lines.push(`  (def ${id} (vca ${inSig} (vca ${cvSig} ${levelVal})))`);
+        }
+      } else {
+        if (levelVal === 4095) {
+          lines.push(`  (def ${id} ${inSig})`);
+        } else if (levelVal === 0) {
+          lines.push(`  (def ${id} 0)`);
+        } else {
+          lines.push(`  (def ${id} (vca ${inSig} ${levelVal}))`);
+        }
+      }
+      continue;
     } else if (m.type === 'quad-vca') {
       // Macro Quad VCA: compiles to 4 low-level independent VCA blocks
       const channels = ['a', 'b', 'c', 'd'];
@@ -3078,7 +3416,7 @@ function generateCode(textOnly = false) {
 
           const cvCable = state.cables.find(c => c.toId === id && c.toPort === cvPort);
           const levelVal = getKnobValue(m.type, volParam, m.params[volParam] ?? 4095);
-          
+
           if (cvCable) {
             const cvSig = getCabledSourceExpr(cvCable, allMods);
             if (levelVal === 4095) {
@@ -3104,12 +3442,12 @@ function generateCode(textOnly = false) {
       // Macro Delay LFO: combines LFO, Envelope and VCA
       const hasCable = state.cables.some(c => c.fromId === id && c.fromPort === 'out');
       if (hasCable) {
-        const trigCable  = state.cables.find(c => c.toId === id && c.toPort === 'trig');
-        const hzCvCable  = state.cables.find(c => c.toId === id && c.toPort === 'hz');
+        const trigCable = state.cables.find(c => c.toId === id && c.toPort === 'trig');
+        const hzCvCable = state.cables.find(c => c.toId === id && c.toPort === 'hz');
         const fadeCvCable = state.cables.find(c => c.toId === id && c.toPort === 'fade');
         const trigSig = getCabledSourceExpr(trigCable, allMods);
 
-        const knobHz   = getKnobValue(m.type, 'hz',   m.params.hz   ?? 10);
+        const knobHz = getKnobValue(m.type, 'hz', m.params.hz ?? 10);
         const knobFade = getKnobValue(m.type, 'fade', m.params.fade ?? 2048);
 
         const hzExpr = hzCvCable
@@ -3130,15 +3468,15 @@ function generateCode(textOnly = false) {
       if (hasCable) {
         const trigCable = state.cables.find(c => c.toId === id && c.toPort === 'trig');
         const trigSig = trigCable ? getCabledSourceExpr(trigCable, allMods) : 'master';
-        
+
         const patDef = def.knobs.find(k => k.param === 'pattern');
         const patIdx = Math.max(0, Math.min(patDef.discrete.length - 1, Math.floor((m.params.pattern ?? 0) / 4096 * patDef.discrete.length)));
         const patName = patDef.discrete[patIdx];
-        
+
         const modeDef = def.knobs.find(k => k.param === 'mode');
         const modeIdx = Math.max(0, Math.min(modeDef.discrete.length - 1, Math.floor((m.params.mode ?? 0) / 4096 * modeDef.discrete.length)));
         const modeName = modeDef.discrete[modeIdx];
-        
+
         lines.push(`  (def ${id}out (${modeName} ${patName} ${trigSig}))`);
       }
       continue;
@@ -3147,7 +3485,7 @@ function generateCode(textOnly = false) {
       const hasNoteCable = state.cables.some(c => c.fromId === id && c.fromPort === 'out');
       const hasTrigCable = state.cables.some(c => c.fromId === id && c.fromPort === 'trig');
       if (hasNoteCable || hasTrigCable) {
-        const trigCable  = state.cables.find(c => c.toId === id && c.toPort === 'trig');
+        const trigCable = state.cables.find(c => c.toId === id && c.toPort === 'trig');
         const probCvCable = state.cables.find(c => c.toId === id && c.toPort === 'prob');
         const trigSig = trigCable ? getCabledSourceExpr(trigCable, allMods) : 'master';
 
@@ -3180,9 +3518,9 @@ function generateCode(textOnly = false) {
         const cCable = state.cables.find(c => c.toId === id && c.toPort === 'c');
 
         const condSig = condCable ? getCabledSourceExpr(condCable, allMods) : '(switch :z)';
-        const aSig = aCable ? getCabledSourceExpr(aCable, allMods) : '0';
-        const bSig = bCable ? getCabledSourceExpr(bCable, allMods) : '0';
-        const cSig = cCable ? getCabledSourceExpr(cCable, allMods) : '0';
+        const aSig = aCable ? getCabledSourceExpr(aCable, allMods) : (m.params.a !== undefined ? m.params.a : '0');
+        const bSig = bCable ? getCabledSourceExpr(bCable, allMods) : (m.params.b !== undefined ? m.params.b : '0');
+        const cSig = cCable ? getCabledSourceExpr(cCable, allMods) : (m.params.c !== undefined ? m.params.c : '0');
 
         lines.push(`  (def ${id}out (if (up ${condSig}) ${cSig} (if (mid ${condSig}) ${bSig} ${aSig})))`);
       }
@@ -3214,9 +3552,11 @@ function generateCode(textOnly = false) {
         const trigCable = state.cables.find(c => c.toId === id && c.toPort === 'trig');
         const trigSig = trigCable ? getCabledSourceExpr(trigCable, allMods) : '0';
 
+        const stepsVal = getKnobValue(m.type, 'steps', m.params.steps ?? 4095);
         const getBeatStr = (arr) => {
-          const steps = arr || [0,0,0,0,0,0,0,0];
-          return steps.map(s => s ? 'x' : '.').join(' ');
+          const steps = arr || [0, 0, 0, 0, 0, 0, 0, 0];
+          const sliced = steps.slice(0, stepsVal);
+          return sliced.map(s => s ? 'x' : '.').join(' ');
         };
 
         lines.push(`  (def ${id}kickPat (beat '(${getBeatStr(m.params.kickPat)})))`);
@@ -3250,7 +3590,7 @@ function generateCode(textOnly = false) {
 
       if (noteCabled || gateCabled) {
         const cleanPat = pat.replace(/\[/g, '(').replace(/\]/g, ')');
-        lines.push(`  (def ${id}score (score :pat '${cleanPat}))`);
+        lines.push(`  (def ${id}score (score '${cleanPat}))`);
       }
 
       if (trigCable) {
@@ -3290,7 +3630,7 @@ function generateCode(textOnly = false) {
 
         const stepsDef = def.knobs.find(k => k.param === 'steps');
         const stepsVal = Math.max(1, Math.min(8, Math.floor((m.params.steps ?? 4095) / 4096 * 8) + 1));
-        
+
         const dirDef = def.knobs.find(k => k.param === 'dir');
         const dirIdx = Math.max(0, Math.min(dirDef.discrete.length - 1, Math.floor((m.params.dir ?? 0) / 4096 * dirDef.discrete.length)));
         const dirVal = dirDef.discrete[dirIdx];
@@ -3309,21 +3649,22 @@ function generateCode(textOnly = false) {
       }
       continue;
     } else if (m.type === 'midi-note') {
-      const chVal = getKnobValue(m.type, 'ch', m.params.ch ?? 1);
+      const chVal = getKnobValue(m.type, 'ch', m.params.ch ?? 0);
+      const chArg = (chVal && chVal !== 'omni') ? ` :ch ${chVal}` : '';
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'note')) {
-        lines.push(`  (def ${id}note (midi-note :ch ${chVal}))`);
+        lines.push(`  (def ${id}note (midi-note${chArg}))`);
       }
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'gate')) {
-        lines.push(`  (def ${id}gate (midi-gate :ch ${chVal}))`);
+        lines.push(`  (def ${id}gate (midi-gate${chArg}))`);
       }
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'vel')) {
-        lines.push(`  (def ${id}vel (midi-velocity :ch ${chVal}))`);
+        lines.push(`  (def ${id}vel (midi-velocity${chArg}))`);
       }
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'press')) {
-        lines.push(`  (def ${id}press (midi-pressure :ch ${chVal}))`);
+        lines.push(`  (def ${id}press (midi-pressure${chArg}))`);
       }
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'bend')) {
-        lines.push(`  (def ${id}bend (midi-bend :ch ${chVal}))`);
+        lines.push(`  (def ${id}bend (midi-bend${chArg}))`);
       }
       continue;
     } else if (m.type === 'midi-cc') {
@@ -3383,7 +3724,7 @@ function generateCode(textOnly = false) {
       const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'out')) {
         const inSrc = getCabledSourceExpr(inCable, allMods);
-        const gainRaw   = m.params.gain   ?? 2048;
+        const gainRaw = m.params.gain ?? 2048;
         const offsetRaw = m.params.offset ?? 2048;
 
         let gainExpr;
@@ -3410,7 +3751,7 @@ function generateCode(textOnly = false) {
         lines.push(`  (def ${id}out ${outExpr})`);
       }
       continue;
-    } else if (m.type === 'delay') {
+    } else if (m.type === 'tape-delay') {
       // Macro Tape Delay feedback loop
       const hasCable = state.cables.some(c => c.fromId === id && c.fromPort === 'out');
       if (hasCable) {
@@ -3418,7 +3759,7 @@ function generateCode(textOnly = false) {
         const inSig = getCabledSourceExpr(inCable, allMods);
 
         const timeCable = state.cables.find(c => c.toId === id && c.toPort === 'time');
-        const knobTime  = getKnobValue(m.type, 'time', m.params.time ?? 2048);
+        const knobTime = getKnobValue(m.type, 'time', m.params.time ?? 2048);
         let timeExpr;
         if (timeCable) {
           const timeSrc = getCabledSourceExpr(timeCable, allMods);
@@ -3428,7 +3769,7 @@ function generateCode(textOnly = false) {
         }
 
         const feedCable = state.cables.find(c => c.toId === id && c.toPort === 'feedback');
-        const knobFeed  = getKnobValue(m.type, 'feedback', m.params.feedback ?? 1024);
+        const knobFeed = getKnobValue(m.type, 'feedback', m.params.feedback ?? 1024);
         let feedExpr;
         if (feedCable) {
           const feedSrc = getCabledSourceExpr(feedCable, allMods);
@@ -3446,10 +3787,10 @@ function generateCode(textOnly = false) {
         }
 
         // Resolve mix — either a static knob value or a knob + CV expression
-        const mixCvCable  = state.cables.find(c => c.toId === id && c.toPort === 'mix');
-        const knobMixRaw  = m.params.mix ?? 2048;
-        const mixAmtVal   = getKnobValue(m.type, 'mixamt', m.params.mixamt ?? 4095);
-        const mixVal      = getKnobValue(m.type, 'mix', knobMixRaw);
+        const mixCvCable = state.cables.find(c => c.toId === id && c.toPort === 'mix');
+        const knobMixRaw = m.params.mix ?? 2048;
+        const mixAmtVal = getKnobValue(m.type, 'mixamt', m.params.mixamt ?? 4095);
+        const mixVal = getKnobValue(m.type, 'mix', knobMixRaw);
         let mixCvExpr = null;
         if (mixCvCable) {
           const mixSrc = getCabledSourceExpr(mixCvCable, allMods);
@@ -3480,6 +3821,61 @@ function generateCode(textOnly = false) {
         }
       }
       continue;
+    } else if (m.type === 'delay') {
+      const hasCable = state.cables.some(c => c.fromId === id && (c.fromPort === 'outL' || c.fromPort === 'outR'));
+      if (hasCable) {
+        const inLCable = state.cables.find(c => c.toId === id && c.toPort === 'inL');
+        const inRCable = state.cables.find(c => c.toId === id && c.toPort === 'inR');
+        const inL = inLCable ? getCabledSourceExpr(inLCable, allMods) : (inRCable ? getCabledSourceExpr(inRCable, allMods) : '0');
+        const inR = inRCable ? getCabledSourceExpr(inRCable, allMods) : inL;
+
+        const timeCable = state.cables.find(c => c.toId === id && c.toPort === 'time');
+        const knobTime = getKnobValue(m.type, 'time', m.params.time ?? 2048);
+        const timeAmt = getKnobValue(m.type, 'timeamt', m.params.timeamt ?? 4095);
+        let timeExpr = `${knobTime}`;
+        if (timeCable) {
+          const timeSrc = getCabledSourceExpr(timeCable, allMods);
+          const att = timeAmt >= 4095 ? timeSrc : `(vca ${timeSrc} ${timeAmt})`;
+          timeExpr = `(clip (add ${att} ${knobTime} :sat))`;
+        }
+
+        const feedCable = state.cables.find(c => c.toId === id && c.toPort === 'feedback');
+        const knobFeed = getKnobValue(m.type, 'feedback', m.params.feedback ?? 1024);
+        const feedAmt = getKnobValue(m.type, 'feedamt', m.params.feedamt ?? 4095);
+        let feedExpr = `${knobFeed}`;
+        if (feedCable) {
+          const feedSrc = getCabledSourceExpr(feedCable, allMods);
+          const att = feedAmt >= 4095 ? feedSrc : `(vca ${feedSrc} ${feedAmt})`;
+          feedExpr = `(clip (add ${att} ${knobFeed} :sat))`;
+        }
+
+        const modeDef = MODULE_DEFS.delay.knobs.find(k => k.param === 'mode');
+        const modeVal = m.params.mode ?? 2048;
+        let modeStr = 'stereo';
+        if (typeof modeVal === 'string') {
+          modeStr = modeVal;
+        } else {
+          const modeIdx = Math.max(0, Math.min(modeDef.discrete.length - 1, Math.floor((modeVal / 4096) * modeDef.discrete.length)));
+          modeStr = modeDef.discrete[modeIdx];
+        }
+
+        const mixCvCable = state.cables.find(c => c.toId === id && c.toPort === 'mix');
+        const knobMix = getKnobValue(m.type, 'mix', m.params.mix ?? 2048);
+        let mixExpr = `${knobMix}`;
+        if (mixCvCable) {
+          const mixSrc = getCabledSourceExpr(mixCvCable, allMods);
+          mixExpr = `(clip (add ${mixSrc} ${knobMix} :sat))`;
+        }
+
+        const knobRatioRaw = m.params.ratio ?? 2048;
+        const knobRatio = (knobRatioRaw / 2048).toFixed(3);
+
+        lines.push(`  (def ${id} (delay :in-l ${inL} :in-r ${inR} :time ${timeExpr} :feedback ${feedExpr} :mode ${modeStr} :ratio ${knobRatio}))`);
+        // Mix: crossfade dry input with wet delay using morph (linear interpolation at mix position)
+        lines.push(`  (def ${id}outL (morph ${inL} ${id} ${mixExpr}))`);
+        lines.push(`  (def ${id}outR (morph ${inR} (sel ${id}) ${mixExpr}))`);
+      }
+      continue;
     } else if (m.type === 'reverb') {
       const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
       const inSig = getCabledSourceExpr(inCable, allMods);
@@ -3506,7 +3902,7 @@ function generateCode(textOnly = false) {
 
       lines.push(`  (def ${id} (reverb :in ${inSig} :decay ${decayExpr} :mix ${mixExpr}))`);
       lines.push(`  (def ${id}outL ${id})`);
-      lines.push(`  (def ${id}outR (${id} :outR))`);
+      lines.push(`  (def ${id}outR (sel ${id}))`); // sel = canonical out2/value_r accessor
       continue;
     } else if (m.type === 'chorus') {
       const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
@@ -3534,7 +3930,9 @@ function generateCode(textOnly = false) {
 
       const fbVal = getKnobValue(m.type, 'feedback', m.params.feedback ?? 2048);
 
-      lines.push(`  (def ${id}out (chorus :in ${inSig} :rate ${rateExpr} :depth ${depthExpr} :feedback ${fbVal}))`);
+      lines.push(`  (def ${id} (chorus :in ${inSig} :rate ${rateExpr} :depth ${depthExpr} :feedback ${fbVal}))`);
+      lines.push(`  (def ${id}outL ${id})`);
+      lines.push(`  (def ${id}outR (sel ${id}))`); // sel = canonical out2/value_r accessor
       continue;
     } else if (m.type === 'flanger') {
       const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
@@ -3562,25 +3960,27 @@ function generateCode(textOnly = false) {
 
       const fbVal = getKnobValue(m.type, 'feedback', m.params.feedback ?? 3000);
 
-      lines.push(`  (def ${id}out (flanger :in ${inSig} :rate ${rateExpr} :depth ${depthExpr} :feedback ${fbVal}))`);
+      lines.push(`  (def ${id} (flanger :in ${inSig} :rate ${rateExpr} :depth ${depthExpr} :feedback ${fbVal}))`);
+      lines.push(`  (def ${id}outL ${id})`);
+      lines.push(`  (def ${id}outR (sel ${id}))`); // sel = canonical out2/value_r accessor
       continue;
     } else if (m.type === 'compressor') {
       const inCable = state.cables.find(c => c.toId === id && c.toPort === 'in');
       const inSig = getCabledSourceExpr(inCable, allMods);
 
       const threshVal = getKnobValue(m.type, 'threshold', m.params.threshold ?? 3000);
-      const ratioVal  = getKnobValue(m.type, 'ratio', m.params.ratio ?? 2048);
-      const attVal    = getKnobValue(m.type, 'attack', m.params.attack ?? 100);
-      const relVal    = getKnobValue(m.type, 'release', m.params.release ?? 1000);
+      const ratioVal = getKnobValue(m.type, 'ratio', m.params.ratio ?? 2048);
+      const attVal = getKnobValue(m.type, 'attack', m.params.attack ?? 100);
+      const relVal = getKnobValue(m.type, 'release', m.params.release ?? 1000);
 
       lines.push(`  (def ${id}out (compressor :in ${inSig} :threshold ${threshVal} :ratio ${ratioVal} :attack ${attVal} :release ${relVal}))`);
       continue;
-      } else if (m.type === 'logic') {
+    } else if (m.type === 'logic') {
       const aCable = state.cables.find(c => c.toId === id && c.toPort === 'a');
       const bCable = state.cables.find(c => c.toId === id && c.toPort === 'b');
       const aSrc = getCabledSourceExpr(aCable, allMods);
       const bSrc = getCabledSourceExpr(bCable, allMods);
-      
+
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'and')) {
         lines.push(`  (def ${id}and (and ${aSrc} ${bSrc}))`);
       }
@@ -3607,7 +4007,7 @@ function generateCode(textOnly = false) {
       const bCable = state.cables.find(c => c.toId === id && c.toPort === 'b');
       const aSrc = getCabledSourceExpr(aCable, allMods);
       const bSrc = getCabledSourceExpr(bCable, allMods);
-      
+
       if (state.cables.some(c => c.fromId === id && c.fromPort === 'add')) {
         lines.push(`  (def ${id}add (add ${aSrc} ${bSrc}))`);
       }
@@ -3630,6 +4030,9 @@ function generateCode(textOnly = false) {
     } else if (m.type === 'constant') {
       const valKnob = getKnobValue(m.type, 'val', m.params.val ?? 2048);
       lines.push(`  (def ${id}out ${valKnob})`);
+      lines.push(`  (def ${id}out1 ${valKnob})`);
+      lines.push(`  (def ${id}out2 ${valKnob})`);
+      lines.push(`  (def ${id}out3 ${valKnob})`);
       continue;
     } else if (m.type === 'benjolin') {
       const pitch1Cable = state.cables.find(c => c.toId === id && c.toPort === 'pitch1');
@@ -3640,7 +4043,7 @@ function generateCode(textOnly = false) {
       const f1Knob = getKnobValue(m.type, 'freq1', m.params.freq1 ?? 1935);
       const f2Knob = getKnobValue(m.type, 'freq2', m.params.freq2 ?? 1935);
       const runglerKnob = getKnobValue(m.type, 'rungler', m.params.rungler ?? 1024);
-      
+
       const lockDef = def.knobs.find(k => k.param === 'lock');
       const lockIdx = Math.max(0, Math.min(lockDef.discrete.length - 1, Math.floor((m.params.lock ?? 0) / 4096 * lockDef.discrete.length)));
       const isLocked = lockDef.discrete[lockIdx] === 'lock' ? 1 : 0;
@@ -3654,10 +4057,10 @@ function generateCode(textOnly = false) {
       lines.push(`  (def ${id}pitch2 (add (spread ${f2Knob} 73) (add ${p2Sig} ${id}fm)))`);
       lines.push(`  (def ${id}out1 (triangle :note ${id}pitch1))`);
       lines.push(`  (def ${id}out2 (square :note ${id}pitch2))`);
-      
-      lines.push(`  (def ${id}c1 (gt ${id}out1 VMID))`);
+
+      lines.push(`  (def ${id}c1 (gt ${id}out1 0))`);
       if (isLocked) {
-        sinkLines.push(`  (<- ${id}reg ${id}c1 :trig ${id}out2)`);
+        sinkLines.push(`  (<- ${id}reg (tap ${id}reg 8) :trig ${id}out2)`);
       } else {
         lines.push(`  (def ${id}fb (xor ${id}c1 (tap ${id}reg 8)))`);
         sinkLines.push(`  (<- ${id}reg ${id}fb :trig ${id}out2)`);
@@ -3668,7 +4071,7 @@ function generateCode(textOnly = false) {
       const in2 = getCabledSourceExpr(state.cables.find(c => c.toId === id && c.toPort === 'in2'), allMods);
       const in3 = getCabledSourceExpr(state.cables.find(c => c.toId === id && c.toPort === 'in3'), allMods);
       const in4 = getCabledSourceExpr(state.cables.find(c => c.toId === id && c.toPort === 'in4'), allMods);
-      
+
       const posCable = state.cables.find(c => c.toId === id && c.toPort === 'pos');
       const posKnob = getKnobValue(m.type, 'pos', m.params.pos ?? 0);
       let posExpr = `${posKnob}`;
@@ -3717,16 +4120,15 @@ function generateCode(textOnly = false) {
     } else if (m.type === 'turns') {
       const trigCable = state.cables.find(c => c.toId === id && c.toPort === 'trig');
       const trigSig = getCabledSourceExpr(trigCable, allMods);
-      const nVal = getKnobValue(m.type, 'n', m.params.n ?? 4);
-      lines.push(`  (def ${id} (counter :bars ${nVal} :trig ${trigSig}))`);
+      lines.push(`  (def ${id} (turns ${trigSig}))`);
       continue;
     } else if (m.type === 'hold') {
       // hold expander expects positional form: (hold VAL GATE)
       // keyword :val is NOT supported by the expander — must use positional args.
       const valCable = state.cables.find(c => c.toId === id && c.toPort === 'val');
-      const onCable  = state.cables.find(c => c.toId === id && c.toPort === 'on');
+      const onCable = state.cables.find(c => c.toId === id && c.toPort === 'on');
       const valSrc = valCable ? getCabledSourceExpr(valCable, allMods) : '0';
-      const onSrc  = onCable  ? getCabledSourceExpr(onCable, allMods)  : '0';
+      const onSrc = onCable ? getCabledSourceExpr(onCable, allMods) : '0';
       lines.push(`  (def ${id} (hold ${valSrc} ${onSrc}))`);
       continue;
     } else if (m.type === 'tape-looper') {
@@ -3736,17 +4138,22 @@ function generateCode(textOnly = false) {
 
       const inSig = getCabledSourceExpr(inCable, allMods);
       const recSig = recCable ? getCabledSourceExpr(recCable, allMods) : '0';
-      
-      const speedKnob = getKnobValue(m.type, 'speed', m.params.speed ?? 2048);
-      const speedScale = (speedKnob - 2048) / 2048 * 2.0 + 1.0;
-      let speedExpr = `${speedScale.toFixed(3)}`;
-      if (speedCable) {
-        const speedSrc = getCabledSourceExpr(speedCable, allMods);
-        speedExpr = `(add ${speedExpr} (spread ${speedSrc} 2))`;
-      }
 
       const lenKnob = m.params.len ?? 2048;
       const seconds = Math.max(1, Math.min(4, Math.floor(lenKnob / 4096 * 4) + 1));
+
+      const speedKnob = getKnobValue(m.type, 'speed', m.params.speed ?? 2048);
+      const speedScale = Math.pow(2.0, (speedKnob - 2048) / 1024); // log sweep 0.25x to 4.0x, 1x at noon
+
+      const f = speedScale / seconds;
+      const b = Math.max(0, Math.min(255, 255 * Math.log(f / 0.05) / Math.log(400000)));
+      const rateCode = Math.round(b * 16);
+
+      let speedExpr = `${rateCode}`;
+      if (speedCable) {
+        const speedSrc = getCabledSourceExpr(speedCable, allMods);
+        speedExpr = `(add ${rateCode} (bipolar ${speedSrc}))`;
+      }
 
       lines.push(`  (def ${id}buf (audio :seconds ${seconds.toFixed(2)}))`);
       sinkLines.push(`  (<- ${id}buf ${inSig} :per-sample :when ${recSig})`);
@@ -3754,11 +4161,11 @@ function generateCode(textOnly = false) {
       continue;
     } else if (m.type === 'dx' && m.params.customVoiceData) {
       const pitchCable = state.cables.find(c => c.toId === id && c.toPort === 'pitch');
-      const gateCable  = state.cables.find(c => c.toId === id && c.toPort === 'gate');
+      const gateCable = state.cables.find(c => c.toId === id && c.toPort === 'gate');
       const decayCable = state.cables.find(c => c.toId === id && c.toPort === 'decay');
 
       const pitchSig = pitchCable ? getCabledSourceExpr(pitchCable, allMods) : '69';
-      const gateSig  = gateCable  ? getCabledSourceExpr(gateCable, allMods)  : '0';
+      const gateSig = gateCable ? getCabledSourceExpr(gateCable, allMods) : '0';
 
       const decayVal = getKnobValue(m.type, 'decay', m.params.decay ?? 2048);
       const decaySig = decayCable ? getCabledSourceExpr(decayCable, allMods) : decayVal;
@@ -3774,7 +4181,7 @@ function generateCode(textOnly = false) {
         const cable = state.cables.find(c => c.toId === id && c.toPort === p.id);
         if (cable) {
           const src = getCabledSourceExpr(cable, allMods);
-          
+
           // Sum the cabled CV signal with the corresponding knob parameter (if any) with saturation clamping.
           // If there is a matching `${portId}amt` knob, scale the CV through it first.
           const kDef = (def.knobs || []).find(k => k.param === p.id);
@@ -3851,30 +4258,16 @@ function generateCode(textOnly = false) {
     if (!hw) continue;
 
     const fromMod = allMods.find(m => m.id === c.fromId);
-    if (fromMod && MODULE_DEFS[fromMod.type]?.isHW) continue;
 
     if (c.toPort === 'cv-out-1' || c.toPort === 'cv-out-2') {
-      const isPitchSource = (fromMod.type === 'score-player' && c.fromPort === 'note') ||
-                            (fromMod.type === 'midi-note'    && c.fromPort === 'note') ||
-                            (fromMod.type === 'turing'       && c.fromPort === 'out')  ||
-                            (fromMod.type === 'step-seq'     && c.fromPort === 'out')  ||
-                            (fromMod.type === 'ws-in'        && (c.fromPort === 'cv-in-1' || c.fromPort === 'cv-in-2'));
+      const isPitchSource = isModulePortPitch(c.fromId, c.fromPort);
       if (isPitchSource) {
         const num = c.toPort === 'cv-out-1' ? '1' : '2';
         hw = `(cv-out :${num} :v-oct)`;
       }
     }
 
-    const fromPorts = MODULE_DEFS[fromMod?.type]?.outputs || [];
-    let src;
-    
-    // Check if source is a macro module
-    if (fromMod && MODULE_DEFS[fromMod.type]?.isMacro) {
-      src = `${c.fromId}${c.fromPort}`;
-    } else {
-      const isDefaultOut = fromPorts.length === 1 || c.fromPort === 'out';
-      src = isDefaultOut ? c.fromId : `(${c.fromId} :${c.fromPort})`;
-    }
+    const src = getCabledSourceExpr(c, allMods);
     sinkLines.push(`  (<- ${hw} ${src})`);
   }
 
@@ -3895,7 +4288,7 @@ function generateCode(textOnly = false) {
   const lastCodeFunc = lastGeneratedCode.split('; flare_layout:')[0] || '';
   const currentCodeFunc = code.split('; flare_layout:')[0] || '';
   const hasCodeChanged = (currentCodeFunc !== lastCodeFunc);
-  
+
   lastGeneratedCode = code;
 
   $('codeArea').value = code;
@@ -3921,59 +4314,53 @@ function generateCode(textOnly = false) {
 function compileAndStatus(code) {
   const statusEl = $('status');
   try {
-    const ast      = Lens.read(code);
+    const ast = Lens.read(code);
     const expanded = Lens.expand(ast, { loadFile: __webLoadFile });
-    const lowered  = Lens.lower(expanded);
-    const sched    = Lens.schedule(lowered);
+    const lowered = Lens.lower(expanded);
+    const sched = Lens.schedule(lowered);
     compiledSnapshot = Lens.encode(sched, lowered);
     rebuildKnobConstantMap();
 
     nodesCount = lowered.slots?.length ?? 0;
+    const budget = sched.budget;
+    const c0Pct = (budget.core0.total / budget.core0.budget * 100).toFixed(0);
+    const c1Pct = (budget.core1.total / budget.core1.budget * 100).toFixed(0);
+    isCpuOverBudget = !budget.ok;
+
+    const cpuEl = $('cpu-status');
+    if (cpuEl) {
+      const over = !budget.ok ? " (OVER BUDGET!)" : "";
+      cpuEl.textContent = `CPU: ${c0Pct}% / ${c1Pct}%${over}`;
+      cpuEl.className = !budget.ok ? 'status-pill err' : 'status-pill ok';
+      cpuEl.style.display = 'block';
+    }
+    const memEl = $('mem-status');
+    if (memEl && sched.memory) {
+      const mem = sched.memory;
+      const audioPct = (mem.audio.total / mem.audio.budget * 100).toFixed(0);
+      const statePct = (mem.nodestate.total / mem.nodestate.budget * 100).toFixed(0);
+      const over = !mem.ok ? " (OVER MEMORY!)" : "";
+      memEl.textContent = `MEM: Audio ${audioPct}% · State ${statePct}%${over}`;
+      memEl.className = !mem.ok ? 'status-pill err' : 'status-pill ok';
+      memEl.style.display = 'block';
+    }
+
     statusEl.textContent = `${nodesCount} nodes · ${compiledSnapshot.length} B${midiOut ? ' · ' + midiOut.name : ''}`;
     statusEl.className = 'ok';
-    $('sendBtn').disabled = $('saveCardBtn').disabled = $('perfBtn').disabled = !compiledSnapshot;
+    $('sendBtn').disabled = $('saveCardBtn').disabled = !compiledSnapshot;
     triggerLiveUpdate();
   } catch (e) {
     compiledSnapshot = null;
     statusEl.textContent = e.message;
     statusEl.className = 'err';
-    $('sendBtn').disabled = $('saveCardBtn').disabled = $('perfBtn').disabled = true;
+    const cpuEl = $('cpu-status');
+    if (cpuEl) cpuEl.style.display = 'none';
+    const memEl = $('mem-status');
+    if (memEl) memEl.style.display = 'none';
+    $('sendBtn').disabled = $('saveCardBtn').disabled = true;
   }
 }
 
-async function measurePerf() {
-  const btn = $('perfBtn');
-  const statusEl = $('status');
-  if (!midiOut) {
-    alert('MIDI not connected. Please click "Connect MIDI" to connect your Eurorack card first.');
-    return;
-  }
-  btn.textContent = 'Measuring...';
-  try {
-    midiOut.send([...Lens.frame(6, [])]);
-    const m = await recvAck();
-    if (m.cmd === 0x01) {
-      throw new Error('Profiler disabled (rebuild firmware with LENS_PERF_PROBE=ON)');
-    }
-    if (m.cmd !== 0x11) {
-      throw new Error(`expected PERF_DUMP, got 0x${m.cmd.toString(16)}`);
-    }
-    const payload = new Uint8Array(m.payload);
-    const v = new DataView(payload.buffer, payload.byteOffset, payload.byteLength);
-    const total_avg = v.getUint32(24, true);
-    const sysclk    = v.getUint32(8, true);
-    const budget    = sysclk / 48000 | 0;
-    const load_pct  = budget ? (total_avg / budget * 100) : 0;
-    
-    btn.textContent = `Measure CPU (${load_pct.toFixed(1)}% Load)`;
-    statusEl.textContent = `CPU Load: ${load_pct.toFixed(1)}% (Avg cycles: ${total_avg} / Budget: ${budget})`;
-    statusEl.className = 'ok';
-  } catch(e) {
-    btn.textContent = 'Measure CPU';
-    statusEl.textContent = 'Perf Error: ' + e.message;
-    statusEl.className = 'err';
-  }
-}
 
 async function connectMidi() {
   const s = $('status');
@@ -3981,26 +4368,33 @@ async function connectMidi() {
   try {
     const midi = await navigator.requestMIDIAccess({ sysex: true });
     midiOut = [...midi.outputs.values()].find(p => /lens|workshop|music thing/i.test(p.name)) || null;
-    midiIn  = [...midi.inputs.values()].find(p => /lens|workshop|music thing/i.test(p.name)) || null;
+    midiIn = [...midi.inputs.values()].find(p => /lens|workshop|music thing/i.test(p.name)) || null;
     if (!midiOut || !midiIn) { s.textContent = 'Workshop card not found'; s.className = 'err'; return; }
     midiIn.onmidimessage = ev => { const m = Lens.parse([...ev.data]); if (m && ackWaiter) { const w = ackWaiter; ackWaiter = null; w(m); } };
     $('connectMidiBtn').textContent = 'Connected';
+    $('connectMidiBtn').style.display = 'none';
+    $('midiConnectedGroup').style.display = 'flex';
     lastUploadedSnapshot = null;
     generateCode();
-  } catch(e) { s.textContent = 'MIDI: ' + e.message; s.className = 'err'; }
+  } catch (e) {
+    s.textContent = 'MIDI: ' + e.message; s.className = 'err';
+    $('connectMidiBtn').textContent = 'Connect MIDI';
+    $('connectMidiBtn').style.display = 'inline-block';
+    $('midiConnectedGroup').style.display = 'none';
+  }
 }
 
-const recvAck = (ms=1500) => new Promise((res,rej) => {
-  const t = setTimeout(()=>{ ackWaiter=null; rej(new Error('ACK timeout')); }, ms);
+const recvAck = (ms = 1500) => new Promise((res, rej) => {
+  const t = setTimeout(() => { ackWaiter = null; rej(new Error('ACK timeout')); }, ms);
   ackWaiter = m => { clearTimeout(t); res(m); };
 });
 
 async function writeSnapshot() {
-  for (let t=0; t<4; t++) {
+  for (let t = 0; t < 4; t++) {
     midiOut.send([...Lens.frame(Lens.CMD.WRITE_STATE, compiledSnapshot)]);
     const m = await recvAck();
     if (m.cmd === Lens.CMD.ACK) return;
-    if (m.cmd === Lens.CMD.NACK && m.payload[1] === 0x06) { await new Promise(r=>setTimeout(r,150)); continue; }
+    if (m.cmd === Lens.CMD.NACK && m.payload[1] === 0x06) { await new Promise(r => setTimeout(r, 150)); continue; }
     throw new Error(`NACK ${m.payload[1]}`);
   }
   throw new Error('Card busy');
@@ -4020,7 +4414,7 @@ async function sendPatch() {
     s.textContent = 'playing!';
     s.className = 'ok';
   }
-  catch(e) { s.textContent = e.message; s.className = 'err'; }
+  catch (e) { s.textContent = e.message; s.className = 'err'; }
   $('sendBtn').disabled = !compiledSnapshot;
 }
 
@@ -4035,15 +4429,17 @@ async function saveToFlash() {
   try {
     await writeSnapshot();
     lastUploadedSnapshot = new Uint8Array(compiledSnapshot);
-    await new Promise(r=>setTimeout(r,700));
+    await new Promise(r => setTimeout(r, 700));
     midiOut.send([...Lens.frame(Lens.CMD.SAVE_STATE)]);
     const m = await recvAck(3000);
     if (m.cmd !== Lens.CMD.ACK) throw new Error('flash save failed');
     s.textContent = 'saved! rebooting…'; s.className = 'ok';
     $('connectMidiBtn').textContent = 'Connect MIDI';
+    $('connectMidiBtn').style.display = 'inline-block';
+    $('midiConnectedGroup').style.display = 'none';
     midiOut = midiIn = null;
     lastUploadedSnapshot = null;
-  } catch(e) { s.textContent = e.message; s.className = 'err'; }
+  } catch (e) { s.textContent = e.message; s.className = 'err'; }
   generateCode();
 }
 
@@ -4119,7 +4515,7 @@ function setupCodePaneResizeAndControls() {
     if (!isResizingCodePane) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const newWidth = window.innerWidth - clientX;
-    
+
     if (newWidth > 180 && newWidth < window.innerWidth - 100) {
       codePaneWidth = newWidth;
       codePaneMaximized = false;
@@ -4143,61 +4539,61 @@ function setupCodePaneResizeAndControls() {
 
 // ── DX7 SysEx Parser & Importer ──────────────────────────────────────
 const DX7_ALGORITHMS = {
-  1: { carriers:[1,3], edges:[[2,1],[4,3],[5,4],[6,5]], feedback:[6,6] },
-  2: { carriers:[1,3], edges:[[2,1],[4,3],[5,4],[6,5]], feedback:[2,2] },
-  3: { carriers:[1,4], edges:[[2,1],[3,2],[5,4],[6,5]], feedback:[6,6] },
-  4: { carriers:[1,4], edges:[[2,1],[3,2],[5,4],[6,5]], feedback:[4,6] },
-  5: { carriers:[1,3,5], edges:[[2,1],[4,3],[6,5]], feedback:[6,6] },
-  6: { carriers:[1,3,5], edges:[[2,1],[4,3],[6,5]], feedback:[5,6] },
-  7: { carriers:[1,3], edges:[[2,1],[4,3],[5,3],[6,5]], feedback:[6,6] },
-  8: { carriers:[1,3], edges:[[2,1],[4,3],[5,3],[6,5]], feedback:[4,4] },
-  9: { carriers:[1,3], edges:[[2,1],[4,3],[5,3],[6,5]], feedback:[2,2] },
-  10: { carriers:[1,4], edges:[[2,1],[3,2],[5,4],[6,4]], feedback:[3,3] },
-  11: { carriers:[1,4], edges:[[2,1],[3,2],[5,4],[6,4]], feedback:[6,6] },
-  12: { carriers:[1,3], edges:[[2,1],[4,3],[5,3],[6,3]], feedback:[2,2] },
-  13: { carriers:[1,3], edges:[[2,1],[4,3],[5,3],[6,3]], feedback:[6,6] },
-  14: { carriers:[1,3], edges:[[2,1],[4,3],[5,4],[6,4]], feedback:[6,6] },
-  15: { carriers:[1,3], edges:[[2,1],[4,3],[5,4],[6,4]], feedback:[2,2] },
-  16: { carriers:[1], edges:[[2,1],[3,1],[5,1],[4,3],[6,5]], feedback:[6,6] },
-  17: { carriers:[1], edges:[[2,1],[3,1],[5,1],[4,3],[6,5]], feedback:[2,2] },
-  18: { carriers:[1], edges:[[2,1],[3,1],[4,1],[5,4],[6,5]], feedback:[3,3] },
-  19: { carriers:[1,4,5], edges:[[2,1],[3,2],[6,4],[6,5]], feedback:[6,6] },
-  20: { carriers:[1,2,4], edges:[[3,1],[3,2],[5,4],[6,4]], feedback:[3,3] },
-  21: { carriers:[1,2,4,5], edges:[[3,1],[3,2],[6,4],[6,5]], feedback:[3,3] },
-  22: { carriers:[1,3,4,5], edges:[[2,1],[6,3],[6,4],[6,5]], feedback:[6,6] },
-  23: { carriers:[1,2,4,5], edges:[[3,2],[6,4],[6,5]], feedback:[6,6] },
-  24: { carriers:[1,2,3,4,5], edges:[[6,3],[6,4],[6,5]], feedback:[6,6] },
-  25: { carriers:[1,2,3,4,5], edges:[[6,4],[6,5]], feedback:[6,6] },
-  26: { carriers:[1,2,4], edges:[[3,2],[5,4],[6,4]], feedback:[6,6] },
-  27: { carriers:[1,2,4], edges:[[3,2],[5,4],[6,4]], feedback:[3,3] },
-  28: { carriers:[1,3,6], edges:[[2,1],[4,3],[5,4]], feedback:[5,5] },
-  29: { carriers:[1,2,3,5], edges:[[4,3],[6,5]], feedback:[6,6] },
-  30: { carriers:[1,2,3,6], edges:[[4,3],[5,4]], feedback:[5,5] },
-  31: { carriers:[1,2,3,4,5], edges:[[6,5]], feedback:[6,6] },
-  32: { carriers:[1,2,3,4,5,6], edges:[], feedback:[6,6] },
+  1: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 4], [6, 5]], feedback: [6, 6] },
+  2: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 4], [6, 5]], feedback: [2, 2] },
+  3: { carriers: [1, 4], edges: [[2, 1], [3, 2], [5, 4], [6, 5]], feedback: [6, 6] },
+  4: { carriers: [1, 4], edges: [[2, 1], [3, 2], [5, 4], [6, 5]], feedback: [4, 6] },
+  5: { carriers: [1, 3, 5], edges: [[2, 1], [4, 3], [6, 5]], feedback: [6, 6] },
+  6: { carriers: [1, 3, 5], edges: [[2, 1], [4, 3], [6, 5]], feedback: [5, 6] },
+  7: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 3], [6, 5]], feedback: [6, 6] },
+  8: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 3], [6, 5]], feedback: [4, 4] },
+  9: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 3], [6, 5]], feedback: [2, 2] },
+  10: { carriers: [1, 4], edges: [[2, 1], [3, 2], [5, 4], [6, 4]], feedback: [3, 3] },
+  11: { carriers: [1, 4], edges: [[2, 1], [3, 2], [5, 4], [6, 4]], feedback: [6, 6] },
+  12: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 3], [6, 3]], feedback: [2, 2] },
+  13: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 3], [6, 3]], feedback: [6, 6] },
+  14: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 4], [6, 4]], feedback: [6, 6] },
+  15: { carriers: [1, 3], edges: [[2, 1], [4, 3], [5, 4], [6, 4]], feedback: [2, 2] },
+  16: { carriers: [1], edges: [[2, 1], [3, 1], [5, 1], [4, 3], [6, 5]], feedback: [6, 6] },
+  17: { carriers: [1], edges: [[2, 1], [3, 1], [5, 1], [4, 3], [6, 5]], feedback: [2, 2] },
+  18: { carriers: [1], edges: [[2, 1], [3, 1], [4, 1], [5, 4], [6, 5]], feedback: [3, 3] },
+  19: { carriers: [1, 4, 5], edges: [[2, 1], [3, 2], [6, 4], [6, 5]], feedback: [6, 6] },
+  20: { carriers: [1, 2, 4], edges: [[3, 1], [3, 2], [5, 4], [6, 4]], feedback: [3, 3] },
+  21: { carriers: [1, 2, 4, 5], edges: [[3, 1], [3, 2], [6, 4], [6, 5]], feedback: [3, 3] },
+  22: { carriers: [1, 3, 4, 5], edges: [[2, 1], [6, 3], [6, 4], [6, 5]], feedback: [6, 6] },
+  23: { carriers: [1, 2, 4, 5], edges: [[3, 2], [6, 4], [6, 5]], feedback: [6, 6] },
+  24: { carriers: [1, 2, 3, 4, 5], edges: [[6, 3], [6, 4], [6, 5]], feedback: [6, 6] },
+  25: { carriers: [1, 2, 3, 4, 5], edges: [[6, 4], [6, 5]], feedback: [6, 6] },
+  26: { carriers: [1, 2, 4], edges: [[3, 2], [5, 4], [6, 4]], feedback: [6, 6] },
+  27: { carriers: [1, 2, 4], edges: [[3, 2], [5, 4], [6, 4]], feedback: [3, 3] },
+  28: { carriers: [1, 3, 6], edges: [[2, 1], [4, 3], [5, 4]], feedback: [5, 5] },
+  29: { carriers: [1, 2, 3, 5], edges: [[4, 3], [6, 5]], feedback: [6, 6] },
+  30: { carriers: [1, 2, 3, 6], edges: [[4, 3], [5, 4]], feedback: [5, 5] },
+  31: { carriers: [1, 2, 3, 4, 5], edges: [[6, 5]], feedback: [6, 6] },
+  32: { carriers: [1, 2, 3, 4, 5, 6], edges: [], feedback: [6, 6] },
 };
 
 function unpackDx7Op(b, o) {
   return {
-    r:[b[o],b[o+1],b[o+2],b[o+3]],
-    l:[b[o+4],b[o+5],b[o+6],b[o+7]],
-    outLevel: b[o+14],
-    mode:     b[o+15] & 1,
-    coarse:  (b[o+15] >> 1) & 31,
-    fine:     b[o+16],
-    detune:  (b[o+12] >> 3) & 15,
+    r: [b[o], b[o + 1], b[o + 2], b[o + 3]],
+    l: [b[o + 4], b[o + 5], b[o + 6], b[o + 7]],
+    outLevel: b[o + 14],
+    mode: b[o + 15] & 1,
+    coarse: (b[o + 15] >> 1) & 31,
+    fine: b[o + 16],
+    detune: (b[o + 12] >> 3) & 15,
   };
 }
 
 function parseDx7Voice(b128) {
   const ops = [];
-  for (let i = 0; i < 6; i++) ops[5-i] = unpackDx7Op(b128, i*17);
+  for (let i = 0; i < 6; i++) ops[5 - i] = unpackDx7Op(b128, i * 17);
   return {
     ops,
     algorithm: (b128[110] & 31) + 1,
-    feedback:   b128[111] & 7,
-    transpose:  b128[117],
-    name: Array.from(b128.slice(118,128)).map(c => String.fromCharCode(c)).join('').replace(/[^\x20-\x7e]/g,' ').trim(),
+    feedback: b128[111] & 7,
+    transpose: b128[117],
+    name: Array.from(b128.slice(118, 128)).map(c => String.fromCharCode(c)).join('').replace(/[^\x20-\x7e]/g, ' ').trim(),
     data: Array.from(b128)
   };
 }
@@ -4206,11 +4602,11 @@ function parseDx7Bank(buf) {
   let body = buf;
   if (buf[0] === 0xF0) body = buf.slice(6, 6 + 4096);
   const voices = [];
-  for (let v = 0; v < 32; v++) voices.push(parseDx7Voice(body.slice(v*128, v*128+128)));
+  for (let v = 0; v < 32; v++) voices.push(parseDx7Voice(body.slice(v * 128, v * 128 + 128)));
   return voices;
 }
 
-const DX7_LEVELLUT = [0,5,9,13,17,20,23,25,27,29,31,33,35,37,39,41,42,43,45,46];
+const DX7_LEVELLUT = [0, 5, 9, 13, 17, 20, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 42, 43, 45, 46];
 const scaleDx7Out = x => x >= 20 ? 28 + x : DX7_LEVELLUT[x < 0 ? 0 : (x > 19 ? 19 : x)];
 
 function opDx7Gain(egL, outLevel) {
@@ -4229,55 +4625,55 @@ function dx7egLevel(egL, outLevel) {
 
 function dx7RatioOf(op) {
   const base = op.coarse === 0 ? 0.5 : op.coarse;
-  return base * (1 + op.fine/100);
+  return base * (1 + op.fine / 100);
 }
 
 function dx7PitchOffset(op) {
   const oct = Math.log2(dx7RatioOf(op));
-  const semisF = 12*oct;
+  const semisF = 12 * oct;
   const semi = Math.round(semisF);
-  let cents = Math.round((semisF-semi)*100) + Math.round((op.detune-7)*2.7);
+  let cents = Math.round((semisF - semi) * 100) + Math.round((op.detune - 7) * 2.7);
   return { semi, cents };
 }
 
 function emitDx7VoiceFn(voice, name) {
   const alg = DX7_ALGORITHMS[voice.algorithm];
-  if(!alg) throw new Error('algorithm '+voice.algorithm+' not in table yet');
+  if (!alg) throw new Error('algorithm ' + voice.algorithm + ' not in table yet');
   const fbTarget = alg.feedback ? alg.feedback[1] : null;
-  const L=[];
-  L.push('; DX7 voice "'+voice.name+'"  algorithm '+voice.algorithm+'  feedback '+voice.feedback);
-  L.push('(def '+name+' (fn (:gate :pitch => :out)');
-  const done=new Set();
+  const L = [];
+  L.push('; DX7 voice "' + voice.name + '"  algorithm ' + voice.algorithm + '  feedback ' + voice.feedback);
+  L.push('(def ' + name + ' (fn (:gate :pitch => :out)');
+  const done = new Set();
   const emit = n => {
-    if(done.has(n)) return;
+    if (done.has(n)) return;
     done.add(n);
-    const mods=(alg.edges||[]).filter(e=>e[1]===n && e[0]!==n).map(e=>e[0]);
+    const mods = (alg.edges || []).filter(e => e[1] === n && e[0] !== n).map(e => e[0]);
     mods.forEach(emit);
-    const op=voice.ops[n-1];
-    const {semi,cents}=dx7PitchOffset(op);
-    const note = semi===0 ? 'pitch' : '(add pitch '+semi+')';
-    const centsArg = cents!==0 ? ' :cents '+cents : '';
-    const Le=op.l.map(l=>dx7egLevel(l, op.outLevel));
-    const env='(dxeg :gate gate :r1 '+op.r[0]+' :r2 '+op.r[1]+' :r3 '+op.r[2]+' :r4 '+op.r[3]+
-              ' :l1 '+Le[0]+' :l2 '+Le[1]+' :l3 '+Le[2]+' :l4 '+Le[3]+')';
-    const pmParts = mods.map(m => 'op'+m);
-    const pmSrc = pmParts.length>1 ? '(mix '+pmParts.join(' ')+')' : pmParts[0];
-    const pm = pmParts.length ? ' :pm '+pmSrc : '';
+    const op = voice.ops[n - 1];
+    const { semi, cents } = dx7PitchOffset(op);
+    const note = semi === 0 ? 'pitch' : '(add pitch ' + semi + ')';
+    const centsArg = cents !== 0 ? ' :cents ' + cents : '';
+    const Le = op.l.map(l => dx7egLevel(l, op.outLevel));
+    const env = '(dxeg :gate gate :r1 ' + op.r[0] + ' :r2 ' + op.r[1] + ' :r3 ' + op.r[2] + ' :r4 ' + op.r[3] +
+      ' :l1 ' + Le[0] + ' :l2 ' + Le[1] + ' :l3 ' + Le[2] + ' :l4 ' + Le[3] + ')';
+    const pmParts = mods.map(m => 'op' + m);
+    const pmSrc = pmParts.length > 1 ? '(mix ' + pmParts.join(' ') + ')' : pmParts[0];
+    const pm = pmParts.length ? ' :pm ' + pmSrc : '';
     if (n === fbTarget && voice.feedback > 0) {
       const FBSCALE = Math.round(4095 * voice.feedback / 7);
-      L.push('  (def op'+n+'env '+env+')');
-      L.push('  (def op'+n+' (vca (sine :note '+note+centsArg+pm+
-             ' :fb (vca op'+n+'env '+FBSCALE+')) op'+n+'env))');
+      L.push('  (def op' + n + 'env ' + env + ')');
+      L.push('  (def op' + n + ' (vca (sine :note ' + note + centsArg + pm +
+        ' :fb (vca op' + n + 'env ' + FBSCALE + ')) op' + n + 'env))');
     } else {
-      const body='(vca (sine :note '+note+centsArg+pm+') '+env+')';
-      L.push('  (def op'+n+' '+body+')');
+      const body = '(vca (sine :note ' + note + centsArg + pm + ') ' + env + ')';
+      L.push('  (def op' + n + ' ' + body + ')');
     }
   };
   alg.carriers.forEach(emit);
-  const sum = alg.carriers.length===1 ? 'op'+alg.carriers[0]
-            : '(mix '+alg.carriers.map(c=>'op'+c).join(' ')+')';
-  L.push('  (<- out (vca '+sum+' 2047))))');
-  return L.join('\n')+'\n';
+  const sum = alg.carriers.length === 1 ? 'op' + alg.carriers[0]
+    : '(mix ' + alg.carriers.map(c => 'op' + c).join(' ') + ')';
+  L.push('  (<- out (vca ' + sum + ' 2047))))');
+  return L.join('\n') + '\n';
 }
 
 function showVoiceSelectionModal(voices, onSelect) {
@@ -4358,7 +4754,7 @@ function init() {
     loadPatch('flare_autosave');
   } else {
     // Initialize WS IN on row 0 and WS OUT on row 1 (both 6 HP, snap alignment)
-    addModuleToRow('ws-in',  0, {}, { id: 'wsIn', left: 0 });
+    addModuleToRow('ws-in', 0, {}, { id: 'wsIn', left: 0 });
     addModuleToRow('ws-out', 1, {}, { id: 'wsOut', left: 0 });
   }
 
@@ -4368,9 +4764,18 @@ function init() {
   $('closeBrowserBtn').addEventListener('click', closeBrowser);
   $('addRowBtn').addEventListener('click', () => { addRow(); });
   $('connectMidiBtn').addEventListener('click', connectMidi);
+  $('disconnectMidiBtn').addEventListener('click', () => {
+    midiOut = midiIn = null;
+    lastUploadedSnapshot = null;
+    $('connectMidiBtn').textContent = 'Connect MIDI';
+    $('connectMidiBtn').style.display = 'inline-block';
+    $('midiConnectedGroup').style.display = 'none';
+    $('status').textContent = 'disconnected';
+    $('status').className = 'status-pill';
+    generateCode();
+  });
   $('sendBtn').addEventListener('click', sendPatch);
   $('saveCardBtn').addEventListener('click', saveToFlash);
-  $('perfBtn').addEventListener('click', measurePerf);
 
   // Local storage save/load presets
   const savePatchBtn = $('savePatchBtn');
@@ -4437,7 +4842,7 @@ function init() {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function (evt) {
       const buf = new Uint8Array(evt.target.result);
       try {
         const voices = parseDx7Bank(buf);
@@ -4451,13 +4856,13 @@ function init() {
             `  (<- (audio-out :1) (${name} :gate g :pitch C3))`,
             `  (<- (audio-out :2) (${name} :gate g :pitch C3)))`
           ].join('\n');
-          
+
           DX7_PRESETS[3] = voices.map(v => v.name);
           const bankKnobDef = MODULE_DEFS.dx.knobs.find(k => k.param === 'bank');
           if (bankKnobDef && !bankKnobDef.discrete.includes(3)) {
             bankKnobDef.discrete.push(3);
           }
-          
+
           loadLoupePatch(demoPatch);
           const pane = $('codePane');
           const btn = $('toggleCodeBtn');
@@ -4510,122 +4915,19 @@ window.addEventListener('DOMContentLoaded', init);
 // 15. LOCAL STORAGE SAVE / LOAD
 // ═══════════════════════════════════════════════════════════════════════
 
-const FACTORY_PATCHES = {
-  'factory_drum': {
-    name: '🥁 Preset: Drum Machine',
-    state: {
-      rows: [
-        [
-          { id: 'wsIn', type: 'ws-in', left: 0, params: {} },
-          { id: 'clock1', type: 'clock', left: 120, params: { bpm: 1638, fm: 0, width: 2048 } },
-          { id: 'multidiv1', type: 'multi-div', left: 240, params: {} },
-          { id: 'kick1', type: 'kick', left: 390, params: { note: 1161, decay: 2048, drive: 1000 } },
-          { id: 'snare1', type: 'snare', left: 570, params: { note: 1451, decay: 1500, snappy: 2048 } },
-          { id: 'hat1', type: 'hat', left: 750, params: { note: 2580, decay: 800 } }
-        ],
-        [
-          { id: 'wsOut', type: 'ws-out', left: 0, params: {} },
-          { id: 'mix1', type: 'mix', left: 120, params: { volA: 3500, volB: 3000, volC: 2500, volD: 2048 } },
-          { id: 'vca1', type: 'vca', left: 270, params: { amp: 4095 } }
-        ]
-      ],
-      cables: [
-        { fromId: 'clock1', fromPort: 'out', toId: 'multidiv1', toPort: 'trig', color: '#ff5e57' },
-        { fromId: 'multidiv1', fromPort: 'div2', toId: 'kick1', toPort: 'trig', color: '#ffaa00' },
-        { fromId: 'multidiv1', fromPort: 'div4', toId: 'snare1', toPort: 'trig', color: '#ffea00' },
-        { fromId: 'multidiv1', fromPort: 'div2', toId: 'hat1', toPort: 'trig', color: '#00ff66' },
-        { fromId: 'kick1', fromPort: 'out', toId: 'mix1', toPort: 'a', color: '#00ffff' },
-        { fromId: 'snare1', fromPort: 'out', toId: 'mix1', toPort: 'b', color: '#0088ff' },
-        { fromId: 'hat1', fromPort: 'out', toId: 'mix1', toPort: 'c', color: '#cc00ff' },
-        { fromId: 'mix1', fromPort: 'out', toId: 'vca1', toPort: 'in', color: '#ff00ff' },
-        { fromId: 'vca1', fromPort: 'out', toId: 'wsOut', toPort: 'audio-out-1', color: '#ff5e57' },
-        { fromId: 'vca1', fromPort: 'out', toId: 'wsOut', toPort: 'audio-out-2', color: '#ff5e57' }
-      ],
-      nextId: 100
-    }
-  },
-  'factory_bass': {
-    name: '🎸 Preset: Acid Bassline',
-    state: {
-      rows: [
-        [
-          { id: 'wsIn', type: 'ws-in', left: 0, params: {} },
-          { id: 'clock1', type: 'clock', left: 120, params: { bpm: 1638, fm: 0, width: 2048 } },
-          { id: 'seq1', type: 'step-seq', left: 240, params: { val1: 1161, val2: 1258, val3: 1161, val4: 1548, val5: 1161, val6: 1258, val7: 1548, val8: 1838 } },
-          { id: 'saw1', type: 'saw', left: 420, params: { pitch: 1161, cents: 2048, depth: 0 } },
-          { id: 'lpf1', type: 'lpf2', left: 600, params: { cut: 1200, res: 2800 } }
-        ],
-        [
-          { id: 'wsOut', type: 'ws-out', left: 0, params: {} },
-          { id: 'env1', type: 'envelope', left: 120, params: { decay: 1500, peak: 4095 } },
-          { id: 'vca1', type: 'vca', left: 240, params: { amp: 4095 } }
-        ]
-      ],
-      cables: [
-        { fromId: 'clock1', fromPort: 'out', toId: 'seq1', toPort: 'trig', color: '#ff5e57' },
-        { fromId: 'clock1', fromPort: 'out', toId: 'env1', toPort: 'trig', color: '#ffaa00' },
-        { fromId: 'seq1', fromPort: 'out', toId: 'saw1', toPort: 'note', color: '#00ff66' },
-        { fromId: 'saw1', fromPort: 'out', toId: 'lpf1', toPort: 'in', color: '#00ffff' },
-        { fromId: 'env1', fromPort: 'out', toId: 'lpf1', toPort: 'cut', color: '#cc00ff' },
-        { fromId: 'lpf1', fromPort: 'out', toId: 'vca1', toPort: 'in', color: '#0088ff' },
-        { fromId: 'vca1', fromPort: 'out', toId: 'wsOut', toPort: 'audio-out-1', color: '#ff5e57' },
-        { fromId: 'vca1', fromPort: 'out', toId: 'wsOut', toPort: 'audio-out-2', color: '#ff5e57' }
-      ],
-      nextId: 100
-    }
-  },
-  'factory_melody': {
-    name: '🎶 Preset: Score Melody',
-    state: {
-      rows: [
-        [
-          { id: 'wsIn', type: 'ws-in', left: 0, params: {} },
-          { id: 'clock1', type: 'clock', left: 120, params: { bpm: 1638 } },
-          { id: 'score1', type: 'score-player', left: 240, params: { speed: 1638, pattern: '[c4 e4 g4 c5 b4 g4 e4 c4]' } },
-          { id: 'sine1', type: 'sine', left: 420, params: { pitch: 1935, cents: 2048, depth: 1000 } },
-          { id: 'delay1', type: 'delay', left: 600, params: { time: 2048, feedback: 2048, mix: 1500 } }
-        ],
-        [
-          { id: 'wsOut', type: 'ws-out', left: 0, params: {} },
-          { id: 'vca1', type: 'vca', left: 120, params: { amp: 4095 } }
-        ]
-      ],
-      cables: [
-        { fromId: 'clock1', fromPort: 'out', toId: 'score1', toPort: 'speed', color: '#ff5e57' },
-        { fromId: 'score1', fromPort: 'note', toId: 'sine1', toPort: 'note', color: '#00ff66' },
-        { fromId: 'sine1', fromPort: 'out', toId: 'delay1', toPort: 'in', color: '#00ffff' },
-        { fromId: 'delay1', fromPort: 'out', toId: 'vca1', toPort: 'in', color: '#0088ff' },
-        { fromId: 'vca1', fromPort: 'out', toId: 'wsOut', toPort: 'audio-out-1', color: '#ff5e57' },
-        { fromId: 'vca1', fromPort: 'out', toId: 'wsOut', toPort: 'audio-out-2', color: '#ff5e57' }
-      ],
-      nextId: 100
-    }
-  }
-};
-
 function updatePatchDropdown() {
   const select = $('patchSelect');
   if (!select) return;
   select.innerHTML = '<option value="">-- Load Patch --</option>';
-  
-  // Add Factory Presets
-  const factoryGroup = el('optgroup', '', { label: 'Factory Presets' });
-  for (const [key, patch] of Object.entries(FACTORY_PATCHES)) {
-    const opt = el('option');
-    opt.value = key;
-    opt.textContent = patch.name;
-    factoryGroup.appendChild(opt);
-  }
-  select.appendChild(factoryGroup);
 
-  // Add Loupe Presets from patches/
+  // Add Presets from patches/
   if (typeof LOUPE_PRESETS !== 'undefined') {
-    const loupeGroup = el('optgroup', '', { label: 'Test Patches (.loupe)' });
+    const loupeGroup = el('optgroup', '', { label: 'Presets' });
     for (const key of Object.keys(LOUPE_PRESETS)) {
       const opt = el('option');
       opt.value = 'loupe_' + key;
       const title = key.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-      opt.textContent = `📄 ${title}`;
+      opt.textContent = title;
       loupeGroup.appendChild(opt);
     }
     select.appendChild(loupeGroup);
@@ -4695,6 +4997,9 @@ function parseParamValue(valStr) {
     if (typeof valStr === 'number') return valStr;
     return 0;
   }
+  if (valStr.toUpperCase() === 'VMAX') return 4095;
+  if (valStr.toUpperCase() === 'VMID') return 2048;
+  if (valStr.toUpperCase() === 'VMIN') return 0;
   if (/^\d+$/.test(valStr)) {
     return parseInt(valStr);
   }
@@ -4719,20 +5024,45 @@ function loadLoupePatch(loupeCode) {
       try {
         const layoutData = JSON.parse(layoutMatch[1]);
         if (layoutData && layoutData.rows && layoutData.cables) {
+          // Normalize legacy/abbreviated types in visual layouts
+          for (let i = 0; i < layoutData.rows.length; i++) {
+            for (const m of layoutData.rows[i]) {
+              if (m.type === 'tri') m.type = 'triangle';
+              if (m.type === 'sqr') m.type = 'square';
+              if (m.type === 'sub') m.type = 'sub-osc';
+              if (m.type === 'svf') m.type = 'vcf';
+              if (m.type === 'env-follow') m.type = 'envfollow';
+              if (m.type === 'folder') m.type = 'wavefold';
+              if (m.type === 'lut') m.type = 'shape';
+              if (m.type === 'mixer') m.type = 'mix';
+              if (m.type === 'ar') m.type = 'envelope';
+            }
+          }
+          // Normalize cables from constant 'out' to 'out1'
+          if (layoutData.cables) {
+            const allMods = layoutData.rows.flat();
+            for (const c of layoutData.cables) {
+              const fromMod = allMods.find(m => m.id === c.fromId);
+              if (fromMod && fromMod.type === 'constant' && c.fromPort === 'out') {
+                c.fromPort = 'out1';
+              }
+            }
+          }
           state.rows = layoutData.rows;
           state.cables = layoutData.cables;
           state.nextId = layoutData.nextId || 100;
-          
+
           // Re-render visual patcher directly from metadata
           const rackCase = $('rackCase');
-          rackCase.innerHTML = '';
+          const existingRows = rackCase.querySelectorAll('.rack-row');
+          existingRows.forEach(r => r.remove());
           for (let i = 0; i < state.rows.length; i++) {
             const rowEl = buildRowEl(i);
             rackCase.appendChild(rowEl);
             const bay = rowEl.querySelector('.module-bay');
             for (const m of state.rows[i]) {
               const modEl = buildModuleEl(m.type, m.id, m.params, m.left);
-              bay.appendChild(modEl);
+              if (modEl) bay.appendChild(modEl);
             }
           }
           setTimeout(redrawCables, 50);
@@ -4834,20 +5164,24 @@ function loadLoupePatch(loupeCode) {
       'midi-note-out': 'midi-note-out',
       'midi-cc-out': 'midi-cc-out',
       'midi-clock-out': 'midi-clock-out',
-      
+
       sub: 'math',
       min: 'math',
       max: 'math',
+      div: 'math',
       and: 'logic',
       or: 'logic',
       xor: 'logic',
       not: 'logic',
-      
+
       score: 'score-player',
       step: 'step-seq',
       tape: 'step-seq',
+      lookup: 'step-seq',
+      seek: 'step-seq',
       follow: 'multi-div',
       delay: 'delay',
+      'tape-delay': 'tape-delay',
       reverb: 'reverb',
       wt: 'wt',
       wavetable: 'wt',
@@ -4855,11 +5189,31 @@ function loadLoupePatch(loupeCode) {
       snap: 'quantizer',
       quantise: 'quantizer',
       'tape-looper': 'tape-looper',
+      play: 'tape-looper',
+      loop: 'tape-looper',
       'shift-register': 'shift-register',
       benjolin: 'benjolin',
       morph: 'morph',
       'midi-sync': 'midi-sync',
-      schmitt: 'schmitt'
+      schmitt: 'schmitt',
+      turns: 'turns',
+      edge: 'trig',
+      fall: 'trig',
+      diff: 'math',
+      envelope: 'envelope',
+      adsr: 'adsr',
+      dx: 'dx',
+      ring: 'ring',
+      noise: 'noise',
+      random: 'random',
+      every: 'every',
+      euclid: 'euclid',
+      onsets: 'rhythm',
+      gates: 'rhythm',
+      hits: 'rhythm',
+      envfollow: 'envfollow',
+      gte: 'schmitt',
+      lte: 'schmitt'
     };
 
     const POSITIONAL_MAPPINGS = {
@@ -4892,7 +5246,8 @@ function loadLoupePatch(loupeCode) {
       wt: ['table', 'pitch', 'pos', 'pm'],
       wavetable: ['table', 'pitch', 'pos', 'pm'],
       dx: ['bank', 'preset', 'pitch', 'gate', 'decay', 'tone'],
-      delay: ['in', 'time', 'feedback', 'mix'],
+      delay: ['inL', 'inR', 'time', 'feedback'],
+      'tape-delay': ['in', 'time', 'feedback', 'mix'],
       reverb: ['in', 'decay', 'mix'],
       lpf: ['in', 'cut'],
       hpf: ['in', 'cut'],
@@ -4917,6 +5272,7 @@ function loadLoupePatch(loupeCode) {
       walk: ['step', 'trig'],
       add: ['a', 'b'],
       mul: ['a', 'gain'],
+      div: ['a', 'b'],
       'signal-switch': ['cond', 'a', 'b', 'c'],
       'seq-switch': ['trig', 'in1', 'in2', 'in3', 'in4'],
       logic: ['a', 'b'],
@@ -4927,7 +5283,29 @@ function loadLoupePatch(loupeCode) {
       'midi-trig': ['note', 'ch'],
       'midi-note-out': ['pitch', 'gate', 'vel', 'ch'],
       'midi-cc-out': ['val', 'cc', 'ch'],
-      'midi-clock-out': ['clk']
+      'midi-clock-out': ['clk'],
+      turns: ['trig'],
+      edge: ['in'],
+      fall: ['in'],
+      diff: ['a'],
+      envelope: ['trig', 'decay', 'peak'],
+      adsr: ['gate', 'attack', 'decay', 'sustain', 'release', 'peak'],
+      dx: ['bank', 'preset', 'voice', 'pitch', 'gate', 'decay', 'tone'],
+      ring: ['in', 'amp'],
+      noise: ['hz', 'rate'],
+      random: ['shape', 'trig'],
+      every: ['trig'],
+      euclid: ['pulses', 'steps', 'trig'],
+      lookup: ['trig'],
+      seek: ['trig'],
+      onsets: ['trig'],
+      gates: ['trig'],
+      hits: ['trig'],
+      play: ['in', 'rec', 'speed'],
+      loop: ['in', 'rec', 'speed'],
+      envfollow: ['in', 'cut'],
+      gte: ['in'],
+      lte: ['in']
     };
 
     const resolveSource = (childExpr) => {
@@ -4955,34 +5333,34 @@ function loadLoupePatch(loupeCode) {
           if (typeof tapeVar === 'string' && env[tapeVar] && env[tapeVar].type === 'tape') {
             const isTuring = tapeVar === 'loop' || modules.some(m => m.id === tapeVar && m.type === 'turing');
             const targetType = isTuring ? 'turing' : 'step-seq';
-            
+
             if (!modules.some(m => m.id === tapeVar)) {
               const params = {};
               if (targetType === 'step-seq') {
                 const list = env[tapeVar].list || [];
                 for (let i = 0; i < Math.min(8, list.length); i++) {
-                  params[`val${i+1}`] = parseParamValue(list[i]);
+                  params[`val${i + 1}`] = parseParamValue(list[i]);
                 }
                 params['steps'] = Math.round((list.length / 8) * 4095);
               }
               modules.push({ id: tapeVar, type: targetType, params });
             }
-            
+
             let trigSrc = null;
             for (let i = 2; i < childExpr.length; i += 2) {
-              if (childExpr[i] === ':trig') trigSrc = resolveSource(childExpr[i+1]);
+              if (childExpr[i] === ':trig') trigSrc = resolveSource(childExpr[i + 1]);
             }
             if (trigSrc) {
               cables.push({ fromId: trigSrc.fromId, fromPort: trigSrc.fromPort, toId: tapeVar, toPort: 'trig' });
             }
-            
+
             return { fromId: tapeVar, fromPort: 'out' };
           } else if (Array.isArray(tapeVar)) {
             const resolvedTape = resolveSource(tapeVar);
             if (resolvedTape && resolvedTape.fromId) {
               let trigSrc = null;
               for (let i = 2; i < childExpr.length; i += 2) {
-                if (childExpr[i] === ':trig') trigSrc = resolveSource(childExpr[i+1]);
+                if (childExpr[i] === ':trig') trigSrc = resolveSource(childExpr[i + 1]);
               }
               if (trigSrc) {
                 cables.push({ fromId: trigSrc.fromId, fromPort: trigSrc.fromPort, toId: resolvedTape.fromId, toPort: 'trig' });
@@ -5012,6 +5390,9 @@ function loadLoupePatch(loupeCode) {
       if (typeof expr === 'string') {
         if (env[expr]) return env[expr];
         if (modules.some(m => m.id === expr)) return expr;
+        if (expr === 'audio-out-1' || expr === 'audio-out-2' || expr === 'cv-out-1' || expr === 'cv-out-2' || expr === 'pulse-out-1' || expr === 'pulse-out-2') {
+          return `wsOut-${expr}`;
+        }
         return null;
       }
       if (Array.isArray(expr)) {
@@ -5020,26 +5401,26 @@ function loadLoupePatch(loupeCode) {
         if (typeof op === 'string' && env[op] && env[op].type === 'fn') {
           const fnDef = env[op];
           const substMap = {};
-          
+
           const callPosArgs = [];
           const callKeyArgs = {};
           for (let i = 1; i < expr.length; i++) {
             const arg = expr[i];
             if (typeof arg === 'string' && arg.startsWith(':')) {
-              callKeyArgs[arg.substring(1)] = expr[i+1];
+              callKeyArgs[arg.substring(1)] = expr[i + 1];
               i++;
             } else {
               callPosArgs.push(arg);
             }
           }
-          
+
           for (let i = 0; i < fnDef.params.length; i++) {
             const paramName = fnDef.params[i];
             const argVal = callKeyArgs[paramName] !== undefined ? callKeyArgs[paramName] : callPosArgs[i];
             substMap[paramName] = argVal;
             substMap[':' + paramName] = argVal;
           }
-          
+
           function substitute(bodyExpr, map) {
             if (typeof bodyExpr === 'string') {
               if (map[bodyExpr] !== undefined) return map[bodyExpr];
@@ -5052,7 +5433,7 @@ function loadLoupePatch(loupeCode) {
             }
             return bodyExpr;
           }
-          
+
           let lastResult = null;
           for (const bodyForm of fnDef.body) {
             const expandedForm = substitute(bodyForm, substMap);
@@ -5060,7 +5441,7 @@ function loadLoupePatch(loupeCode) {
           }
           return lastResult;
         }
-        
+
         if (typeof op === 'string' && (env[op] || modules.some(m => m.id === op))) {
           const mod = modules.find(m => m.id === op);
           if (mod) {
@@ -5082,7 +5463,7 @@ function loadLoupePatch(loupeCode) {
           for (let i = 1; i < expr.length; i++) {
             const arg = expr[i];
             if (typeof arg === 'string' && arg.startsWith(':')) {
-              keywordArgs[arg.substring(1)] = expr[i+1];
+              keywordArgs[arg.substring(1)] = expr[i + 1];
               i++;
             } else {
               positionalArgs.push(arg);
@@ -5104,7 +5485,7 @@ function loadLoupePatch(loupeCode) {
           for (let i = 1; i < expr.length; i++) {
             const arg = expr[i];
             if (typeof arg === 'string' && arg.startsWith(':')) {
-              keywordArgs[arg.substring(1)] = expr[i+1];
+              keywordArgs[arg.substring(1)] = expr[i + 1];
               i++;
             } else if (Array.isArray(arg)) {
               voices.push(arg);
@@ -5113,10 +5494,10 @@ function loadLoupePatch(loupeCode) {
 
           const drumSeqId = getAutoId('drum-seq');
           const drumSeqParams = {
-            kickPat: [0,0,0,0,0,0,0,0],
-            snarePat: [0,0,0,0,0,0,0,0],
-            hatPat: [0,0,0,0,0,0,0,0],
-            percPat: [0,0,0,0,0,0,0,0]
+            kickPat: [0, 0, 0, 0, 0, 0, 0, 0],
+            snarePat: [0, 0, 0, 0, 0, 0, 0, 0],
+            hatPat: [0, 0, 0, 0, 0, 0, 0, 0],
+            percPat: [0, 0, 0, 0, 0, 0, 0, 0]
           };
 
           modules.push({ id: drumSeqId, type: 'drum-seq', params: drumSeqParams });
@@ -5131,12 +5512,12 @@ function loadLoupePatch(loupeCode) {
           modules.push({ id: mixId, type: 'mix', params: mixParams });
 
           const RHYTHMS = {
-            'four-on-floor': [1,0,0,0,1,0,0,0],
-            'backbeat': [0,0,1,0,0,0,1,0],
-            'eighths': [1,0,1,0,1,0,1,0],
-            'offbeat': [0,1,0,1,0,1,0,1],
-            'sixteenths': [1,1,1,1,1,1,1,1],
-            'downbeat': [1,0,0,0,0,0,0,0]
+            'four-on-floor': [1, 0, 0, 0, 1, 0, 0, 0],
+            'backbeat': [0, 0, 1, 0, 0, 0, 1, 0],
+            'eighths': [1, 0, 1, 0, 1, 0, 1, 0],
+            'offbeat': [0, 1, 0, 1, 0, 1, 0, 1],
+            'sixteenths': [1, 1, 1, 1, 1, 1, 1, 1],
+            'downbeat': [1, 0, 0, 0, 0, 0, 0, 0]
           };
 
           const voiceChannels = ['a', 'b', 'c', 'd'];
@@ -5156,7 +5537,7 @@ function loadLoupePatch(loupeCode) {
             for (let i = 1; i < vExpr.length; i++) {
               const arg = vExpr[i];
               if (typeof arg === 'string' && arg.startsWith(':')) {
-                vKeyArgs[arg.substring(1)] = vExpr[i+1];
+                vKeyArgs[arg.substring(1)] = vExpr[i + 1];
                 i++;
               } else {
                 vPosArgs.push(arg);
@@ -5165,7 +5546,7 @@ function loadLoupePatch(loupeCode) {
 
             // Set rhythm pattern on drum-seq
             const rhythmName = vKeyArgs.on;
-            let pat = [0,0,0,0,0,0,0,0];
+            let pat = [0, 0, 0, 0, 0, 0, 0, 0];
             if (typeof rhythmName === 'string' && RHYTHMS[rhythmName]) {
               pat = RHYTHMS[rhythmName];
             } else if (Array.isArray(rhythmName)) {
@@ -5240,13 +5621,13 @@ function loadLoupePatch(loupeCode) {
             env[name] = { type: 'fn', params, body: valExpr.slice(2) };
             return name;
           }
-          
+
           if (Array.isArray(valExpr) && valExpr[0] === 'tape') {
             const list = valExpr.find(Array.isArray) || [];
             env[name] = { type: 'tape', list: list };
             return name;
           }
-          
+
           const src = resolveSource(valExpr);
           if (src) {
             env[name] = src;
@@ -5275,25 +5656,25 @@ function loadLoupePatch(loupeCode) {
         if (op === '<-') {
           const sink = expr[1];
           const source = expr[2];
-          
+
           if (typeof sink === 'string' && env[sink] && env[sink].type === 'tape') {
             const tapeName = sink;
             const id = tapeName;
             if (!modules.some(m => m.id === id)) {
               modules.push({ id, type: 'turing', params: {} });
             }
-            
+
             let trigSrc = null;
             const keywordArgs = {};
             for (let i = 3; i < expr.length; i += 2) {
               if (typeof expr[i] === 'string' && expr[i].startsWith(':')) {
-                keywordArgs[expr[i].substring(1)] = expr[i+1];
+                keywordArgs[expr[i].substring(1)] = expr[i + 1];
               }
             }
             if (keywordArgs.trig) {
               trigSrc = resolveSource(keywordArgs.trig);
             }
-            
+
             if (Array.isArray(source) && source[0] === 'if') {
               const cond = source[1];
               if (Array.isArray(cond) && cond[0] === 'chance') {
@@ -5304,12 +5685,12 @@ function loadLoupePatch(loupeCode) {
                 }
                 if (!trigSrc) {
                   for (let i = 2; i < cond.length; i += 2) {
-                    if (cond[i] === ':trig') trigSrc = resolveSource(cond[i+1]);
+                    if (cond[i] === ':trig') trigSrc = resolveSource(cond[i + 1]);
                   }
                 }
               }
             }
-            
+
             if (trigSrc) {
               cables.push({ fromId: trigSrc.fromId, fromPort: trigSrc.fromPort, toId: id, toPort: 'trig' });
             }
@@ -5343,7 +5724,7 @@ function loadLoupePatch(loupeCode) {
         if (op === 'if') {
           const id = getAutoId('signal-switch');
           const params = {};
-          
+
           let condExpr = expr[1];
           let cExpr = null;
           let bExpr = null;
@@ -5362,8 +5743,9 @@ function loadLoupePatch(loupeCode) {
               aExpr = nestedIf[3];
             }
           } else {
-            aExpr = expr[2];
+            cExpr = expr[2];
             bExpr = expr[3];
+            aExpr = expr[3];
           }
 
           modules.push({ id, type: 'signal-switch', params });
@@ -5372,6 +5754,8 @@ function loadLoupePatch(loupeCode) {
             const src = resolveSource(childExpr);
             if (src) {
               cables.push({ fromId: src.fromId, fromPort: src.fromPort, toId: id, toPort: targetPort });
+            } else {
+              params[targetPort] = parseParamValue(childExpr);
             }
           };
 
@@ -5383,23 +5767,23 @@ function loadLoupePatch(loupeCode) {
           return id;
         }
 
-        const mappedType = LOUPE_OP_MAP[op];
+        let mappedType = LOUPE_OP_MAP[op];
         if (mappedType && MODULE_DEFS[mappedType]) {
           const id = getAutoId(mappedType);
           const params = {};
-          
+
           const positionalArgs = [];
           const keywordArgs = {};
           for (let i = 1; i < expr.length; i++) {
             const arg = expr[i];
             if (typeof arg === 'string' && arg.startsWith(':')) {
-              keywordArgs[arg.substring(1)] = expr[i+1];
+              keywordArgs[arg.substring(1)] = expr[i + 1];
               i++;
             } else {
               positionalArgs.push(arg);
             }
           }
-          
+
           const mapping = POSITIONAL_MAPPINGS[op] || POSITIONAL_MAPPINGS[mappedType] || [];
           for (let i = 0; i < Math.min(positionalArgs.length, mapping.length); i++) {
             const key = mapping[i];
@@ -5407,7 +5791,7 @@ function loadLoupePatch(loupeCode) {
               keywordArgs[key] = positionalArgs[i];
             }
           }
-          
+
           if (mappedType === 'score-player') {
             let patVal = keywordArgs['pat'] || keywordArgs['pattern'] || positionalArgs[0];
             if (patVal === "'" && positionalArgs[1]) {
@@ -5425,9 +5809,7 @@ function loadLoupePatch(loupeCode) {
 
           if (['sine', 'triangle', 'saw', 'square'].includes(mappedType)) {
             if (keywordArgs.hz) {
-              keywordArgs['note'] = keywordArgs['hz'];
-              delete keywordArgs['hz'];
-              params['range'] = 4095; // Set to LFO range (discrete knob index 1)
+              mappedType = 'phasor';
             }
           }
 
@@ -5443,16 +5825,19 @@ function loadLoupePatch(loupeCode) {
               }
             }
           }
-          
+
           modules.push({ id, type: mappedType, params });
-          
-          if (op === 'sub' || op === 'min' || op === 'max' || op === 'and' || op === 'or' || op === 'xor' || op === 'not') {
+
+          if (op === 'diff') {
+            return { fromId: id, fromPort: 'sub' };
+          }
+          if (op === 'sub' || op === 'div' || op === 'min' || op === 'max' || op === 'and' || op === 'or' || op === 'xor' || op === 'not') {
             return { fromId: id, fromPort: op };
           }
           if (mappedType === 'multi-div') {
             return { fromId: id, fromPort: 'div2' };
           }
-          
+
           return id;
         }
 
@@ -5461,7 +5846,7 @@ function loadLoupePatch(loupeCode) {
           const portNum = (label && label.startsWith(':')) ? label.substring(1) : (label || '1');
           return `wsOut-${op}-${portNum}`;
         }
-        if (op === 'cv-in' || op === 'knob' || op === 'audio-in' || op === 'pulse-in') {
+        if (op === 'cv-in' || op === 'knob' || op === 'audio-in' || op === 'pulse-in' || op === 'switch') {
           const label = expr[1];
           const portName = (label && label.startsWith(':')) ? label.substring(1) : (label || 'main');
           return `wsIn-${op}-${portName}`;
@@ -5492,12 +5877,12 @@ function loadLoupePatch(loupeCode) {
       const def = MODULE_DEFS[m.type];
       const hp = def ? def.hp : 6;
       const width = hp * HP;
-      
+
       let rowIdx = 1;
-      if (def?.category === 'clocks' || def?.category === 'gates' || def?.category === 'midi' || m.type === 'lfo') {
+      if (def?.category === 'clocks' || def?.category === 'gates' || def?.category === 'midi' || m.type === 'phasor') {
         rowIdx = 0;
       }
-      
+
       let left;
       if (rowIdx === 0) {
         left = leftRow0;
@@ -5540,18 +5925,21 @@ function loadLoupePatch(loupeCode) {
     state.cables = cables;
 
     const rackCase = $('rackCase');
-    rackCase.innerHTML = '';
-    
+    const existingRows = rackCase.querySelectorAll('.rack-row');
+    existingRows.forEach(r => r.remove());
+
     for (let i = 0; i < state.rows.length; i++) {
       const rowEl = buildRowEl(i);
       rackCase.appendChild(rowEl);
       const bay = rowEl.querySelector('.module-bay');
       for (const m of state.rows[i]) {
         const modEl = buildModuleEl(m.type, m.id, m.params, m.left);
-        bay.appendChild(modEl);
+        if (modEl) {
+          bay.appendChild(modEl);
+        }
       }
     }
-    
+
     setTimeout(redrawCables, 50);
     updateRowWidths();
     generateCode();
@@ -5571,41 +5959,64 @@ function loadPatch(key) {
     return;
   }
 
+  const dataStr = localStorage.getItem(key);
+  if (!dataStr) return;
   let data;
-  if (key.startsWith('factory_')) {
-    // Load deep copy of factory preset to prevent mutation
-    data = JSON.parse(JSON.stringify(FACTORY_PATCHES[key]));
-  } else {
-    const dataStr = localStorage.getItem(key);
-    if (!dataStr) return;
-    try {
-      data = JSON.parse(dataStr);
-    } catch (e) {
-      alert('Error loading patch: ' + e.message);
-      return;
-    }
+  try {
+    data = JSON.parse(dataStr);
+  } catch (e) {
+    alert('Error loading patch: ' + e.message);
+    return;
   }
-  
+
   try {
     if (!data || !data.state) throw new Error('Invalid patch format');
-    
+
+    // Normalize legacy/abbreviated types in visual layouts
+    if (data.state && data.state.rows) {
+      for (let i = 0; i < data.state.rows.length; i++) {
+        for (const m of data.state.rows[i]) {
+          if (m.type === 'tri') m.type = 'triangle';
+          if (m.type === 'sqr') m.type = 'square';
+          if (m.type === 'sub') m.type = 'sub-osc';
+          if (m.type === 'svf') m.type = 'vcf';
+          if (m.type === 'env-follow') m.type = 'envfollow';
+          if (m.type === 'folder') m.type = 'wavefold';
+          if (m.type === 'lut') m.type = 'shape';
+          if (m.type === 'mixer') m.type = 'mix';
+          if (m.type === 'ar') m.type = 'envelope';
+        }
+      }
+    }
+    // Normalize cables from constant 'out' to 'out1'
+    if (data.state && data.state.cables && data.state.rows) {
+      const allMods = data.state.rows.flat();
+      for (const c of data.state.cables) {
+        const fromMod = allMods.find(m => m.id === c.fromId);
+        if (fromMod && fromMod.type === 'constant' && c.fromPort === 'out') {
+          c.fromPort = 'out1';
+        }
+      }
+    }
+
     state.rows = data.state.rows;
     state.cables = data.state.cables;
     state.nextId = data.state.nextId;
-    
+
     const rackCase = $('rackCase');
-    rackCase.innerHTML = '';
-    
+    const existingRows = rackCase.querySelectorAll('.rack-row');
+    existingRows.forEach(r => r.remove());
+
     for (let i = 0; i < state.rows.length; i++) {
       const rowEl = buildRowEl(i);
       rackCase.appendChild(rowEl);
       const bay = rowEl.querySelector('.module-bay');
       for (const m of state.rows[i]) {
         const modEl = buildModuleEl(m.type, m.id, m.params, m.left);
-        bay.appendChild(modEl);
+        if (modEl) bay.appendChild(modEl);
       }
     }
-    
+
     setTimeout(redrawCables, 50);
     updateRowWidths();
     generateCode();

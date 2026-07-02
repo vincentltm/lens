@@ -61,9 +61,12 @@ async function withDevice(want, fn) {
     waiter = { resolve, timer };
   });
   const send = (cmd, payload) => out.sendMessage([...frame(cmd, payload)]);
+  // Use a longer timeout for WRITE_STATE since the card may be mid-audio-frame
+  // when the USB packet arrives; the ACK comes back after the frame boundary.
+  const recvWrite = (ms = 6000) => recv(ms);
 
   console.error(`port: ${o.name}`);
-  try { return await fn(send, recv); }
+  try { return await fn(send, recv, recvWrite); }
   finally { out.closePort(); inp.closePort(); }
 }
 
@@ -88,16 +91,36 @@ function snapshotFromPatch(file) {
       throw new Error('Prelude/kernel drift: C runtime missing: ' + v.missingC.join(', '));
     }
   }
-  return compile(file).snapshot;
+  const result = compile(file);
+  const budget = result.scheduled.budget;
+  const c0Pct = (budget.core0.total / budget.core0.budget * 100).toFixed(1);
+  const c1Pct = (budget.core1.total / budget.core1.budget * 100).toFixed(1);
+  console.log(`Estimated CPU: Core 0 = ${budget.core0.total}/${budget.core0.budget} cycles (${c0Pct}%), Core 1 = ${budget.core1.total}/${budget.core1.budget} cycles (${c1Pct}%)`);
+  if (!budget.ok) {
+    console.warn(`\x1b[33mWARNING: ${budget.warning}\x1b[0m`);
+    console.warn(`\x1b[33mWARNING: The patch exceeds the per-sample cycle budget! This will cause pitch drop and USB timeouts.\x1b[0m`);
+  }
+  return result.snapshot;
 }
 
-async function writeState(send, recv, snapshot, tries = 4) {
+async function writeState(send, recvWrite, snapshot, tries = 8) {
   for (;;) {
     send(CMD.WRITE_STATE, snapshot);
-    const p = await recv();
+    let p;
+    try { p = await recvWrite(); }
+    catch (e) {
+      // Timeout: the card is alive (patch still runs) but didn't reply in time.
+      // Retry if we have attempts left, otherwise surface the error.
+      if (--tries > 0) {
+        await new Promise(r => setTimeout(r, 300));
+        continue;
+      }
+      throw e;
+    }
     if (p.cmd === CMD.ACK) return;
     if (p.cmd === CMD.NACK && p.payload[1] === 0x06 && --tries > 0) {
-      await new Promise(r => setTimeout(r, 200));
+      // NACK_BUSY: previous patch still pending apply; wait for Core 0 to consume it.
+      await new Promise(r => setTimeout(r, 300));
       continue;
     }
     expectAck(p);
@@ -155,9 +178,9 @@ async function main() {
       const file = positional[0]; if (!file) throw new Error('usage: write <patch.loupe> [--save]');
       const save = hasFlag('--save');
       const snapshot = snapshotFromPatch(file);
-      await withDevice(portArg, async (send, recv) => {
+      await withDevice(portArg, async (send, recv, recvWrite) => {
         await setSwapMode(send, recv);
-        await writeState(send, recv, snapshot);
+        await writeState(send, recvWrite, snapshot);
         if (save) {
           await new Promise(r => setTimeout(r, 700));
           send(CMD.SAVE_STATE); expectAck(await recv());
@@ -299,8 +322,8 @@ async function main() {
     case 'roundtrip': {
       const file = positional[0]; if (!file) throw new Error('usage: roundtrip <patch.loupe>');
       const snapshot = snapshotFromPatch(file);
-      await withDevice(portArg, async (send, recv) => {
-        await writeState(send, recv, snapshot);
+      await withDevice(portArg, async (send, recv, recvWrite) => {
+        await writeState(send, recvWrite, snapshot);
         await new Promise(r => setTimeout(r, 700));
         send(CMD.READ_STATE);
         const p = await recv();
@@ -314,14 +337,14 @@ async function main() {
 
     case 'watch': {
       const file = positional[0]; if (!file) throw new Error('usage: watch <patch.loupe>');
-      await withDevice(portArg, async (send, recv) => {
+      await withDevice(portArg, async (send, recv, recvWrite) => {
         await setSwapMode(send, recv);
         let lastBytes = null;
         const push = async () => {
           try {
             const snapshot = snapshotFromPatch(file);
             if (lastBytes && Buffer.compare(Buffer.from(snapshot), Buffer.from(lastBytes)) === 0) return;
-            await writeState(send, recv, snapshot);
+            await writeState(send, recvWrite, snapshot);
             lastBytes = snapshot;
             console.log(`${new Date().toLocaleTimeString()}  pushed ${file} (${snapshot.length} B)`);
           } catch (e) { console.error(`${new Date().toLocaleTimeString()}  ${e.message}`); }
@@ -393,11 +416,10 @@ async function main() {
       const secs = parseFloat(flagVal('--secs') || '0.5');
       const snapshot = snapshotFromPatch(file);
       const expectedCrc = crc32(snapshot.slice(0, snapshot.length - 4));
-      await withDevice(portArg, async (send, recv) => {
-        // 1. snapshot current diag for baseline.
+      await withDevice(portArg, async (send, recv, recvWrite) => {
         send(CMD.DIAG); const d0 = parseDiag((await recv()).payload);
         // 2. push patch.
-        await writeState(send, recv, snapshot);
+        await writeState(send, recvWrite, snapshot);
         // 3. poll diag until apply_count increments OR snapshot_crc matches.
         const targetCrc = readU32LE(snapshot, snapshot.length - 4);
         let applied = false; let d1 = d0;

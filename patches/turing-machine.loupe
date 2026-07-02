@@ -1,25 +1,15 @@
-; a loop of notes that slowly rewrites itself; main controls mutation rate.
-;   knob-main = mutation (CW = locked loop, CCW = pure random)
-;   knob-x = tempo (used when pulse-in-1 is unpatched)
-;   knob-y = active length
-;   pulse-in-1 = external clock (patch one in and it takes over from knob-x)
-;   cv-out-1 = pitch     pulse-out-1 = clock trigger
-;   patch: cv-out-1 -> SineSquare v/oct; pulse-out-1 -> Slope trig; Slope -> Mix.
+; Turing Machine: Looping shift-register melody generator that slowly mutates.
+;   knob-main = mutation rate     audio-out-1/2 = melody
 (patch
-  (def master (normal (pulse-in :1) (clock :tempo (knob :x))))
-  (def loop (tape '(C3 Eb3 G3 Bb3 C4 Bb3 G3 Eb3)))
+  (def clock1 (clock :bpm 120))
+  (def turing1loop (tape '(C3 Eb3 G3 Bb3 C4 Bb3 G3 Eb3)))
+  (<- turing1loop (if (chance 2048 :trig clock1) (step turing1loop :len 8 :trig clock1) (snap (add C3 (spread (random :trig clock1) 25)) :scale minor)) :len 8 :trig clock1)
+  (def turing1out (step turing1loop :len 8 :trig clock1))
+  (def sine1 (sine :note turing1out))
+  (def vca1 sine1)
 
-  ; knob-y picks the active loop length, 1..(len loop) cells: 1 = single-cell
-  ; repeat, full = the whole loop. Spread the knob across the tape's own length.
-  (def length (add 1 (spread (knob :y) (len loop))))
+  (<- (audio-out :1) vca1)
+  (<- (audio-out :2) vca1)
+)
 
-  ; keep the current step, or replace with a random note in a 2-OCTAVE window from C3.
-  ; (random) spans 0..4095, far above MIDI range; the window keeps replacements musical.
-  (<- loop (if (chance (knob :main))
-               (step loop :len length)
-               (snap (add C3 (spread (random) 25)) :scale minor))
-           :len length)
-
-  (<- (cv-out :1 :v-oct) (step loop :len length))
-  (<- (pulse-out :1)     (trig))
-  (<- (led :0)           (step loop :len length)))
+; flare_layout: {"rows":[[{"id":"wsIn","type":"ws-in","left":0,"params":{}},{"id":"clock1","type":"clock","left":120,"params":{"bpm":1638}},{"id":"turing1","type":"turing","left":240,"params":{"prob":2048,"len":4095}},{"id":"sine1","type":"sine","left":420,"params":{"pitch":1935,"cents":2048,"depth":0}}],[{"id":"wsOut","type":"ws-out","left":0,"params":{}},{"id":"vca1","type":"vca","left":120,"params":{"amp":4095}}]],"cables":[{"fromId":"clock1","fromPort":"out","toId":"turing1","toPort":"trig","color":"#ff5e57"},{"fromId":"turing1","fromPort":"out","toId":"sine1","toPort":"note","color":"#00ff66"},{"fromId":"sine1","fromPort":"out","toId":"vca1","toPort":"in","color":"#00ffff"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-1","color":"#ff5e57"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-2","color":"#ff5e57"}],"nextId":100}

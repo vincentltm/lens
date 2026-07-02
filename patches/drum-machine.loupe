@@ -1,33 +1,24 @@
-; two drum kits (straight and latin) A/B'd live by the Z-switch, using the groove DSL.
-;   knob-main = tempo     knob-x = kick drive (clean..punchy)     knob-y = hat decay (tight..open)
-;   switch-z  = up = LATIN,  middle/down = STRAIGHT     audio-out 1/2 = kit (mono)
-;   patch: audio-out-1 -> Mix. nothing external needed; drums are internal.
-;
-; named rhythms: four-on-floor backbeat eighths offbeat sixteenths downbeat
-;                tresillo cinquillo habanera son-clave rumba-clave bossa
-; or roll your own: (beat x..x..x.) or (euclid pulses steps)
-
+; Drum Machine: 4-channel step-sequenced drum kit (kick / snare / hat).
+;   knob-main = Tempo modulation     knob-x = kick decay     knob-y = hat decay
 (patch
-  (def tempo (knob :main))
-  (def punch (knob :x))
-  (def open  (knob :y))
-  (def clk   (clock :tempo tempo))
+  (def clock1 (clock :bpm 120 :fm (vca (knob :main) 3862.125)))
+  (def clock1mult2 (follow clock1 :mult 2))
+  (def drumseq1kickPat (beat '(x . . . x . . .)))
+  (def drumseq1kick (onsets drumseq1kickPat clock1mult2))
+  (def drumseq1snarePat (beat '(. . x . . . x .)))
+  (def drumseq1snare (onsets drumseq1snarePat clock1mult2))
+  (def drumseq1hatPat (beat '(x x x x x x x x)))
+  (def drumseq1hat (onsets drumseq1hatPat clock1mult2))
+  (def drumseq1percPat (beat '(. . . . . . . .)))
+  (def drumseq1perc (onsets drumseq1percPat clock1mult2))
+  (def kick1 (kick :trig drumseq1kick :note 36 :decay (add 2048 (knob :x) :sat) :drive 1000))
+  (def snare1 (snare :trig drumseq1snare :note 45 :decay 1500 :snappy 2048))
+  (def hat1 (hat :trig drumseq1hat :note 80 :decay (add 800 (knob :y) :sat)))
+  (def mix1 (clip (add (add (vca kick1 3500) (vca snare1 3000)) (vca hat1 2500))))
+  (def vca1 mix1)
 
-  ; a straight backbeat kit
-  (def straight
-    (groove :trig clk
-      (kick  :on four-on-floor :note A1 :drive punch :sweep 3700 :decay 1500)
-      (snare :on backbeat      :note C3 :snappy 3600 :tone 2800  :decay 1350)
-      (hat   :on eighths       :note A5 :tone 3200   :decay open)))
+  (<- (audio-out :1) vca1)
+  (<- (audio-out :2) vca1)
+)
 
-  ; a latin kit
-  (def latin
-    (groove :trig clk
-      (kick  :on son-clave      :note A1 :drive punch :sweep 3500 :decay 1800)
-      (snare :on tresillo       :note C3 :snappy 2200 :tone 2600  :decay 1250)
-      (hat   :on (euclid 11 16) :note A5 :tone 3400   :decay open)))
-
-  (def kit (if (eq (switch :z) VMAX) latin straight))
-  (<- (audio-out :1) kit)
-  (<- (audio-out :2) kit)
-  (<- (led :0) (hits four-on-floor clk)))
+; flare_layout: {"rows":[[{"id":"wsIn","type":"ws-in","left":0,"params":{}},{"id":"clock1","type":"clock","left":120,"params":{"bpm":1638,"fm":3862.125,"width":2048}},{"id":"drumseq1","type":"drum-seq","left":240,"params":{"steps":4095,"kickPat":[1,0,0,0,1,0,0,0],"snarePat":[0,0,1,0,0,0,1,0],"hatPat":[1,1,1,1,1,1,1,1],"percPat":[0,0,0,0,0,0,0,0]}},{"id":"kick1","type":"kick","left":450,"params":{"note":1161,"decay":2048,"drive":1000}},{"id":"snare1","type":"snare","left":630,"params":{"note":1451,"decay":1500,"snappy":2048}},{"id":"hat1","type":"hat","left":810,"params":{"note":2580,"decay":800}}],[{"id":"wsOut","type":"ws-out","left":0,"params":{}},{"id":"mix1","type":"mix","left":120,"params":{"volA":3500,"volB":3000,"volC":2500,"volD":2048}},{"id":"vca1","type":"vca","left":270,"params":{"amp":4095}}]],"cables":[{"fromId":"clock1","fromPort":"mult2","toId":"drumseq1","toPort":"trig","color":"#ff5e57"},{"fromId":"drumseq1","fromPort":"kick","toId":"kick1","toPort":"trig","color":"#ffaa00"},{"fromId":"drumseq1","fromPort":"snare","toId":"snare1","toPort":"trig","color":"#ffea00"},{"fromId":"drumseq1","fromPort":"hat","toId":"hat1","toPort":"trig","color":"#00ff66"},{"fromId":"wsIn","fromPort":"knob-x","toId":"kick1","toPort":"decay","color":"#00d2ff"},{"fromId":"wsIn","fromPort":"knob-y","toId":"hat1","toPort":"decay","color":"#00d2ff"},{"fromId":"kick1","fromPort":"out","toId":"mix1","toPort":"a","color":"#00ffff"},{"fromId":"snare1","fromPort":"out","toId":"mix1","toPort":"b","color":"#0088ff"},{"fromId":"hat1","fromPort":"out","toId":"mix1","toPort":"c","color":"#cc00ff"},{"fromId":"mix1","fromPort":"out","toId":"vca1","toPort":"in","color":"#ff00ff"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-1","color":"#ff5e57"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-2","color":"#ff5e57"},{"fromId":"wsIn","fromPort":"knob-main","toId":"clock1","toPort":"fm","color":"#ffb900"}],"nextId":100}

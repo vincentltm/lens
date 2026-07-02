@@ -1,9 +1,11 @@
-; one sine, main knob picks the pitch across two octaves starting at C3.
-;   knob-main = pitch (C3 to B4)     audio-out-1 = sine
-;
-; (spread knob-main 24) divides the knob into 24 semitone buckets. Each bucket
-; is about 170 ADC units wide, comfortably outside the framework's knob jitter,
-; so the pitch sits stably on each semitone. C3 env-resolves to MIDI 48;
-; the positional pitch on sine is in MIDI domain (no auto-spread).
+; Hello: Simple Sine Wave Pitch Sweep
+;   knob-main = pitch     audio-out-1/2 = sine wave
 (patch
-  (<- (audio-out :1) (sine (add C3 (spread (knob :main) 24)))))
+  (def sine1 (sine :note (knob :main)))
+  (def vca1 sine1)
+
+  (<- (audio-out :1) vca1)
+  (<- (audio-out :2) vca1)
+)
+
+; flare_layout: {"rows":[[{"id":"wsIn","type":"ws-in","left":0,"params":{}},{"id":"sine1","type":"sine","left":120,"params":{"pitch":2048,"cents":2048,"depth":0}}],[{"id":"wsOut","type":"ws-out","left":0,"params":{}},{"id":"vca1","type":"vca","left":120,"params":{"amp":4095}}]],"cables":[{"fromId":"wsIn","fromPort":"knob-main","toId":"sine1","toPort":"note","color":"#00d2ff"},{"fromId":"sine1","fromPort":"out","toId":"vca1","toPort":"in","color":"#ff4d4d"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-1","color":"#ff4d4d"},{"fromId":"vca1","fromPort":"out","toId":"wsOut","toPort":"audio-out-2","color":"#ff4d4d"}],"nextId":100}

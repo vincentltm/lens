@@ -26,8 +26,8 @@ struct Buffer {
 #endif
 #define LENS_CONTROL_BUFFER_BYTES (1024)
 #define LENS_MAX_SLOTS            256
-#define LENS_NODESTATE_BYTES      (4 * 1024)  /* op_wavetable state is ~1 KB/instance -> a
-                                                 few voices fit; bump to 8K for more */
+#define LENS_NODESTATE_BYTES      (3776)       /* 3.69 KB: enough for a few wavetable
+                                                  voices and the expanded ReverbState */
 #define LENS_MAX_BUFFERS          16
 #define LENS_MAX_TERMINALS        16
 #define LENS_CONST_POOL_WORDS     256

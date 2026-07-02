@@ -87,6 +87,10 @@ static int buffer_input_index(uint8_t kid) {
             return 0;
         case KID_OP_DEGREE: case KID_OP_PITCH:
             return 1;
+        case KID_OP_PLUCK:  case KID_OP_REVERB:
+            return 3;
+        case KID_OP_CHORUS: case KID_OP_FLANGER: case KID_OP_DELAY:
+            return 4;
         default:
             return -1;
     }

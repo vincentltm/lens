@@ -160,10 +160,12 @@ function threadStages(stages) {
   return sig;
 }
 
-// Resolve a score/notes item sym through env; _ and ~ stay as syms (rest/tie).
 function expandScoreItem(node, env) {
   if (node.t === 'sym' && node.s !== '_' && node.s !== '~') {
-    const r = envLookup(env, node.s);
+    let r = envLookup(env, node.s);
+    if (!r.found) {
+      r = envLookup(env, node.s.toUpperCase());
+    }
     if (r.found) return r.value;
     throw new Error(`unknown name: ${node.s}`);
   }

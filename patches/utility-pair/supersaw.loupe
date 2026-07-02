@@ -1,6 +1,0 @@
-; UTILITY: supersaw — four detuned saws around a 1V/oct note; `detune` breathes the spread.
-(def supersaw (fn (:note :detune)
-  (mix (saw note :cents (add VMID detune))
-       (saw note :cents (sub VMID detune))
-       (saw note :cents (add VMID (div detune 3)))
-       (saw note :cents (sub VMID (div detune 3))))))

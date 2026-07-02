@@ -138,6 +138,7 @@ enum KernelId {
     KID_OP_CHORUS           = 122,
     KID_OP_FLANGER          = 123,
     KID_OP_COMPRESSOR       = 124,
-    KID_COUNT               = 125,  /* valid ids are 0..KID_COUNT-1; sizes KFN */
+    KID_OP_DELAY            = 125,
+    KID_COUNT               = 126,  /* valid ids are 0..KID_COUNT-1; sizes KFN */
     KID_UNKNOWN             = 255
 };

@@ -1,0 +1,24 @@
+; Plucked Melodies: Two Karplus-Strong plucked strings (melody + bass) through a filter and reverb.
+;   knob-y = string damp / decay length     audio-out-1/2 = stereo plucked ensemble
+(patch
+  (def clock1 (clock :bpm 80))
+  (def clock1mult2 (follow clock1 :mult 2))
+  (def score1score (score '(c4 e4 g4 c5 b4 g4 e4 c4)))
+  (def score1note (step :tape (score1score :notes) :trig clock1mult2))
+  (def multidiv103div4 (every :n 4 :trig clock1mult2))
+  (def pluck1 (pluck :trig clock1mult2 :pitch score1note :damp (add 658.09375 (knob :y) :sat)))
+  (def scoreplayer100score (score '(c4 e4 g4 b4)))
+  (def scoreplayer100note (step :tape (scoreplayer100score :notes) :trig multidiv103div4))
+  (def scoreplayer100gate (onsets :tape (scoreplayer100score :rhythm) :trig multidiv103div4))
+  (def pluck102 (pluck :trig scoreplayer100gate :pitch (add scoreplayer100note -12) :damp (add 162.5625 (knob :y) :sat)))
+  (def mix101 (clip (add (vca pluck102 2724.0625) (vca pluck1 2866.34375))))
+  (def lpf2106 (lpf2 :in mix101 :cut (add 908.5625 (vca (spread scoreplayer100note 132071) 1515.8125) :sat) :res 651.15625))
+  (def reverb1 (reverb :in lpf2106 :decay 3875.53125 :mix 3431.25))
+  (def reverb1outL reverb1)
+  (def reverb1outR (sel reverb1))
+
+  (<- (audio-out :1) reverb1outL)
+  (<- (audio-out :2) reverb1outR)
+)
+
+; flare_layout: {"rows":[[{"id":"wsIn","type":"ws-in","left":0,"params":{}},{"id":"clock1","type":"clock","left":120,"params":{"bpm":813.6875,"fm":0,"width":2048}},{"id":"multidiv103","type":"multi-div","left":225,"params":{}},{"id":"score1","type":"score-player","left":285,"params":{"speed":2064.34375,"pattern":"[c4 e4 g4 c5 b4 g4 e4 c4]"}},{"id":"scoreplayer100","type":"score-player","left":405,"params":{"speed":2048,"pattern":"[c4 e4 g4 b4]"}},{"id":"pluck1","type":"pluck","left":525,"params":{"pitch":1941.78125,"damp":658.09375}},{"id":"pluck102","type":"pluck","left":615,"params":{"pitch":1533.0625,"damp":162.5625}},{"id":"mix101","type":"mix","left":705,"params":{"volA":2724.0625,"volB":2866.34375,"volC":2048,"volD":2048}},{"id":"lpf2106","type":"lpf2","left":840,"params":{"cut":908.5625,"res":651.15625,"cutamt":1515.8125}},{"id":"reverb1","type":"reverb","left":1095,"params":{"decay":3875.53125,"mix":3431.25,"decayamt":4095,"mixamt":4095}},{"id":"wsOut","type":"ws-out","left":1215,"params":{}}],[]],"cables":[{"fromId":"score1","fromPort":"note","toId":"pluck1","toPort":"pitch","color":"#00ff66"},{"fromId":"wsIn","fromPort":"knob-y","toId":"pluck1","toPort":"damp","color":"#00d2ff"},{"fromId":"pluck102","fromPort":"out","toId":"mix101","toPort":"a","color":"#ff4d4d"},{"fromId":"pluck1","fromPort":"out","toId":"mix101","toPort":"b","color":"#ff4d4d"},{"fromId":"clock1","fromPort":"mult2","toId":"score1","toPort":"trig","color":"#ffb900"},{"fromId":"clock1","fromPort":"mult2","toId":"pluck1","toPort":"trig","color":"#ffb900"},{"fromId":"scoreplayer100","fromPort":"gate","toId":"pluck102","toPort":"trig","color":"#ffb900"},{"fromId":"scoreplayer100","fromPort":"note","toId":"pluck102","toPort":"pitch","color":"#4cd137"},{"fromId":"multidiv103","fromPort":"div4","toId":"scoreplayer100","toPort":"trig","color":"#ffb900"},{"fromId":"clock1","fromPort":"mult2","toId":"multidiv103","toPort":"trig","color":"#ffb900"},{"fromId":"reverb1","fromPort":"outR","toId":"wsOut","toPort":"audio-out-2","color":"#ff4d4d"},{"fromId":"reverb1","fromPort":"outL","toId":"wsOut","toPort":"audio-out-1","color":"#ff4d4d"},{"fromId":"mix101","fromPort":"out","toId":"lpf2106","toPort":"in","color":"#ff4d4d"},{"fromId":"scoreplayer100","fromPort":"note","toId":"lpf2106","toPort":"cut","color":"#4cd137"},{"fromId":"wsIn","fromPort":"knob-y","toId":"pluck102","toPort":"damp","color":"#00d2ff"},{"fromId":"lpf2106","fromPort":"out","toId":"reverb1","toPort":"in","color":"#ff4d4d"}],"nextId":109}

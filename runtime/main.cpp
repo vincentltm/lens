@@ -400,6 +400,9 @@ protected:
             __dmb();   /* pair with the Core 1 writer: read len after seeing ready */
             struct LensRuntime* new_rt = nullptr;
             size_t plen = g_pending.len;
+            struct LensRuntime* old_rt = g_rt;
+            g_rt = nullptr; /* Temporarily disable audio walk during apply to prevent race conditions/crashes */
+            __dmb();
             int rc = snapshot_apply(&new_rt, g_pending.bytes, plen);
             g_apply_attempts++;
             g_last_apply_rc = rc;
@@ -410,12 +413,15 @@ protected:
                 }
                 g_snapshot_crc = snapshot_trailer_crc(g_pending.bytes, plen);
                 g_apply_count++;
-                g_last_apply_sample = g_rt ? g_rt->sample_counter : 0u;
-                struct LensRuntime* old_rt = g_rt;
+                g_last_apply_sample = old_rt ? old_rt->sample_counter : 0u;
                 g_rt = new_rt;
                 if (old_rt) runtime_destroy(old_rt);
                 /* New patch starts at its own downbeat: restart beat tracking. */
                 g_master_prev = 0; g_beat_count = 0; g_beat_now = false;
+            } else {
+                /* Apply failed: restore the previous runtime so audio keeps running.
+                 * Do NOT destroy old_rt — it is still live and valid. */
+                g_rt = old_rt;
             }
             g_pending.ready = false;
         } else if (g_pending.ready) {
@@ -698,7 +704,8 @@ static void run_device_loop(void) {
          * handles USB MIDI CIN tags and yields pure data bytes, including
          * CIN=0xF which macOS CoreMIDI uses to fragment large sysex transfers. */
         uint8_t in_buf[64];
-        while (tud_midi_available()) {
+        bool sent_response = false;
+        while (tud_midi_available() && !sent_response) {
             uint32_t n = tud_midi_stream_read(in_buf, sizeof(in_buf));
             for (uint32_t bi = 0; bi < n; bi++) {
                 midi_feed_byte(in_buf[bi]);
@@ -726,10 +733,14 @@ static void run_device_loop(void) {
                                                             lenssysex::NACK_BAD_LENGTH);
                             }
                         }
+                        /* Break out of the drain loop so tud_task() runs next and
+                         * delivers the queued ACK/NACK to the host immediately. */
+                        sent_response = true;
                         break;
 
                     case lenssysex::CMD_PING:
                         lenssysex::sysex_send_frame(lenssysex::CMD_ACK, nullptr, 0);
+                        sent_response = true;
                         break;
 
                     case lenssysex::CMD_SWAP_MODE: {
@@ -739,6 +750,7 @@ static void run_device_loop(void) {
                         size_t n = lenssysex::get_payload(&parser, mb, sizeof(mb));
                         if (n >= 1 && mb[0] <= SWAP_AT_BAR) g_swap_mode = mb[0];
                         lenssysex::sysex_send_frame(lenssysex::CMD_ACK, nullptr, 0);
+                        sent_response = true;
                         break;
                     }
 
@@ -812,6 +824,7 @@ static void run_device_loop(void) {
                         u32(0); u32(0); u32(0); u32(0); u32(0); u32(0);
 #endif
                         lenssysex::sysex_send_frame(lenssysex::CMD_DIAG_DUMP, d, sizeof(d));
+                        sent_response = true;
                         break;
                     }
 
@@ -819,11 +832,13 @@ static void run_device_loop(void) {
                         /* ACK first, then signal Core 0 to perform the flash write. */
                         lenssysex::sysex_send_frame(lenssysex::CMD_ACK, nullptr, 0);
                         lens_request_save();
+                        sent_response = true;
                         break;
 
                     case lenssysex::CMD_FACTORY_RESET:
                         lenssysex::sysex_send_frame(lenssysex::CMD_ACK, nullptr, 0);
                         lens_request_factory_reset();
+                        sent_response = true;
                         break;
 
                     case lenssysex::CMD_READ_PERF: {
@@ -907,6 +922,7 @@ static void run_device_loop(void) {
                         /* SPEC: perf ring not compiled in; reply ACK stub. */
                         lenssysex::sysex_send_frame(lenssysex::CMD_ACK, nullptr, 0);
 #endif
+                        sent_response = true;
                         break;
                     }
 
@@ -945,6 +961,7 @@ static void run_device_loop(void) {
 #else
                         lenssysex::sysex_send_frame(lenssysex::CMD_ACK, nullptr, 0);
 #endif
+                        sent_response = true;
                         break;
                     }
                     case lenssysex::CMD_UPDATE_CONST: {
@@ -973,12 +990,14 @@ static void run_device_loop(void) {
                         } else {
                             lenssysex::sysex_send_nack(cmd, lenssysex::NACK_BAD_LENGTH);
                         }
+                        sent_response = true;
                         break;
                     }
 
                     default:
                         /* Unknown command: NACK with reason. */
                         lenssysex::sysex_send_nack(cmd, lenssysex::NACK_UNKNOWN_CMD);
+                        sent_response = true;
                         break;
                     }
                 }

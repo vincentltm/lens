@@ -72,6 +72,16 @@ function chooseKernel(op, kwargs) {
   return opToKernel(op);
 }
 
+// Canonical audio buffer sizes (cells) for each fixed-buffer op.
+// MUST match the allocBuffer() calls below — single source of truth used by
+// both preScan (budget accounting) and the actual allocation.
+const AUDIO_BUF_CELLS = {
+  pluck:   1536,   // Karplus-Strong delay line; covers MIDI 24 (~32 Hz) at 48 kHz
+  reverb:  23838,  // Freeverb comb+all-pass network
+  chorus:  1024,   // Chorus/vibrato delay line
+  flanger: 512,    // Flanger delay line
+};
+
 function lower(expanded) {
   let nextSlotId = 0;
   let nextBufId = 0;
@@ -79,6 +89,73 @@ function lower(expanded) {
   const slots = [];
   const buffers = [];
   const terminals = [];
+  let nonDelayAudioCells = 0;
+  let numDelays = 0;
+  const visitedNodes = new Set();
+  function preScan(node) {
+    if (!node || visitedNodes.has(node)) return;
+    visitedNodes.add(node);
+
+    if (node.t === 'call') {
+      const op = node.op;
+      if (op === 'delay') {
+        numDelays++;
+      } else if (AUDIO_BUF_CELLS[op] !== undefined) {
+        // Fixed-size audio buffer op — add its footprint to the non-delay budget.
+        nonDelayAudioCells += AUDIO_BUF_CELLS[op];
+      }
+      // Note: 'audio' tapes are counted via node.t === 'audio' below to avoid double-counting.
+      if (node.args) {
+        for (const arg of node.args) preScan(arg);
+      }
+      if (node.kwargs) {
+        for (const val of Object.values(node.kwargs)) preScan(val);
+      }
+    } else if (node.t === 'audio') {
+      // Raw audio tape node — count its cell footprint.
+      let seconds = 1;
+      if (node.seconds && node.seconds.t === 'num') seconds = node.seconds.v;
+      else if (node.length && node.length.t === 'num') seconds = node.length.v / 48000;
+      nonDelayAudioCells += Math.round(seconds * 48000);
+      preScan(node.seconds);
+      preScan(node.length);
+    } else if (node.t === 'tape') {
+      if (node.blankLen) nonDelayAudioCells += node.blankLen;
+      if (node.items) { for (const item of node.items) preScan(item); }
+    } else if (node.t === 'lens' || node.t === 'oplens-sel') {
+      if (node.cells) { for (const cell of node.cells) preScan(cell); }
+      preScan(node.at); preScan(node.clamp);
+    } else if (node.t === 'opthru') {
+      if (node.results) { for (const res of node.results) preScan(res); }
+      preScan(node.at); preScan(node.clamp);
+    } else if (node.t === 'connected') {
+      preScan(node.source); preScan(node.sink);
+    } else if (node.t === 'z1') {
+      preScan(node.in); preScan(node.init);
+    } else if (node.t === 'feedback') {
+      if (node.args) { for (const arg of node.args) preScan(arg); }
+    } else if (node.t === 'morph') {
+      preScan(node.a); preScan(node.b); preScan(node.mix);
+    } else if (node.t === 'outputs') {
+      preScan(node.out1); preScan(node.out2);
+    }
+  }
+  for (const c of expanded.cables) {
+    preScan(c.value);
+    preScan(c.sink);
+  }
+
+  // Audio pool = 128 KB; 12-bit packing → 1.5 bytes per cell → 87381 cells total.
+  // Reserve ~4 KB headroom for alignment/state overhead, so budget = 84000 cells.
+  // Each delay instance gets an equal share of the remaining capacity, automatically
+  // shrinking when reverbs, tape loops, or other effects are also present in the patch.
+  let dynamicDelaySize = 24000;
+  if (numDelays > 0) {
+    const POOL_CELLS = 84000; // floor((128 * 1024 * 2) / 3) minus safety margin
+    const remaining = Math.max(1024, POOL_CELLS - nonDelayAudioCells);
+    dynamicDelaySize = Math.max(1024, Math.floor(remaining / numDelays));
+  }
+
   let masterSlotId = null;   // slot of the master clock, for beat/bar swaps
 
   // Memoisation: AST node object (by identity) -> lowered Ref.
@@ -449,7 +526,7 @@ function lower(expanded) {
       const trigRef  = trigArg  !== undefined ? lowerNode(trigArg)  : { kind: 'const', value: 0 };
       const pitchRef = pitchArg !== undefined ? lowerNode(pitchArg) : { kind: 'const', value: 60 };
       const dampRef  = dampArg  !== undefined ? lowerNode(dampArg)  : { kind: 'const', value: 2048 };
-      const bufRef   = allocBuffer('audio', 1536);
+      const bufRef   = allocBuffer('audio', AUDIO_BUF_CELLS.pluck);
       return allocSlot('op_pluck', [trigRef, pitchRef, dampRef, bufRef], { param0: 0 }, {});
     }
 
@@ -460,7 +537,7 @@ function lower(expanded) {
       const inRef = inArg !== undefined ? lowerNode(inArg) : { kind: 'const', value: 0 };
       const decayRef = decayArg !== undefined ? lowerNode(decayArg) : { kind: 'const', value: 2048 };
       const mixRef = mixArg !== undefined ? lowerNode(mixArg) : { kind: 'const', value: 1024 };
-      const bufRef = allocBuffer('audio', 5952);
+      const bufRef = allocBuffer('audio', AUDIO_BUF_CELLS.reverb);
       return allocSlot('op_reverb', [inRef, decayRef, mixRef, bufRef], { param0: 0 }, {});
     }
 
@@ -473,7 +550,7 @@ function lower(expanded) {
       const rateRef = rateArg !== undefined ? lowerNode(rateArg) : { kind: 'const', value: 100 };
       const depthRef = depthArg !== undefined ? lowerNode(depthArg) : { kind: 'const', value: 1024 };
       const fbRef = fbArg !== undefined ? lowerNode(fbArg) : { kind: 'const', value: 1024 };
-      const bufRef = allocBuffer('audio', 1024);
+      const bufRef = allocBuffer('audio', AUDIO_BUF_CELLS.chorus);
       return allocSlot('op_chorus', [inRef, rateRef, depthRef, fbRef, bufRef], { param0: 0 }, {});
     }
 
@@ -486,7 +563,7 @@ function lower(expanded) {
       const rateRef = rateArg !== undefined ? lowerNode(rateArg) : { kind: 'const', value: 50 };
       const depthRef = depthArg !== undefined ? lowerNode(depthArg) : { kind: 'const', value: 512 };
       const fbRef = fbArg !== undefined ? lowerNode(fbArg) : { kind: 'const', value: 2048 };
-      const bufRef = allocBuffer('audio', 512);
+      const bufRef = allocBuffer('audio', AUDIO_BUF_CELLS.flanger);
       return allocSlot('op_flanger', [inRef, rateRef, depthRef, fbRef, bufRef], { param0: 0 }, {});
     }
 
@@ -502,6 +579,45 @@ function lower(expanded) {
       const attRef = attArg !== undefined ? lowerNode(attArg) : { kind: 'const', value: 100 };
       const relRef = relArg !== undefined ? lowerNode(relArg) : { kind: 'const', value: 1000 };
       return allocSlot('op_compressor', [inRef, threshRef, ratioRef, attRef, relRef], { param0: 0 }, {});
+    }
+
+    if (op === 'delay') {
+      const inLArg = args[0] !== undefined ? args[0] : (kwargs['in-l'] !== undefined ? kwargs['in-l'] : kwargs.in_l);
+      const inRArg = args[1] !== undefined ? args[1] : (kwargs['in-r'] !== undefined ? kwargs['in-r'] : kwargs.in_r);
+      const timeArg = args[2] !== undefined ? args[2] : kwargs.time;
+      const fbArg = args[3] !== undefined ? args[3] : kwargs.feedback;
+      const modeArg = args[4] !== undefined ? args[4] : kwargs.mode;
+      const ratioArg = args[5] !== undefined ? args[5] : kwargs.ratio;
+
+      const inLRef = inLArg !== undefined ? lowerNode(inLArg) : { kind: 'const', value: 0 };
+      const inRRef = inRArg !== undefined ? lowerNode(inRArg) : { kind: 'const', value: 0 };
+      const timeRef = timeArg !== undefined ? lowerNode(timeArg) : { kind: 'const', value: 2048 };
+      const fbRef = fbArg !== undefined ? lowerNode(fbArg) : { kind: 'const', value: 1024 };
+
+      let mode = 1;
+      if (modeArg !== undefined) {
+        if (modeArg.t === 'kw' || modeArg.t === 'keyword' || modeArg.t === 'sym' || modeArg.t === 'symbol') {
+          const val = modeArg.s || modeArg.v;
+          if (val === 'mono') mode = 0;
+          else if (val === 'stereo') mode = 1;
+          else if (val === 'pingpong') mode = 2;
+        } else if (modeArg.t === 'num') {
+          mode = Math.round(modeArg.v);
+        }
+      }
+
+      let ratio = 1.0;
+      if (ratioArg !== undefined && ratioArg.t === 'num') {
+        ratio = ratioArg.v;
+      }
+      if (ratio < 0) ratio = 0;
+      if (ratio > 2.0) ratio = 2.0;
+
+      const ratioScaled = Math.round(ratio * 2048);
+      const param0 = mode | (ratioScaled << 8);
+
+      const bufRef = allocBuffer('audio', dynamicDelaySize);
+      return allocSlot('op_delay', [inLRef, inRRef, timeRef, fbRef, bufRef], { param0: param0 }, {});
     }
 
     if (op === 'sel') {
@@ -622,6 +738,13 @@ function lower(expanded) {
             rateRef = allocSlot('op_div', [bpmRef, sixtyRef], {}, {});
           }
         }
+      }
+
+      if (kwargs.fm) {
+        const fmRef = lowerNode(kwargs.fm);
+        const depthRef = kwargs.depth ? lowerNode(kwargs.depth) : { kind: 'const', value: 4095 };
+        const fmAtt = allocSlot('op_vca', [fmRef, depthRef], {}, {});
+        rateRef = allocSlot('op_add', [rateRef, fmAtt], {}, {});
       }
 
       // :phase drives the shaper from an external phase (e.g. a phasor ramp) instead of

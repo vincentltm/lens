@@ -175,7 +175,11 @@ const html = `<!doctype html>
   #livewrap { display: flex; align-items: center; gap: 5px; color: #9c9482;
               cursor: pointer; user-select: none; }
   #livewrap input { cursor: pointer; }
-  #status { margin-left: auto; color: #7d7668; max-width: 46%; }
+  #cpu-status { margin-left: auto; color: #9fd08a; padding-right: 12px; }
+  #cpu-status.err { color: #e07a5f; }
+  #mem-status { color: #9fd08a; padding-right: 12px; }
+  #mem-status.err { color: #e07a5f; }
+  #status { color: #7d7668; max-width: 46%; }
   #status.err { color: #e07a5f; }
   #status.ok  { color: #9fd08a; }
   main { flex: 1; position: relative; min-height: 0; }
@@ -218,6 +222,8 @@ const html = `<!doctype html>
   <label id="livewrap" title="push every good compile straight to the card as you type"><input id="live" type="checkbox"> live</label>
   <select id="swapmode" title="when a live edit swaps in"><option value="0">at zero</option><option value="1">at beat</option><option value="2">at bar</option></select>
   <button id="savecard" disabled title="writes the patch to the card's flash; the card reboots">save to card</button>
+  <span id="cpu-status" style="display: none;"></span>
+  <span id="mem-status" style="display: none;"></span>
   <span id="status"></span>
 </div>
 <main>
@@ -260,17 +266,14 @@ try {
 
   // Load VCV SVG assets
   const resDir = '/Users/vmaurer/Music/Archive/Workshop_Computer_VCV/res';
-  const assetFiles = {
+  const knobFiles = {
     largeKnob: "largeKnob_dark.svg",
     mediumKnob: "mediumKnob_dark.svg",
-    smallKnob: "smallKnob_dark.svg",
-    switchUp: "switch_up.svg",
-    switchMid: "switch_middle.svg",
-    switchDown: "switch_down.svg"
+    smallKnob: "smallKnob_dark.svg"
   };
 
   const assets = {};
-  for (const [key, filename] of Object.entries(assetFiles)) {
+  for (const [key, filename] of Object.entries(knobFiles)) {
     const filePath = path.join(resDir, filename);
     if (!fs.existsSync(filePath)) {
       throw new Error(`Asset file not found: ${filePath}`);
@@ -281,6 +284,49 @@ try {
       .replace(/<!DOCTYPE[^>]*>/g, '')
       .trim();
   }
+
+  // Inline premium brushed chrome toggle switch SVGs (APEM/Eurorack style)
+  assets.switchUp = `<svg width="100%" height="100%" viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="14" r="9" fill="#151413" stroke="#5d5c58" stroke-width="1" />
+  <circle cx="12" cy="14" r="6" fill="#2d2c29" stroke="#7d7c78" stroke-width="0.5" />
+  <path d="M 9.5 14 L 10 4 C 10 2, 14 2, 14 4 L 14.5 14 Z" fill="url(#metalGrad)" stroke="#222" stroke-width="0.5" />
+  <defs>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8a8985" />
+      <stop offset="35%" stop-color="#e8e7e3" />
+      <stop offset="65%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#6a6965" />
+    </linearGradient>
+  </defs>
+</svg>`;
+
+  assets.switchMid = `<svg width="100%" height="100%" viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="14" r="9" fill="#151413" stroke="#5d5c58" stroke-width="1" />
+  <circle cx="12" cy="14" r="6" fill="#2d2c29" stroke="#7d7c78" stroke-width="0.5" />
+  <path d="M 9.5 14 L 10 10 C 10 8, 14 8, 14 10 L 14.5 14 Z" fill="url(#metalGrad)" stroke="#222" stroke-width="0.5" />
+  <defs>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8a8985" />
+      <stop offset="35%" stop-color="#e8e7e3" />
+      <stop offset="65%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#6a6965" />
+    </linearGradient>
+  </defs>
+</svg>`;
+
+  assets.switchDown = `<svg width="100%" height="100%" viewBox="0 0 24 28" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="14" r="9" fill="#151413" stroke="#5d5c58" stroke-width="1" />
+  <circle cx="12" cy="14" r="6" fill="#2d2c29" stroke="#7d7c78" stroke-width="0.5" />
+  <path d="M 9.5 14 L 10 24 C 10 26, 14 26, 14 24 L 14.5 14 Z" fill="url(#metalGrad)" stroke="#222" stroke-width="0.5" />
+  <defs>
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8a8985" />
+      <stop offset="35%" stop-color="#e8e7e3" />
+      <stop offset="65%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#6a6965" />
+    </linearGradient>
+  </defs>
+</svg>`;
 
   const assetsJs = `const FLARE_ASSETS = ${JSON.stringify(assets)};`;
 

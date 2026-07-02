@@ -1,4 +1,0 @@
-; UTILITY: cross-switch — pass a,b straight through, or cross them while `cross` is high.
-(def cross-switch (fn (:a :b :cross => :x :y)
-  (<- x (if cross b a))
-  (<- y (if cross a b))))
